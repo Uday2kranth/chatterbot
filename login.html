@@ -56,17 +56,6 @@
   </div>
 
   <script>
-    // 1. Immutable authorized users database
-    const AUTHORIZED_USERS = {
-      "Admin@uday": { password: "Superm@n62", role: "admin" },
-      "Sai_Kiran": { password: "kiransir@bava", role: "student" },
-      "Gagan": { password: "gagan@kranthi", role: "student" },
-      "Akash": { password: "labbe@kiransir", role: "student" },
-      "Sai_Ram": { password: "sai@ram", role: "student" },
-      "Tharun": { password: "mama@kiransir", role: "student" },
-      "Ban": { password: "DataScientist", role: "student" }
-    };
-
     // 2. Initialize Theme Setting
     const themeBtn = document.getElementById('theme-toggle-btn');
     const currentTheme = localStorage.getItem('chatterbot_theme') || 'dark';
@@ -122,15 +111,20 @@
       const originalBtnHTML = submitBtn.innerHTML;
       submitBtn.innerHTML = `<span>Verifying...</span><i class="fa-solid fa-spinner fa-spin"></i>`;
 
-      const userRecord = AUTHORIZED_USERS[username];
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
-      // Simulate a small latency for smooth interactive experience
-      setTimeout(async () => {
-        if (userRecord && userRecord.password === password) {
+        const data = await response.json();
+
+        if (response.ok && data.success) {
           // Store session
           const sessionData = {
-            user: username,
-            role: userRecord.role,
+            user: data.user,
+            role: data.role,
             timestamp: Date.now()
           };
           localStorage.setItem('chatterbot_session', JSON.stringify(sessionData));
@@ -143,9 +137,9 @@
               body: JSON.stringify({
                 type: 'auth',
                 action: 'login',
-                user: username,
+                user: data.user,
                 time: new Date().toLocaleString(),
-                details: `Logged in from web application frontend.`
+                details: `Logged in securely via serverless authentication.`
               })
             });
           } catch (err) {
@@ -158,12 +152,18 @@
           // Login Failed
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnHTML;
-          errorText.textContent = "Incorrect username or password. Please try again.";
+          errorText.textContent = data.error || "Incorrect username or password. Please try again.";
           errorMessage.style.display = 'flex';
           passwordInput.value = '';
           passwordInput.focus();
         }
-      }, 600);
+      } catch (err) {
+        console.error('Login request failed:', err);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+        errorText.textContent = "Network error. Please try again later.";
+        errorMessage.style.display = 'flex';
+      }
     });
   </script>
 </body>

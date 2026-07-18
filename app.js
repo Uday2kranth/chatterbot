@@ -172,11 +172,10 @@ const PROVIDER_MODELS = {
     { value: "gemma-4-31B-it", name: "Gemma 4 31B it", multimodal: true, preferredVision: true }
   ],
   gemini: [
-    { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
-    { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro", multimodal: true, voice: true },
-    { value: "gemini-2.0-flash-exp", name: "Gemini 2.0 Flash Exp", multimodal: true, voice: true },
-    { value: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite", multimodal: true, voice: true },
-    { value: "gemini-2.5-flash", name: "Gemini 2.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true }
+    { value: "gemini-3.5-flash", name: "Gemini 3.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
+    { value: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash-Lite", multimodal: true, voice: true },
+    { value: "gemini-2.5-pro", name: "Gemini 2.5 Pro", multimodal: true, voice: true },
+    { value: "gemini-3.5-pro", name: "Gemini 3.5 Pro (Preview)", multimodal: true, voice: true }
   ]
 };
 

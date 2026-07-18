@@ -567,7 +567,7 @@
             </details>
 
             <!-- Google AI Studio Detail Accordion -->
-            <details class="guide-details">
+            <details class="guide-details" open>
               <summary>
                 <span style="display:flex; align-items:center; gap:8px;">
                   <i class="fa-solid fa-circle-nodes" style="color:var(--accent-primary);"></i>
@@ -577,26 +577,41 @@
               </summary>
               <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
                 <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
-                  <strong>Rate Limits:</strong> 15 RPM / 1,000 RPD for Flash-Lite, 10 RPM / 250 RPD for Flash. (Shared daily pool: 1,250 requests).
+                  <strong>Rate Limits:</strong> Multi-key rotated. Sustained rates are dynamically distributed.
                 </p>
                 <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
                   <thead>
                     <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
                       <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
                       <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Limits (RPM / RPD)</th>
                       <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr style="border-bottom:1px solid var(--border-color);">
-                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-2.5-flash-lite</td>
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-3.5-flash</td>
                       <td style="padding:6px 8px;">1,000,000</td>
-                      <td style="padding:6px 8px; color:var(--text-secondary);">Default lightweight routing model. Low latency, multimodal (audio/vision).</td>
+                      <td style="padding:6px 8px;">10 RPM / 1,500 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship flash model. Ultra-low latency, code gen, translation.</td>
                     </tr>
                     <tr style="border-bottom:1px solid var(--border-color);">
-                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-2.5-flash</td>
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-3.1-flash-lite</td>
                       <td style="padding:6px 8px;">1,000,000</td>
-                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship. Deep reasoning, coding, translation, and complete document PDFs.</td>
+                      <td style="padding:6px 8px;">15 RPM / 1,000 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Default lightweight routing model. Highly optimized.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-2.5-pro</td>
+                      <td style="padding:6px 8px;">2,000,000</td>
+                      <td style="padding:6px 8px;">5 RPM / 100 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Advanced reasoning, complete codebase analysis, math.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-3.5-pro</td>
+                      <td style="padding:6px 8px;">2,000,000</td>
+                      <td style="padding:6px 8px;">2 RPM / 50 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Next-generation frontier preview model. Deep complex logic.</td>
                     </tr>
                   </tbody>
                 </table>

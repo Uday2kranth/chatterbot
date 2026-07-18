@@ -2634,11 +2634,10 @@ async function toggleVoiceRecording() {
 }
 
 function setupMobileSimulator() {
-  const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
   const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
   const sidebar = document.getElementById('sidebar');
 
-  // ── Sidebar backdrop for mobile mode ──
+  // ── Sidebar backdrop for mobile view ──
   function getMobileBackdrop() {
     let bd = document.getElementById('mobile-sidebar-backdrop');
     if (!bd) {
@@ -2647,117 +2646,38 @@ function setupMobileSimulator() {
       bd.className = 'mobile-sidebar-backdrop';
       bd.style.display = 'none';
       document.body.appendChild(bd);
+      bd.addEventListener('click', () => {
+        if (sidebar) sidebar.classList.remove('open');
+        bd.style.display = 'none';
+      });
     }
     return bd;
   }
 
-  function openMobileSidebar() {
-    if (!sidebar) return;
-    sidebar.classList.add('open');
-    getMobileBackdrop().style.display = 'block';
-  }
-
-  function closeMobileSidebar() {
-    if (!sidebar) return;
-    sidebar.classList.remove('open');
-    getMobileBackdrop().style.display = 'none';
-  }
-
-  function updateToggleIcon(isMobileActive) {
-    if (!mobileToggleBtn) return;
-    const icon = mobileToggleBtn.querySelector('i');
-    if (isMobileActive) {
-      if (icon) icon.className = 'fa-solid fa-desktop';
-      mobileToggleBtn.title = 'Switch to Desktop View';
-    } else {
-      if (icon) icon.className = 'fa-solid fa-mobile-screen-button';
-      mobileToggleBtn.title = 'Toggle Mobile View';
-    }
-  }
-
-  function applyMobileMode() {
-    document.body.classList.add('mobile-view-active');
-    updateToggleIcon(true);
-    // Remove collapsed class so all text labels render in mobile view
-    if (sidebar) sidebar.classList.remove('collapsed');
-    // Open the sidebar by default when toggling to mobile view so it is visible
-    openMobileSidebar();
-
-    // Wire hamburger to open/close sidebar
-    if (hamburgerBtn && !hamburgerBtn._mobileHandler) {
-      hamburgerBtn._mobileHandler = (e) => {
-        e.stopPropagation();
-        const isOpen = sidebar && sidebar.classList.contains('open');
-        isOpen ? closeMobileSidebar() : openMobileSidebar();
-      };
-      hamburgerBtn.addEventListener('click', hamburgerBtn._mobileHandler);
-    }
-
-    // Backdrop tap closes sidebar
-    const bd = getMobileBackdrop();
-    if (!bd._closeHandler) {
-      bd._closeHandler = () => closeMobileSidebar();
-      bd.addEventListener('click', bd._closeHandler);
-    }
-  }
-
-  function removeMobileMode() {
-    document.body.classList.remove('mobile-view-active');
-    closeMobileSidebar();
-    updateToggleIcon(false);
-
-    // Clean up hamburger handler
-    if (hamburgerBtn && hamburgerBtn._mobileHandler) {
-      hamburgerBtn.removeEventListener('click', hamburgerBtn._mobileHandler);
-      hamburgerBtn._mobileHandler = null;
-    }
-
-    // Restore sidebar visibility (desktop collapsed state)
-    if (sidebar) {
-      const wasCollapsed = localStorage.getItem('chatterbot_sidebar_collapsed') === 'true';
-      sidebar.classList.toggle('collapsed', wasCollapsed);
-    }
-  }
-
-  // ── Toggle button click ──
-  if (mobileToggleBtn) {
-    mobileToggleBtn.addEventListener('click', (e) => {
+  // Wire hamburger button to toggle sidebar on mobile viewport sizes
+  if (hamburgerBtn && sidebar) {
+    hamburgerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isMobile = document.body.classList.contains('mobile-view-active');
-      if (isMobile) {
-        removeMobileMode();
-        localStorage.setItem('chatterbot_mobile_sim', 'false');
-        showToast("🖥️ Switched to desktop layout.", "info");
+      const isOpen = sidebar.classList.contains('open');
+      if (isOpen) {
+        sidebar.classList.remove('open');
+        getMobileBackdrop().style.display = 'none';
       } else {
-        applyMobileMode();
-        localStorage.setItem('chatterbot_mobile_sim', 'true');
-        showToast("📱 Mobile layout active. Sidebar is open.", "info");
+        sidebar.classList.add('open');
+        getMobileBackdrop().style.display = 'block';
       }
     });
   }
 
-  // ── Auto-apply on real mobile screens via media query detection ──
+  // Monitor viewport changes to close sidebar overlay if resized to desktop
   const mq = window.matchMedia('(max-width: 768px)');
-  function handleMediaChange(e) {
-    if (e.matches) {
-      // Real phone — auto apply mobile wiring
-      applyMobileMode();
-    } else {
-      // Back to desktop — only remove if not manually toggled
-      if (localStorage.getItem('chatterbot_mobile_sim') !== 'true') {
-        removeMobileMode();
-      }
+  mq.addEventListener('change', (e) => {
+    if (!e.matches) {
+      if (sidebar) sidebar.classList.remove('open');
+      const bd = document.getElementById('mobile-sidebar-backdrop');
+      if (bd) bd.style.display = 'none';
     }
-  }
-  mq.addEventListener('change', handleMediaChange);
-
-  // ── Restore saved preference on load ──
-  const storedMobile = localStorage.getItem('chatterbot_mobile_sim') === 'true';
-  if (storedMobile || mq.matches) {
-    applyMobileMode();
-  } else {
-    updateToggleIcon(false);
-  }
+  });
 }
 
 // ── Global Token Tracker Data State ──

@@ -1,0 +1,65 @@
+# Reference, Blueprint and Plan Markdown files (Keep repo clean)
+*.md
+!README.md
+
+# Document Exports & Office Word/Excel/PPT Files
+*.doc
+*.docx
+*.pdf
+*.rtf
+*.odt
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.pages
+*.numbers
+*.key
+~$*
+
+# Image Formats (Supported and Unsupported)
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.ico
+*.heic
+*.heif
+*.tiff
+*.tif
+*.bmp
+*.svg
+*.psd
+*.raw
+*.ai
+
+# Credentials and Secret Configuration files
+*credentials*
+credentials.json
+token.json
+.env
+.env.local
+.env.*.local
+
+# Databases and Local Storage backups
+db/
+*.db
+*.sqlite
+
+# Dev Scratch scripts and temporary files
+scratch/
+.gemini/
+.tempmediaStorage/
+.agents/
+
+# Package dependencies and platform-specific lockfiles
+node_modules/
+.vercel/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Multi-Model AI Chatbot Dashboard</title>
+  <script>
+    window.addEventListener('error', function(e) {
+      alert('GLOBAL ERROR DETECTED:\nMessage: ' + e.message + '\nFile: ' + e.filename + '\nLine: ' + e.lineno + ':' + e.colno + '\nStack: ' + (e.error ? e.error.stack : 'N/A'));
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      alert('UNHANDLED REJECTION DETECTED:\nReason: ' + e.reason + '\nStack: ' + (e.reason && e.reason.stack ? e.reason.stack : 'N/A'));
+    });
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Marked Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- KaTeX for beautiful math formulas rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <!-- html2canvas for exporting messages as images -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+  <!-- Toast Container for Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Password Verification Modal Overlay -->
+  <div class="drawer-overlay" id="password-auth-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2500; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);">
+    <div style="width: 90%; max-width: 400px; padding: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); display: flex; flex-direction: column; gap: 16px; position: relative;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+        <i class="fa-solid fa-shield-halved" style="color: var(--accent-primary);"></i>
+        <span>Unlock Secure Settings</span>
+      </h3>
+      <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; margin: 0;">
+        Please enter your user password to unlock and manage secure API keys, endpoints, and rotation slots.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label for="settings-unlock-password" style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary);">Password</label>
+        <div class="api-input-wrapper" style="position: relative; display: flex; align-items: center;">
+          <input type="password" id="settings-unlock-password" placeholder="Enter your password" style="width: 100%; padding: 10px 40px 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); color: var(--text-primary); font-size: 0.85rem; outline: none;">
+          <button class="toggle-pwd-btn" data-target="settings-unlock-password" type="button" style="position: absolute; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer;" aria-label="Toggle Password Visibility">
+            <i class="fa-solid fa-eye-slash"></i>
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;">
+        <button id="cancel-unlock-btn" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 8px; background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; font-weight: 600;">Cancel</button>
+        <button id="confirm-unlock-btn" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 8px; background: var(--accent-primary); border: none; color: white; cursor: pointer; font-weight: 600;">Unlock Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summarization Modal Overlay -->
+  <div class="drawer-overlay" id="summary-modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2500; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);">
+    <div style="width: 90%; max-width: 550px; padding: 24px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); display: flex; flex-direction: column; gap: 16px; position: relative;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+          <i class="fa-solid fa-compress" style="color: var(--accent-primary);"></i>
+          <span>Conversation RAG Context Summary</span>
+        </h3>
+        <button id="close-summary-modal-btn" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;" aria-label="Close Summary Modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; margin: 0;" id="summary-info-text">
+        Summarized X turns of chat history. Copy this context code block to paste into another session.
+      </p>
+      
+      <div style="position:relative; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; padding:12px; max-height:220px; overflow-y:auto;">
+        <pre id="summary-code-block" style="margin:0; font-family:monospace; font-size:0.8rem; color:var(--text-primary); white-space:pre-wrap; word-break:break-all;"></pre>
+      </div>
+      
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;">
+        <button id="copy-summary-content-btn" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 8px; background: var(--accent-primary); border: none; color: white; cursor: pointer; font-weight: 600; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-copy"></i> Copy Context Summary
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompts library is now embedded directly in the chat-area below -->
+
+  <!-- Custom Roles Modal Overlay -->
+  <div class="drawer-overlay" id="roles-modal-overlay">
+    <div class="prompts-modal" id="roles-modal" style="width: 90%; max-width: 500px; margin: auto; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); display: flex; flex-direction: column; max-height: 80vh; position: relative;">
+      <div class="drawer-header" style="border-bottom: 1px solid var(--border-color); padding: 20px 24px;">
+        <h2 class="drawer-title">
+          <i class="fa-solid fa-user-gear" style="color:var(--accent-primary);"></i>
+          <span>Configure System Roles</span>
+        </h2>
+        <button class="drawer-close" id="close-roles-btn" aria-label="Close Roles Config">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="drawer-body" style="padding: 24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto;">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">Customize model behavior by setting custom bot and user role profiles. These fields build a system instructions prompt.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label for="bot-role-input" style="font-weight:600; font-size:0.85rem; color:var(--text-primary);">Bot Persona / Role</label>
+          <textarea id="bot-role-input" class="api-input" style="height: 70px; resize: none; padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem;" placeholder="e.g. You are an expert Computer Networks examiner. Ask questions one-by-one and grade responses."></textarea>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label for="user-role-input" style="font-weight:600; font-size:0.85rem; color:var(--text-primary);">User Identity / Role</label>
+          <textarea id="user-role-input" class="api-input" style="height: 70px; resize: none; padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem;" placeholder="e.g. A university student reviewing syllabus for Semester 4 examinations."></textarea>
+        </div>
+      </div>
+      <div class="drawer-footer" style="border-top: 1px solid var(--border-color); padding: 20px 24px; display:flex; gap:12px;">
+        <button class="drawer-btn secondary" id="cancel-roles-btn" style="flex:1; padding: 10px;">Cancel</button>
+        <button class="drawer-btn primary" id="save-roles-btn" style="flex:1; padding: 10px;">Apply Roles</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom System Prompt Modal Overlay -->
+  <div class="drawer-overlay" id="system-prompt-modal-overlay">
+    <div class="prompts-modal" id="system-prompt-modal" style="width: 90%; max-width: 500px; margin: auto; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); display: flex; flex-direction: column; max-height: 80vh; position: relative;">
+      <div class="drawer-header" style="border-bottom: 1px solid var(--border-color); padding: 20px 24px;">
+        <h2 class="drawer-title">
+          <i class="fa-solid fa-gears" style="color:var(--accent-primary);"></i>
+          <span>Session System Prompt</span>
+        </h2>
+        <button class="drawer-close" id="close-sys-prompt-btn" aria-label="Close Prompt Config">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="drawer-body" style="padding: 24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto;">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">Enter a custom system prompt to guide the AI chatbot's response context and style for this active chat session.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label for="sys-prompt-input" style="font-weight:600; font-size:0.85rem; color:var(--text-primary);">System Prompt Context</label>
+          <textarea id="sys-prompt-input" class="api-input" style="height: 120px; resize: none; padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem;" placeholder="e.g. You are an AI tutor helping me review computer networks. Explain all answers using clear analogies."></textarea>
+        </div>
+      </div>
+      <div class="drawer-footer" style="border-top: 1px solid var(--border-color); padding: 20px 24px; display:flex; gap:12px;">
+        <button class="drawer-btn secondary" id="cancel-sys-prompt-btn" style="flex:1; padding: 10px;">Cancel</button>
+        <button class="drawer-btn primary" id="save-sys-prompt-btn" style="flex:1; padding: 10px;">Apply Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Export Configuration Modal Overlay -->
+  <div class="drawer-overlay" id="email-config-modal-overlay" style="align-items: center; justify-content: center; z-index: 2500; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); display: flex;">
+    <div class="prompts-modal" id="email-config-modal" style="width: 90%; max-width: 500px; margin: auto; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); display: flex; flex-direction: column; max-height: 80vh; position: relative;">
+      <div class="drawer-header" style="border-bottom: 1px solid var(--border-color); padding: 20px 24px; display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="drawer-title" style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+          <i class="fa-solid fa-envelope" style="color:var(--accent-primary);"></i>
+          <span>Email Export Configuration</span>
+        </h2>
+        <button class="drawer-close" id="close-email-config-btn" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;" aria-label="Close Email Config">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="drawer-body" style="padding: 24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto;">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin:0;">
+          Configure recipient email address(es) for exporting conversation pair snapshots. 
+          You can specify multiple recipients by separating their email IDs with commas.
+        </p>
+        
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+          <label for="modal-email-input" style="font-weight:600; font-size:0.85rem; color:var(--text-primary);">Recipient Email Addresses</label>
+          <input type="text" id="modal-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
+          <span style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Use commas (,) to separate multiple email recipients.</span>
+        </div>
+      </div>
+      <div class="drawer-footer" style="border-top: 1px solid var(--border-color); padding: 20px 24px; display:flex; gap:12px;">
+        <button class="drawer-btn secondary" id="cancel-email-config-btn" style="flex:1; padding: 10px;">Cancel</button>
+        <button class="drawer-btn primary" id="save-email-config-btn" style="flex:1; padding: 10px; font-weight:600;">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Sub-views are now embedded directly in the chat-area below -->
+
+  <!-- Dashboard Main Window -->
+  <div class="dashboard-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="app-branding">
+          <div class="app-logo">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <span class="app-title">ChatterBot</span>
+        </div>
+        <div class="header-actions" style="display:flex; align-items:center; gap:6px;">
+          <button id="mobile-toggle-btn" class="theme-toggle-floating" style="position:static; padding:8px;" title="Toggle Mobile View Simulator">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+          </button>
+          <button id="theme-toggle-btn" class="theme-toggle-floating" style="position:static; padding:8px;" aria-label="Toggle Theme">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <button id="sidebar-toggle-btn" class="theme-toggle-floating" style="position:static; padding:8px;" title="Toggle Sidebar">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Start New Chat / Prompts Library Session -->
+      <div class="sidebar-actions-top" style="display:flex; flex-direction:column; gap:4px; padding: 12px 20px 4px 20px;">
+        <button class="new-chat-btn" id="new-chat-btn" style="margin:0; width:100%;">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Chat Session</span>
+        </button>
+        <button class="new-chat-btn" id="prompts-library-btn" style="margin:0; width:100%; border-color:var(--accent-secondary); color:var(--accent-secondary);">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Prompts Library</span>
+        </button>
+        <button class="new-chat-btn" id="model-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Model Capabilities Guide">
+          <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
+          <span>Model Guide</span>
+        </button>
+        <button class="new-chat-btn" id="api-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified API Key Generation Guide">
+          <i class="fa-solid fa-key" style="color:var(--accent-primary);"></i>
+          <span>API Guide</span>
+        </button>
+        <button class="new-chat-btn" id="token-tracker-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified Token Tracker">
+          <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
+          <span>Token Tracker</span>
+        </button>
+      </div>
+
+      <!-- Persistent Sidebar Chat Sessions List -->
+      <div class="history-section">
+        <h3 class="history-title">Chat History</h3>
+        <div class="history-list" id="history-list">
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </div>
+
+      <!-- User Info & Action Settings Footer -->
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-info">
+            <div class="user-avatar" id="user-avatar-initials">U</div>
+            <div class="user-details">
+              <span class="user-name" id="user-display-name">Username</span>
+              <span class="user-role" id="user-display-role">Student</span>
+            </div>
+          </div>
+          <button class="logout-btn" id="logout-btn" title="Log Out">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+
+        <div class="footer-buttons" style="grid-template-columns: 1fr;">
+          <button class="footer-btn" id="clear-chat-btn">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Clear Logs</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat Area -->
+    <main class="chat-area">
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div class="active-model-info">
+          <span class="active-provider" id="active-provider-label">OPENROUTER</span>
+          <span class="active-model-name" id="active-model-label">Llama 3.1 8B (Free)</span>
+        </div>
+
+        <div class="chat-controls-top">
+          <!-- Provider Dropdown -->
+          <div class="selector-group">
+            <label for="provider-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">PROVIDER</label>
+            <select id="provider-select" class="custom-select">
+              <option value="openrouter">OpenRouter</option>
+              <option value="nvidia">NVIDIA NIM</option>
+              <option value="omnirouter">OmniRouter</option>
+              <option value="mistral">Mistral AI</option>
+              <option value="cerebras">Cerebras</option>
+              <option value="groq">Groq</option>
+              <option value="sambanova">SambaNova</option>
+              <option value="gemini">Google Gemini</option>
+            </select>
+          </div>
+
+          <!-- Model Dropdown -->
+          <div class="selector-group">
+            <label for="model-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">MODEL</label>
+            <select id="model-select" class="custom-select">
+              <!-- Populated dynamically via app.js -->
+            </select>
+          </div>
+
+          <!-- Roles Trigger button -->
+          <button id="custom-roles-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-primary); color:var(--accent-primary); padding: 7px 12px;" title="Configure Bot & User Roles">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>Roles</span>
+          </button>
+
+          <!-- Email Export Configuration Trigger button -->
+          <button id="header-email-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-secondary); color:var(--accent-secondary); padding: 7px 12px;" title="Configure Recipient Emails for Export">
+            <i class="fa-solid fa-envelope"></i>
+            <span id="header-email-label">Email Export</span>
+          </button>
+        </div>
+
+        <!-- Hamburger button — only shown in mobile layout to open sidebar -->
+        <button id="mobile-hamburger-btn" style="display:none; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); padding:8px 12px; border-radius:8px; cursor:pointer; font-size:1rem; align-items:center; gap:6px;" title="Open Navigation Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </header>
+
+      <!-- Active System Prompt Indicator Banner -->
+      <div id="system-prompt-banner" style="display: none; padding: 10px 24px; background-color: var(--accent-glow-subtle); border-bottom: 1px solid var(--border-color); justify-content: space-between; align-items: center; font-size: 0.85rem; z-index: 2;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-primary);"></i>
+          <span>Active Role-Play: <strong id="system-prompt-title-display">Exam Prep Simulator</strong></span>
+        </div>
+        <button class="msg-action-btn" id="reset-system-prompt-btn" style="color: var(--error-color); margin: 0; padding: 2px 8px; font-weight:500;">
+          <i class="fa-solid fa-circle-xmark"></i> Disable
+        </button>
+      </div>      <!-- View 1: Active Chat View (Messages & Input) -->
+      <div id="active-chat-view" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+        <!-- Scrollable Message pane -->
+        <div class="messages-container" id="messages-container">
+          <!-- Empty State Container (Shows when there are no active messages) -->
+          <div class="empty-state" id="chat-empty-state">
+            <div class="empty-icon">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <h2 class="empty-title">Select Model & Begin Chatting</h2>
+            <p class="empty-desc">Choose your preferred provider and LLM pipeline from the top controls. Students must provide their own API keys in Settings to run models.</p>
+            <div class="empty-suggestions">
+              <button class="suggestion-card" data-prompt="What is the difference between OpenRouter and NVIDIA NIM?">
+                <strong>Question:</strong> "What is the difference between OpenRouter and NVIDIA NIM?"
+              </button>
+              <button class="suggestion-card" data-prompt="Explain Quantum Computing in three simple sentences.">
+                <strong>Question:</strong> "Explain Quantum Computing in three simple sentences."
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generating state typing dot pulse -->
+        <div class="typing-indicator" id="typing-indicator" style="display: none;">
+          <span style="font-size:0.8rem; color:var(--text-secondary); margin-right:6px;">AI Pipeline Responding</span>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+
+        <!-- Input box container -->
+        <div class="input-area-container">
+          <!-- Input toolbar / active info -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; padding: 0 4px;">
+            <span style="font-size:0.75rem; color:var(--text-secondary); display:flex; align-items:center; gap:4px;">
+              <i class="fa-solid fa-circle-info" style="color:var(--text-muted); font-size: 0.8rem;"></i>
+              <span>Type prompt and press Enter to chat.</span>
+            </span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button id="export-chat-md-btn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s, color 0.2s;" title="Export Entire Chat as Markdown">
+                <i class="fa-solid fa-file-arrow-down"></i>
+                <span style="font-weight:600;">Export Markdown</span>
+              </button>
+              <button id="export-chat-word-btn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s, color 0.2s;" title="Export Entire Chat as Word Document (.doc)">
+                <i class="fa-solid fa-file-word" style="color:#2b579a;"></i>
+                <span style="font-weight:600;">Export Word</span>
+              </button>
+              <button id="summarize-chat-btn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s, color 0.2s;" title="Summarize Entire Conversation to Code Block">
+                <i class="fa-solid fa-compress"></i>
+                <span style="font-weight:600;">Summarize</span>
+              </button>
+              <button id="session-prompt-btn" style="background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s;" title="Set Session System Prompt">
+                <i class="fa-solid fa-gear"></i>
+                <span style="font-weight:600;">System Prompt</span>
+              </button>
+            </div>
+          </div>
+          <div class="input-box">
+            <!-- Multimodal preview panel -->
+            <div id="multimodal-preview-bar" style="display:none; align-items:center; gap:8px; padding:8px; border-bottom:1px solid var(--border-color); background:var(--bg-tertiary); border-radius: 8px 8px 0 0;">
+              <!-- Rendered dynamically -->
+            </div>
+            <div class="input-row">
+              <textarea id="chat-input" class="chat-input-textarea" placeholder="Type your message here... (Press Shift+Enter for new line)" rows="1"></textarea>
+              <button id="send-chat-btn" class="send-btn" aria-label="Send Message" disabled>
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+            <div class="input-footer">
+              <span style="font-size:0.7rem; color:var(--text-muted);">Logged in session secured.</span>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <!-- Multimodal File upload triggers (active on all operators) -->
+                <div id="groq-media-controls" style="display: none; align-items: center; gap: 8px; margin-right: 4px;">
+                  <!-- Image Upload Button -->
+                  <button type="button" id="img-upload-trigger" class="msg-action-btn" style="padding: 4px 8px; font-size: 0.75rem;" title="Upload Study Image">
+                     <i class="fa-solid fa-image" style="color:var(--accent-primary);"></i>
+                     <span>Image</span>
+                  </button>
+                  <input type="file" id="img-file-input" accept="image/*" style="display:none;">
+    
+                  <!-- Audio File Upload Button -->
+                  <button type="button" id="audio-upload-btn" class="msg-action-btn" style="padding: 4px 8px; font-size: 0.75rem;" title="Upload Audio File">
+                    <i class="fa-solid fa-file-audio" style="color:var(--accent-primary);"></i>
+                    <span>Audio</span>
+                  </button>
+                  <input type="file" id="audio-file-input" accept="audio/*" style="display:none;">
+
+                  <!-- Live Recording Button -->
+                  <button type="button" id="voice-record-btn" class="msg-action-btn" style="padding: 4px 8px; font-size: 0.75rem;" title="Record Voice">
+                    <i class="fa-solid fa-microphone" style="color:var(--accent-primary);"></i>
+                    <span id="voice-btn-text">Record</span>
+                  </button>
+                </div>
+  
+                <label class="search-toggle" style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-secondary); user-select:none; margin:0;">
+                  <input type="checkbox" id="web-search-checkbox" style="cursor:pointer; accent-color:var(--accent-primary);">
+                  <i class="fa-solid fa-earth-americas" style="color:var(--accent-primary); font-size: 0.85rem;"></i>
+                  <span>Web Search</span>
+                </label>
+                <div class="status-badge">
+                  <span class="status-indicator"></span>
+                  <span id="connection-status">Ready</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 2: Model Capabilities Guide View -->
+      <div id="model-guide-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
+            <span>Model Capabilities Guide</span>
+          </h2>
+          <button class="drawer-btn secondary" id="close-model-guide-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition:opacity 0.2s;">
+            <i class="fa-solid fa-xmark"></i> Close Guide
+          </button>
+        </div>
+        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <!-- Model Picker Suffix Explanation Card (IMPORTANT) -->
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <h3 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>🔍 How to Identify Model Capabilities in the Selector Dropdown</span>
+            </h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.8rem; line-height: 1.45; color: var(--text-secondary);">
+              Check the square brackets suffix right beside each model identifier in the picker dropdown to quickly identify its features:
+            </p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:8px;">
+              <div style="background:var(--bg-secondary); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                <div style="font-size:0.75rem; font-weight:700; color:var(--accent-secondary); margin-bottom:4px;">[WS]</div>
+                <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.35;"><strong>Web Search:</strong> Supports real-time internet querying and RAG citation logic.</div>
+              </div>
+              <div style="background:var(--bg-secondary); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                <div style="font-size:0.75rem; font-weight:700; color:var(--accent-primary); margin-bottom:4px;">[IMG]</div>
+                <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.35;"><strong>Image:</strong> Multimodal vision capable. Supports uploading diagrams or screenshots.</div>
+              </div>
+              <div style="background:var(--bg-secondary); border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                <div style="font-size:0.75rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">[A]</div>
+                <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.35;"><strong>Audio:</strong> Native speech comprehension or automated Whisper translation.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Groq Background Whisper Disclaimer (Important rate limits warning) -->
+          <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--error-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+            <h3 style="margin: 0; font-size: 0.9rem; font-weight: 600; color: var(--error-color); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>⚠️ IMPORTANT ROUTING DISCLAIMER: BACKGROUND WHISPER USAGE</span>
+            </h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--text-secondary);">
+              No matter which operator or model is active (e.g. Mistral, Gemini, or NIM), clicking the <strong>Record</strong> or <strong>Audio</strong> upload buttons will **always route through the Groq Whisper API** in the background for transcribing.
+            </p>
+            <p style="margin: 4px 0 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--text-secondary);">
+              <strong>💡 Warning / Strategy:</strong> Because your Groq API key limits are vital for this audio-to-text transcription service, <strong>try to avoid using Groq for regular chat/thinking models</strong> when other free operators (like Gemini, OpenRouter, or NVIDIA) are available. This will conserve your Groq key's daily rate budget exclusively for voice and audio features!
+            </p>
+          </div>
+
+          <!-- Section 1: Detailed Free Providers Reference Tables -->
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <h3 style="margin:0; font-size:1rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-list-check" style="color:var(--accent-primary);"></i>
+              <span>Curated Model Capabilities Matrix</span>
+            </h3>
+
+            <!-- OpenRouter Detail Accordion -->
+            <details class="guide-details" open>
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-server" style="color:var(--accent-primary);"></i>
+                  <span>1. OpenRouter (Zero-Credit Free Tier)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Rate Limits:</strong> 20 RPM / 200 RPD for free accounts. (Loophole: Deposit $10 once to unlock 1,000 RPD).
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-ultra:free</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Frontier MoE. Deep planning, heavy enterprise tasks, document parsing.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-super-120b-a12b:free</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">High-efficiency math, logic, and AIME benchmark resolution.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">openai/gpt-oss-20b:free</td>
+                      <td style="padding:6px 8px;">131,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Low-latency conversational responses. Highly optimized.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-nano-30b-a3b:free</td>
+                      <td style="padding:6px 8px;">256,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Compact MoE designed for high-speed sub-agent orchestrations.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">poolside/laguna-m.1:free</td>
+                      <td style="padding:6px 8px;">262,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship coding assistant. Repo-scale tasks and tool calling.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">poolside/laguna-xs-2.1:free</td>
+                      <td style="padding:6px 8px;">262,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Lightweight developer assistant, quantized to FP8.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">cohere/north-mini-code:free</td>
+                      <td style="padding:6px 8px;">256,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Low-latency CLI execution and structured terminal tasks.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">qwen/qwen3-coder:free</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Huge repository analysis, debugging, and codebases.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">google/gemma-4-31b-it:free</td>
+                      <td style="padding:6px 8px;">262,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">OCR visual processing, tables, layouts (Image input).</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">google/gemma-4-26b-a4b-it:free</td>
+                      <td style="padding:6px 8px;">262,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Visual instruction follower, entity/object counting (Image input).</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-nano-omni:free</td>
+                      <td style="padding:6px 8px;">300,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Multimodal voice, image, audio, and video scanner model.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- Google AI Studio Detail Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-circle-nodes" style="color:var(--accent-primary);"></i>
+                  <span>2. Google AI Studio (Gemini)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Rate Limits:</strong> 15 RPM / 1,000 RPD for Flash-Lite, 10 RPM / 250 RPD for Flash. (Shared daily pool: 1,250 requests).
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-2.5-flash-lite</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Default lightweight routing model. Low latency, multimodal (audio/vision).</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-2.5-flash</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship. Deep reasoning, coding, translation, and complete document PDFs.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- Groq Detail Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-bolt" style="color:var(--accent-primary);"></i>
+                  <span>3. Groq (Lightning Inference)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Daily Limits:</strong> Allocated per model ID. (e.g. 500k Tokens / 1,000 Requests).
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Daily Limits</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Key Specialty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">meta-llama/llama-4-scout-17b-16e-instruct</td>
+                      <td style="padding:6px 8px;">131,072</td>
+                      <td style="padding:6px 8px;">500k Tokens / 1K RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Curated Flagship chat & vision (multimodal).</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">openai/gpt-oss-120b</td>
+                      <td style="padding:6px 8px;">131,072</td>
+                      <td style="padding:6px 8px;">200k Tokens / 1K RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Ultra-Large reasoning & logical analysis.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">openai/gpt-oss-20b</td>
+                      <td style="padding:6px 8px;">131,072</td>
+                      <td style="padding:6px 8px;">250k Tokens / 1K RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">High-speed efficient reasoning tasks.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">qwen/qwen3-32b</td>
+                      <td style="padding:6px 8px;">131,072</td>
+                      <td style="padding:6px 8px;">500k Tokens / 1K RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Advanced multilingual instruction executor.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">whisper-large-v3-turbo</td>
+                      <td style="padding:6px 8px;">N/A (Audio)</td>
+                      <td style="padding:6px 8px;">2 Hours Audio / 2K RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Background live voice recording transcriber.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- NVIDIA NIM Detail Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-microchip" style="color:var(--accent-primary);"></i>
+                  <span>4. NVIDIA NIM (Prototyping Tier)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Rate Limits:</strong> ~40 RPM combined across all endpoints. Prototyping only.
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-ultra</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship 550B MoE. Deep research, multi-document scanning.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-super-120b-a12b</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Math reasoning, agent scripting, multi-token predictions.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">openai/gpt-oss-120b</td>
+                      <td style="padding:6px 8px;">131,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Large-scale open weight logical reasoning model.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">qwen/qwen3-32b</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Excellent multi-lingual coding & conversational flows.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-nano-30b-a3b</td>
+                      <td style="padding:6px 8px;">256,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">High speed routing sub-agent inside complex logic tasks.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">poolside/laguna-m.1</td>
+                      <td style="padding:6px 8px;">262,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Curated software developer specialist. 32K output cap.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">cohere/north-mini-code</td>
+                      <td style="padding:6px 8px;">256,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Low latency shell command line logic, tool calling.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">google/gemma-4-31b-it</td>
+                      <td style="padding:6px 8px;">262,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Optical OCR, chart layouts, document structure parser (Vision).</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">nvidia/nemotron-3-nano-omni</td>
+                      <td style="padding:6px 8px;">300,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Voice/Vision. Unified perception model for media streaming.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- Cerebras Detail Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-server" style="color:var(--accent-primary);"></i>
+                  <span>5. Cerebras (Ultra-Fast Inference)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Limits:</strong> 1,000,000 tokens daily cap. Enforces a **hard 8,192 context window cap** per request.
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context Cap</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gpt-oss-120b</td>
+                      <td style="padding:6px 8px;">8,192 (Hard)</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">World-record speed inference for deep math, code, and agent steps.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemma-4-31b</td>
+                      <td style="padding:6px 8px;">8,192 (Hard)</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Extremely responsive conversation chat streams + OCR Vision parser.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- SambaNova Detail Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-network-wired" style="color:var(--accent-primary);"></i>
+                  <span>6. SambaNova (Developer & Free Tiers)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Daily Limits:</strong> 20 RPM / 20 RPD / 200k TPD per model independently. (Developer tier shares 20M tokens/day).
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">RPM / RPD Limit</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">DeepSeek-V3.1</td>
+                      <td style="padding:6px 8px;">20 RPM / 20 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Production. Advanced logical reasoning, coding, and chat logic.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">Meta-Llama-3.3-70B-Instruct</td>
+                      <td style="padding:6px 8px;">20 RPM / 20 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Production. Deep multilingual text execution, agent pipelines.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gpt-oss-120b</td>
+                      <td style="padding:6px 8px;">20 RPM / 20 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Production. Curated open weight large math & engineering model.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">DeepSeek-V3.2</td>
+                      <td style="padding:6px 8px;">20 RPM / 20 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Preview. Next-gen experimental chatbot interface.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemma-4-31B-it</td>
+                      <td style="padding:6px 8px;">20 RPM / 20 RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Preview. Google dense OCR layout and image understanding.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">MiniMax-M2.7</td>
+                      <td style="padding:6px 8px;">60 RPM / 12K RPD</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Developer Tier. Curated high throughput reasoning engine.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- Mistral AI Detail Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-brain" style="color:var(--accent-primary);"></i>
+                  <span>7. Mistral AI (Experiment Tier)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Limits:</strong> 2 RPM / 500K TPM. (Up to 1 Billion free tokens per month).
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context Window</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">mistral-large-latest</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship Mistral model. Complex reasoning, multi-language, agentic tasks.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">open-mixtral-8x22b</td>
+                      <td style="padding:6px 8px;">64,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">High reasoning MoE code compiler and text assistant.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">codestral-latest</td>
+                      <td style="padding:6px 8px;">32,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Specialist model tuned exclusively for developer coding/debug workflows.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">open-mistral-nemo</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Lite model optimized for fast responses and instruction following.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">pixtral-12b-2409</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Vision support model. Processes images and layout documents natively.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- FreeModel.dev Analysis Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-globe" style="color:var(--accent-primary);"></i>
+                  <span>8. FreeModel.dev Analysis & Integration</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="font-size:0.8rem; line-height:1.45; color:var(--text-secondary); display:flex; flex-direction:column; gap:6px;">
+                <p style="margin:0;">
+                  <strong>Website:</strong> <a href="https://freemodel.dev" target="_blank" style="color:var(--accent-primary); text-decoration:none;">freemodel.dev</a> (Grants $300 free trial credits on signup - no card required).
+                </p>
+                <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); padding:10px; border-radius:8px; margin-top:4px;">
+                  <strong style="color:var(--text-primary);">Integration Instructions:</strong>
+                  <p style="margin:4px 0 0 0; font-size:0.75rem; color:var(--text-secondary);">
+                    FreeModel.dev features an OpenAI-compatible pipeline routing to GPT-5.4/5.5 placeholders. Access it in the chatbot by setting the Local/Custom endpoint panel to: <code>https://api.freemodel.dev/v1/chat/completions</code> and pasting your developer API key.
+                  </p>
+                </div>
+              </div>
+            </details>
+
+            <!-- Providers to Avoid Accordion -->
+            <details class="guide-details">
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-triangle-exclamation" style="color:var(--error-color);"></i>
+                  <span>🚨 Unusable / Blacklisted Providers to Avoid</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="font-size:0.8rem; line-height:1.45; color:var(--text-secondary); display:flex; flex-direction:column; gap:6px;">
+                <div>❌ <strong>Kiro AI / Harnesses:</strong> ToS strictly bans third-party wrappers (like our dashboard) or proxy layers. Violators face API bans.</div>
+                <div>❌ <strong>Google Antigravity:</strong> Endpoints are restricted strictly to local client libraries; OAuth scrapers and proxies are blocked.</div>
+                <div>❌ <strong>FriendliAI / Blackbox:</strong> Terms explicitly forbid sublicensing or distributing API wrapper frontends.</div>
+                <div>❌ <strong>Hugging Face Free Inference:</strong> Capped at $0.10/month total budget, exhausting after 3-5 requests.</div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 6: API Keys Generation Guide View -->
+      <div id="api-guide-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-key" style="color:var(--accent-secondary);"></i>
+            <span>API Keys Generation Guide</span>
+          </h2>
+          <button class="drawer-btn secondary" id="close-api-guide-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition:opacity 0.2s;">
+            <i class="fa-solid fa-xmark"></i> Close Guide
+          </button>
+        </div>
+        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin: 0;">
+            Welcome! This guide is designed specifically for complete beginners who want to set up API keys for various AI model providers. All you need to follow these steps is a <strong>Google Account</strong> or a <strong>GitHub Account</strong>.
+          </p>
+
+          <!-- Groq Background Whisper Disclaimer (Important rate limits warning) -->
+          <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--error-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+            <h3 style="margin: 0; font-size: 0.9rem; font-weight: 600; color: var(--error-color); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>⚠️ IMPORTANT ROUTING DISCLAIMER: BACKGROUND WHISPER USAGE</span>
+            </h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--text-secondary);">
+              No matter which operator or model is active (e.g. Mistral, Gemini, or NIM), clicking the <strong>Record</strong> or <strong>Audio</strong> upload buttons will **always route through the Groq Whisper API** in the background for transcribing.
+            </p>
+            <p style="margin: 4px 0 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--text-secondary);">
+              <strong>💡 Warning / Strategy:</strong> Because your Groq API key limits are vital for this audio-to-text transcription service, <strong>try to avoid using Groq for regular chat/thinking models</strong> when other free operators (like Gemini, OpenRouter, or NVIDIA) are available. This will conserve your Groq key's daily rate budget exclusively for voice and audio features!
+            </p>
+          </div>
+
+          <!-- Critical Warnings Section -->
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="background:var(--accent-glow-subtle); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+              <h3 style="margin:0 0 8px 0; color:var(--error-color); font-size:0.95rem; font-weight:600; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>🚨 CRITICAL WARNINGS FOR BEGINNERS</span>
+              </h3>
+              
+              <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px; font-size:0.8rem; line-height:1.45; color:var(--text-secondary);">
+                <div>
+                  <strong style="color:var(--text-primary);">1. The "Login Redirect" Scenario</strong><br/>
+                  When you click any direct link below to create an API key:
+                  <ul style="padding-left:16px; margin:4px 0;">
+                    <li>If you are already logged in: The link will take you directly to the key generation page.</li>
+                    <li>If you are NOT logged in: You will be redirected to their Login/Sign-Up page first.</li>
+                  </ul>
+                  <strong style="color:var(--accent-primary);">⚠️ What to do:</strong> After logging in with Google/GitHub, if you get lost on their generic homepage, simply <strong>come back here and click the link again</strong>. Since you are now logged in, it will take you straight to the correct page.
+                </div>
+                
+                <hr style="border:none; border-top:1px solid var(--border-color); margin:8px 0;"/>
+                
+                <div>
+                  <strong style="color:var(--text-primary);">2. The "One-Time Show" Rule (IMPORTANT)</strong><br/>
+                  For almost all of these providers, <strong>your secret API key is only visible ONCE</strong> when you first generate it.<br/>
+                  <strong style="color:var(--accent-primary);">⚠️ What to do:</strong> Copy the key immediately and save it securely in a text file or paste it into our Settings panel. <strong>If you refresh or click away, you will lose access forever</strong> and will need to delete it and create a new one.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Providers Steps -->
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Provider 1 -->
+            <details class="guide-details" open>
+              <summary>
+                <span>1. OpenRouter (openrouter)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  OpenRouter allows you to access hundreds of AI models through a single API key.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://openrouter.ai/keys</a></div>
+                  <div><strong>Authentication Options:</strong> GitHub, Google, or Email.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent-primary);">https://openrouter.ai/keys</a>.</li>
+                  <li>If prompted, click <strong>"Sign In"</strong> or <strong>"Sign Up"</strong> and select <strong>"Continue with Google"</strong> or <strong>"Continue with GitHub"</strong>.</li>
+                  <li>Click the blue <strong>"Create Key"</strong> button.</li>
+                  <li>Give your key a name (e.g., `My-App-Key`) and click <strong>"Create"</strong>.</li>
+                  <li>A window will pop up showing your key (starts with `sk-or-...`).</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Copy the key immediately! You will never be able to see or copy this key again once you close this window.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 2 -->
+            <details class="guide-details">
+              <summary>
+                <span>2. NVIDIA NIM (nvidia)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  NVIDIA NIM provides high-performance access to open-source foundation models hosted by NVIDIA.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://build.nvidia.com/" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://build.nvidia.com/</a></div>
+                  <div><strong>Authentication Options:</strong> Google, GitHub, or NVIDIA Developer Account.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://build.nvidia.com/" target="_blank" style="color:var(--accent-primary);">https://build.nvidia.com/</a>.</li>
+                  <li>Click <strong>"Login"</strong> or <strong>"Get Started"</strong> in the top right corner and sign in.</li>
+                  <li>Follow the on-screen prompts to complete your NVIDIA Developer profile if requested.</li>
+                  <li>Once logged in, navigate to the catalog and look for the <strong>"API Key"</strong> or <strong>"Generate Key"</strong> button.</li>
+                  <li>Click <strong>"Generate API Key"</strong> and enter a description.</li>
+                  <li>Ensure that catalog access permissions are checked, then click <strong>"Generate"</strong>.</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Copy the secret key immediately and store it safely. It will only be shown once.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 3 -->
+            <details class="guide-details">
+              <summary>
+                <span>3. OmniRouter (omnirouter)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  OmniRouter is an open gateway designed to unify multiple LLM providers behind a single endpoint.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://omniroute.online/" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://omniroute.online/</a></div>
+                  <div><strong>Authentication Options:</strong> GitHub or Google.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://omniroute.online/" target="_blank" style="color:var(--accent-primary);">https://omniroute.online/</a>.</li>
+                  <li>Click <strong>"Sign In / Log In"</strong> and authenticate using GitHub or Google.</li>
+                  <li>Navigate to the <strong>"API Keys"</strong> tab on the left sidebar.</li>
+                  <li>Click <strong>"Generate API Key"</strong> or <strong>"Create New Key"</strong> and enter a label.</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Copy the generated token string instantly and save it securely. You may not be able to view it again.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 4 -->
+            <details class="guide-details">
+              <summary>
+                <span>4. Mistral AI (mistral)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  Mistral AI is a leading provider offering highly capable open-weights models.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://console.mistral.ai/api-keys/" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://console.mistral.ai/api-keys/</a></div>
+                  <div><strong>Authentication Options:</strong> Google, GitHub, or Email.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://console.mistral.ai/api-keys/" target="_blank" style="color:var(--accent-primary);">https://console.mistral.ai/api-keys/</a>.</li>
+                  <li>Click <strong>"Login"</strong> or <strong>"Sign Up"</strong> and pick Google or GitHub.</li>
+                  <li>Look for the <strong>"API Keys"</strong> section on the left-hand navigation menu.</li>
+                  <li>Click the <strong>"Create New Key"</strong> button, name it, and click <strong>"Create"</strong>.</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Copy the visible key string immediately and store it safely. It hides permanently after closing the page.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 5 -->
+            <details class="guide-details">
+              <summary>
+                <span>5. Cerebras (cerebras)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  Cerebras provides ultra-fast inference speeds for open foundation models using specialized hardware.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://cloud.cerebras.ai/" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://cloud.cerebras.ai/</a></div>
+                  <div><strong>Authentication Options:</strong> Google, GitHub, or Email.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://cloud.cerebras.ai/" target="_blank" style="color:var(--accent-primary);">https://cloud.cerebras.ai/</a>.</li>
+                  <li>Click the <strong>"Get API Key"</strong> or <strong>"Log In"</strong> button in the top right corner and sign in.</li>
+                  <li>On the left navigation bar, click on <strong>"API Keys"</strong>.</li>
+                  <li>Click the <strong>"Generate API Key"</strong> button and give it a name.</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Use the copy icon to copy the full key string immediately. It will be obscured permanently.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 6 -->
+            <details class="guide-details">
+              <summary>
+                <span>6. Groq (groq)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  Groq is famous for its LPU technology, delivering near-instant responses from open models.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://console.groq.com/keys</a></div>
+                  <div><strong>Authentication Options:</strong> Google, GitHub, or Email.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent-primary);">https://console.groq.com/keys</a>.</li>
+                  <li>Select Google or GitHub to sign up or log in.</li>
+                  <li>On the left sidebar, click <strong>"API Keys"</strong>.</li>
+                  <li>Click <strong>"Create API Key"</strong>, enter a name, and click <strong>"Submit"</strong>.</li>
+                  <li>A popup will reveal your API key (starts with `gsk_...`).</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Click the <strong>"Copy"</strong> button immediately! It will never be displayed to you again.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 7 -->
+            <details class="guide-details">
+              <summary>
+                <span>7. SambaNova (sambanova)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  SambaNova Cloud delivers lightning-fast inference for massive open-source models.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://cloud.sambanova.ai/" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://cloud.sambanova.ai/</a></div>
+                  <div><strong>Authentication Options:</strong> Google, GitHub, or Email.</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://cloud.sambanova.ai/" target="_blank" style="color:var(--accent-primary);">https://cloud.sambanova.ai/</a>.</li>
+                  <li>Click <strong>"Get Started"</strong> or <strong>"Login"</strong> and sign in using Google or GitHub.</li>
+                  <li>Navigate to the menu panel and select <strong>"API Keys and URLs"</strong>.</li>
+                  <li>Click <strong>"Create API Key"</strong>, add a label, and click <strong>"Generate"</strong>.</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Copy the key value instantly and save it securely. It cannot be retrieved once closed.</li>
+                </ol>
+              </div>
+            </details>
+
+            <!-- Provider 8 -->
+            <details class="guide-details">
+              <summary>
+                <span>8. Google Gemini (gemini)</span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content">
+                <p style="margin:0 0 10px 0;">
+                  Google Gemini keys are generated via Google AI Studio, the developer platform for prototyping with Gemini models.
+                </p>
+                <div style="margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+                  <div><strong>Direct Link:</strong> <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent-primary); text-decoration:underline;">https://aistudio.google.com/app/apikey</a></div>
+                  <div><strong>Authentication Options:</strong> Google Account (Mandatory).</div>
+                </div>
+                <strong style="color:var(--text-primary);">Step-by-Step Instructions:</strong>
+                <ol style="padding-left:18px; margin:6px 0 0 0; display:flex; flex-direction:column; gap:6px;">
+                  <li>Click the exact link: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent-primary);">https://aistudio.google.com/app/apikey</a>.</li>
+                  <li>Sign in using your standard Google Account and accept Terms of Service if prompted.</li>
+                  <li>Click the blue button labeled <strong>"Create API key"</strong>.</li>
+                  <li>Select <strong>"Create API key in new project"</strong> (Recommended for beginners).</li>
+                  <li>Once generated, a string of characters will appear.</li>
+                  <li style="color:var(--error-color);"><strong>🛑 WARNING:</strong> Click <strong>"Copy"</strong> immediately. Once closed, the key characters are permanently obscured.</li>
+                </ol>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- View 3: Token Tracker View -->
+      <div id="token-tracker-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
+            <span>Unified Token Tracker</span>
+          </h2>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button class="drawer-btn secondary" id="reset-tracker-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:transparent; border:1px solid var(--error-color); color:var(--error-color); transition:opacity 0.2s;">
+              <i class="fa-solid fa-rotate-left"></i> Reset Stats
+            </button>
+            <button class="drawer-btn secondary" id="close-token-tracker-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition:opacity 0.2s;">
+              <i class="fa-solid fa-xmark"></i> Close Tracker
+            </button>
+          </div>
+        </div>
+        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <!-- Summary Stats Cards -->
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:12px;">
+            <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:14px; text-align:center;">
+              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; margin-bottom:4px;">Total Spent</div>
+              <div id="tracker-total-tokens" style="font-size:1.4rem; font-weight:700; color:var(--accent-primary);">0</div>
+            </div>
+            <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:14px; text-align:center;">
+              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; margin-bottom:4px;">Input Tokens</div>
+              <div id="tracker-input-tokens" style="font-size:1.4rem; font-weight:700; color:var(--text-secondary);">0</div>
+            </div>
+            <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:14px; text-align:center;">
+              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; margin-bottom:4px;">Output Tokens</div>
+              <div id="tracker-output-tokens" style="font-size:1.4rem; font-weight:700; color:var(--text-secondary);">0</div>
+            </div>
+          </div>
+
+          <!-- Section 1: Provider Breakdown -->
+          <div>
+            <h3 style="font-size:0.95rem; color:var(--text-primary); margin:0 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom:6px; font-weight:600;">Provider Breakdown</h3>
+            <div id="tracker-provider-list" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+          <!-- Section 2: Model Breakdown Table -->
+          <div>
+            <h3 style="font-size:0.95rem; color:var(--text-primary); margin:20px 0 10px 0; border-bottom: 1px solid var(--border-color); padding-bottom:6px; font-weight:600;">Model Granular Breakdown</h3>
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                    <th style="padding:8px 6px; font-weight:600;">Model ID</th>
+                    <th style="padding:8px 6px; font-weight:600;">Provider</th>
+                    <th style="padding:8px 6px; font-weight:600; text-align:right;">Input</th>
+                    <th style="padding:8px 6px; font-weight:600; text-align:right;">Output</th>
+                    <th style="padding:8px 6px; font-weight:600; text-align:right;">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="tracker-model-table-body">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 4: Prompts Library View -->
+      <div id="prompts-library-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent-primary);"></i>
+            <span>Curated Prompts Library</span>
+          </h2>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button class="drawer-btn primary" id="add-prompt-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--accent-primary); color:white; border:none; display:flex; align-items:center; gap:6px; font-weight:600; transition: opacity 0.2s;">
+              <i class="fa-solid fa-plus"></i> Add Prompt
+            </button>
+            <button class="drawer-btn secondary" id="close-prompts-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
+              <i class="fa-solid fa-xmark"></i> Close Library
+            </button>
+          </div>
+        </div>
+        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin: 0 0 4px 0;">
+            Select a curated template to guide the active chat session's AI context. You can check the raw instructions text, copy prompts to clipboard, or create your own custom study/coding directives.
+          </p>
+
+          <!-- Add Custom Prompt Form container (Hidden by default, toggled via Add Prompt button) -->
+          <div id="add-prompt-form-container" style="display:none; border:1px dashed var(--accent-primary); border-radius:12px; padding:16px; background:var(--bg-tertiary); flex-direction:column; gap:12px;">
+            <h4 style="margin:0; font-size:0.9rem; color:var(--accent-primary); display:flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-square-plus"></i> Create Custom Study Prompt
+            </h4>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label for="custom-prompt-title" style="font-size:0.75rem; font-weight:600; color:var(--text-primary);">Title</label>
+                <input type="text" id="custom-prompt-title" placeholder="e.g. Database Indexing Tutor" style="padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; outline:none;">
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label for="custom-prompt-desc" style="font-size:0.75rem; font-weight:600; color:var(--text-primary);">Brief Description</label>
+                <input type="text" id="custom-prompt-desc" placeholder="e.g. Explains indexing schemas with visual diagrams." style="padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; outline:none;">
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label for="custom-prompt-text" style="font-size:0.75rem; font-weight:600; color:var(--text-primary);">System Instructions Prompt</label>
+              <textarea id="custom-prompt-text" placeholder="e.g. Act as a database administrator. Teach database indexing step-by-step..." style="height:80px; resize:none; padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; font-family:inherit; outline:none;"></textarea>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+              <button id="cancel-add-prompt" style="padding:6px 12px; font-size:0.75rem; border-radius:6px; background:transparent; border:1px solid var(--border-color); color:var(--text-primary); cursor:pointer;">Cancel</button>
+              <button id="save-custom-prompt" style="padding:6px 12px; font-size:0.75rem; border-radius:6px; background:var(--accent-primary); border:none; color:white; font-weight:600; cursor:pointer;">Save Prompt</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Prompts Grid -->
+          <div id="prompts-grid-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:8px;">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- View 5: Secure Settings View -->
+      <div id="secure-settings-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-shield-halved" style="color:var(--accent-primary);"></i>
+            <span>Secure Settings & API Keys</span>
+          </h2>
+          <button class="drawer-btn secondary" id="close-settings-view-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
+            <i class="fa-solid fa-xmark"></i> Close Settings
+          </button>
+        </div>
+        
+        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <!-- Admin Privilege Banner -->
+          <div id="admin-privilege-alert" style="display: none;">
+            <div class="admin-badge">Admin Privileges Active</div>
+            <div class="settings-info-alert" style="margin-top: 8px;">
+              <i class="fa-solid fa-circle-info"></i>
+              <p>You are logged in as <strong>Admin@uday</strong>. Custom keys entered below will override server keys. If left empty, backend-injected environment keys will be used automatically.</p>
+            </div>
+          </div>
+
+          <!-- Student Setup Instructions -->
+          <div id="student-setup-alert" style="display: none;">
+            <div class="settings-info-alert" style="margin-top: 8px;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <p><strong>External API Keys Required:</strong> Please enter your API keys for the providers you wish to query. These keys remain on your browser's local storage and are sent securely via request headers.</p>
+            </div>
+          </div>
+
+
+
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <!-- OpenRouter Fields (5 slots) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>OpenRouter API Keys (5 Rotation Slots)</span>
+                <a href="https://openrouter.ai/keys" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <div class="api-input-wrapper">
+                  <input type="password" id="openrouter-key-1" class="api-input compact-key" placeholder="OpenRouter Key Slot 1">
+                  <button class="toggle-pwd-btn" data-target="openrouter-key-1" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="openrouter-key-2" class="api-input compact-key" placeholder="OpenRouter Key Slot 2 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="openrouter-key-2" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="openrouter-key-3" class="api-input compact-key" placeholder="OpenRouter Key Slot 3 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="openrouter-key-3" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="openrouter-key-4" class="api-input compact-key" placeholder="OpenRouter Key Slot 4 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="openrouter-key-4" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="openrouter-key-5" class="api-input compact-key" placeholder="OpenRouter Key Slot 5 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="openrouter-key-5" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- NVIDIA NIM Fields (5 slots) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>NVIDIA NIM API Keys (5 Rotation Slots)</span>
+                <a href="https://build.nvidia.com/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <div class="api-input-wrapper">
+                  <input type="password" id="nvidia-key-1" class="api-input compact-key" placeholder="NVIDIA Key Slot 1">
+                  <button class="toggle-pwd-btn" data-target="nvidia-key-1" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="nvidia-key-2" class="api-input compact-key" placeholder="NVIDIA Key Slot 2 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="nvidia-key-2" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="nvidia-key-3" class="api-input compact-key" placeholder="NVIDIA Key Slot 3 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="nvidia-key-3" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="nvidia-key-4" class="api-input compact-key" placeholder="NVIDIA Key Slot 4 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="nvidia-key-4" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="nvidia-key-5" class="api-input compact-key" placeholder="NVIDIA Key Slot 5 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="nvidia-key-5" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- OmniRouter Field -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>OmniRouter (Localhost Link & Key)</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Routing Endpoint</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <input type="text" id="omnirouter-endpoint-input" class="api-input compact-key" placeholder="Endpoint (e.g. https://api.omnirouter.io/v1)">
+                <div class="api-input-wrapper">
+                  <input type="password" id="omnirouter-key-input" class="api-input compact-key" placeholder="OmniRouter API Key (Optional)">
+                  <button class="toggle-pwd-btn" data-target="omnirouter-key-input" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Local LLM Field (Ollama, LM Studio, etc.) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>Local LLM Endpoint (Ollama, LM Studio, etc.)</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Client-Side Direct</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <input type="text" id="local-endpoint-input" class="api-input compact-key" placeholder="Localhost Endpoint Link (e.g. http://localhost:11434/v1)">
+                <input type="text" id="local-models-input" class="api-input compact-key" placeholder="Local Model Names (comma-separated, e.g. llama3, phi3)">
+                <div class="api-input-wrapper">
+                  <input type="password" id="local-key-input" class="api-input compact-key" placeholder="Local API Key (Optional)">
+                  <button class="toggle-pwd-btn" data-target="local-key-input" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mistral Fields (2 slots) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>Mistral AI API Keys (2 Rotation Slots)</span>
+                <a href="https://console.mistral.ai/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <div class="api-input-wrapper">
+                  <input type="password" id="mistral-key-1" class="api-input compact-key" placeholder="Mistral Key Slot 1">
+                  <button class="toggle-pwd-btn" data-target="mistral-key-1" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="mistral-key-2" class="api-input compact-key" placeholder="Mistral Key Slot 2 (Optional)">
+                  <button class="toggle-pwd-btn" data-target="mistral-key-2" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cerebras Field (Single Slot) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>Cerebras API Key</span>
+                <a href="https://inference.cerebras.ai/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div class="api-input-wrapper">
+                <input type="password" id="cerebras-key-input" class="api-input" placeholder="csk-...">
+                <button class="toggle-pwd-btn" data-target="cerebras-key-input" type="button" aria-label="Toggle Password Visibility">
+                  <i class="fa-solid fa-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Groq Fields (2 slots) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>Groq API Keys (2 Rotation Slots)</span>
+                <a href="https://console.groq.com/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <div class="api-input-wrapper">
+                  <input type="password" id="groq-key-1" class="api-input compact-key" placeholder="Groq Key Slot 1">
+                  <button class="toggle-pwd-btn" data-target="groq-key-1" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+                <div class="api-input-wrapper">
+                  <input type="password" id="groq-key-2" class="api-input compact-key" placeholder="Groq different account API (Optional)">
+                  <button class="toggle-pwd-btn" data-target="groq-key-2" type="button" aria-label="Toggle Password Visibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- SambaNova Field (Single Slot) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>SambaNova API Key</span>
+                <a href="https://cloud.sambanova.ai/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div class="api-input-wrapper">
+                <input type="password" id="sambanova-key-input" class="api-input" placeholder="SambaNova API Key">
+                <button class="toggle-pwd-btn" data-target="sambanova-key-input" type="button" aria-label="Toggle Password Visibility">
+                  <i class="fa-solid fa-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Google Gemini Field (Single Slot) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>Google Gemini API Key</span>
+                <a href="https://aistudio.google.com/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div class="api-input-wrapper">
+                <input type="password" id="gemini-key-input" class="api-input" placeholder="AIzaSy...">
+                <button class="toggle-pwd-btn" data-target="gemini-key-input" type="button" aria-label="Toggle Password Visibility">
+                  <i class="fa-solid fa-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div style="border-top: 1px solid var(--border-color); padding-top:20px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-top:20px;">
+            <div style="display:flex; gap:6px;">
+              <button class="drawer-btn secondary" id="export-keys-btn" style="padding:10px 14px; border-color:#818cf8; color:#818cf8; background:none; cursor:pointer;" title="Export API Keys to JSON">
+                <i class="fa-solid fa-file-export"></i> Export
+              </button>
+              <button class="drawer-btn secondary" id="import-keys-btn" style="padding:10px 14px; border-color:#10b981; color:#34d399; background:none; cursor:pointer;" title="Import API Keys from JSON">
+                <i class="fa-solid fa-file-import"></i> Import
+              </button>
+              <input type="file" id="import-keys-file-input" accept=".json" style="display:none;">
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="drawer-btn secondary" id="cancel-settings-btn" style="padding:10px 16px; border-radius:8px; cursor:pointer; background:none; border:1px solid var(--border-color); color:var(--text-primary);">Cancel</button>
+              <button class="drawer-btn primary" id="save-settings-btn" style="padding:10px 16px; border-radius:8px; cursor:pointer; background:var(--accent-primary); border:none; color:white; font-weight:600;">Save Config</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Main logic JS -->
+  <script src="app.js"></script>
+</body>
+</html>

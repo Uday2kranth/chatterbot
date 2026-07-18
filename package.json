@@ -1,0 +1,15 @@
+{
+  "name": "multi-model-chatbot-dashboard",
+  "version": "1.0.0",
+  "description": "Multi-Model AI Chatbot Dashboard exactly as specified in the system architectural blueprint.",
+  "main": "api/chat.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "nodemailer": "^6.9.3"
+  },
+  "devDependencies": {},
+  "private": true
+}

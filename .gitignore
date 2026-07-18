@@ -52,6 +52,7 @@ scratch/
 .gemini/
 .tempmediaStorage/
 .agents/
+vercel_deployment_guide.md
 
 # Package dependencies and platform-specific lockfiles
 node_modules/

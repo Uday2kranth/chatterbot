@@ -121,13 +121,39 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
+          // Generate a unique device session ID to enforce one session limit
+          const sessionId = 'session_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+          
           // Store session
           const sessionData = {
             user: data.user,
             role: data.role,
+            sessionId: sessionId,
             timestamp: Date.now()
           };
           localStorage.setItem('chatterbot_session', JSON.stringify(sessionData));
+
+          // If not admin, register the active device session on the database server
+          if (data.role !== 'admin') {
+            try {
+              await fetch('/api/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user: data.user,
+                  id: 'active_device_session',
+                  session: {
+                    title: 'Active Device Session',
+                    isSystemData: true,
+                    sessionId: sessionId,
+                    timestamp: Date.now()
+                  }
+                })
+              });
+            } catch (err) {
+              console.warn('Failed to register active device session:', err);
+            }
+          }
 
           // Log Login to Google Sheets asynchronously in the background via secure API
           try {

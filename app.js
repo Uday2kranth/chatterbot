@@ -196,6 +196,33 @@ function initializeApp() {
   setupMultimodalAndAudio();
   setupMobileSimulator();
   setupTokenTracker();
+  setupSessionValidationLoop();
+}
+
+// Periodically check if session is still valid on this device (every 20 seconds)
+function setupSessionValidationLoop() {
+  if (userRole === 'admin') return;
+
+  setInterval(async () => {
+    try {
+      const response = await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}`);
+      if (response.ok) {
+        const sessions = await response.json();
+        if (sessions.active_device_session && sessions.active_device_session.sessionId) {
+          const serverSessionId = sessions.active_device_session.sessionId;
+          const localSession = JSON.parse(localStorage.getItem('chatterbot_session') || '{}');
+          const localSessionId = localSession.sessionId;
+          if (localSessionId && serverSessionId !== localSessionId) {
+            localStorage.removeItem('chatterbot_session');
+            alert('You have been logged out because this account was logged in on another device.');
+            window.location.href = 'login.html';
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to perform periodic session validation check:', err);
+    }
+  }, 20000);
 }
 
 // Theme handling
@@ -237,6 +264,17 @@ function setupUserInfo() {
 
   logoutBtn.addEventListener('click', async () => {
     if (confirm('Are you sure you want to log out?')) {
+      // Clear active device session from server
+      if (userRole !== 'admin') {
+        try {
+          await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}&id=active_device_session`, {
+            method: 'DELETE'
+          });
+        } catch (err) {
+          console.warn('Failed to clear active device session on server:', err);
+        }
+      }
+
       // Log logout event to sheets asynchronously via backend API
       try {
         await fetch('/api/log', {
@@ -799,8 +837,11 @@ function setupSettingsDrawer() {
     localStorage.setItem('chatterbot_omnirouter_endpoint', document.getElementById('omnirouter-endpoint-input').value.trim());
     // 7. Save SambaNova
     localStorage.setItem('chatterbot_key_sambanova', document.getElementById('sambanova-key-input').value.trim());
-    // 8. Save Gemini
-    localStorage.setItem('chatterbot_key_gemini', document.getElementById('gemini-key-input').value.trim());
+    // 8. Save Gemini (5 keys)
+    for (let i = 1; i <= 5; i++) {
+      const val = document.getElementById(`gemini-key-${i}`).value.trim();
+      localStorage.setItem(`chatterbot_key_gemini_${i}`, val);
+    }
     // 9. Save Local LLM
     localStorage.setItem('chatterbot_local_endpoint', document.getElementById('local-endpoint-input').value.trim());
     localStorage.setItem('chatterbot_local_models', document.getElementById('local-models-input').value.trim());
@@ -835,7 +876,7 @@ function setupSettingsDrawer() {
         cerebras: document.getElementById('cerebras-key-input').value.trim(),
         groq: [],
         sambanova: document.getElementById('sambanova-key-input').value.trim(),
-        gemini: document.getElementById('gemini-key-input').value.trim(),
+        gemini: [],
         local_endpoint: document.getElementById('local-endpoint-input').value.trim(),
         local_models: document.getElementById('local-models-input').value.trim(),
         local_key: document.getElementById('local-key-input').value.trim()
@@ -851,6 +892,9 @@ function setupSettingsDrawer() {
       }
       for (let i = 1; i <= 2; i++) {
         keysObj.groq.push(document.getElementById(`groq-key-${i}`).value.trim());
+      }
+      for (let i = 1; i <= 5; i++) {
+        keysObj.gemini.push(document.getElementById(`gemini-key-${i}`).value.trim());
       }
 
       const jsonStr = JSON.stringify(keysObj, null, 2);
@@ -890,7 +934,16 @@ function setupSettingsDrawer() {
           if (keysObj.omnirouter_endpoint !== undefined) localStorage.setItem('chatterbot_omnirouter_endpoint', keysObj.omnirouter_endpoint || '');
           if (keysObj.cerebras !== undefined) localStorage.setItem('chatterbot_key_cerebras', keysObj.cerebras || '');
           if (keysObj.sambanova !== undefined) localStorage.setItem('chatterbot_key_sambanova', keysObj.sambanova || '');
-          if (keysObj.gemini !== undefined) localStorage.setItem('chatterbot_key_gemini', keysObj.gemini || '');
+          if (keysObj.gemini !== undefined) {
+            if (Array.isArray(keysObj.gemini)) {
+              keysObj.gemini.forEach((key, idx) => {
+                localStorage.setItem(`chatterbot_key_gemini_${idx + 1}`, key || '');
+              });
+            } else {
+              localStorage.setItem('chatterbot_key_gemini', keysObj.gemini || '');
+              localStorage.setItem('chatterbot_key_gemini_1', keysObj.gemini || '');
+            }
+          }
           if (keysObj.local_endpoint !== undefined) localStorage.setItem('chatterbot_local_endpoint', keysObj.local_endpoint || '');
           if (keysObj.local_models !== undefined) localStorage.setItem('chatterbot_local_models', keysObj.local_models || '');
           if (keysObj.local_key !== undefined) localStorage.setItem('chatterbot_local_key', keysObj.local_key || '');
@@ -1113,11 +1166,13 @@ function setupSettingsDrawer() {
         sambanovaInput.disabled = false;
         sambanovaInput.value = localStorage.getItem('chatterbot_key_sambanova') || '';
       }
-      // Load Gemini
-      const geminiInput = document.getElementById('gemini-key-input');
-      if (geminiInput) {
-        geminiInput.disabled = false;
-        geminiInput.value = localStorage.getItem('chatterbot_key_gemini') || '';
+      // Load Gemini (5 keys)
+      for (let i = 1; i <= 5; i++) {
+        const input = document.getElementById(`gemini-key-${i}`);
+        if (input) {
+          input.disabled = false;
+          input.value = localStorage.getItem(`chatterbot_key_gemini_${i}`) || (i === 1 ? localStorage.getItem('chatterbot_key_gemini') || '' : '');
+        }
       }
       // Load Local LLM
       const localEndpointInput = document.getElementById('local-endpoint-input');
@@ -1180,6 +1235,21 @@ async function loadChatSessions() {
         if (keys.local_models !== undefined) localStorage.setItem('chatterbot_local_models', keys.local_models || '');
         if (keys.local_key !== undefined) localStorage.setItem('chatterbot_local_key', keys.local_key || '');
         delete chatSessions.api_keys_storage;
+      }
+      
+      // ── Process and check active device session constraint ──
+      if (chatSessions.active_device_session && chatSessions.active_device_session.sessionId) {
+        const serverSessionId = chatSessions.active_device_session.sessionId;
+        const localSession = JSON.parse(localStorage.getItem('chatterbot_session') || '{}');
+        const localSessionId = localSession.sessionId;
+        
+        if (userRole !== 'admin' && localSessionId && serverSessionId !== localSessionId) {
+          localStorage.removeItem('chatterbot_session');
+          alert('You have been logged out because this account was logged in on another device.');
+          window.location.href = 'login.html';
+          return;
+        }
+        delete chatSessions.active_device_session;
       }
       
       // ── Process and extract token tracker storage ──
@@ -2016,8 +2086,21 @@ async function submitPrompt() {
   }
   const groqKey = groqKeys.join(',');
 
+  const getGeminiKeysString = () => {
+    const geminiKeys = [];
+    for (let i = 1; i <= 5; i++) {
+      const val = localStorage.getItem(`chatterbot_key_gemini_${i}`) || '';
+      if (val.trim()) geminiKeys.push(val.trim());
+    }
+    if (geminiKeys.length === 0) {
+      const legacy = localStorage.getItem('chatterbot_key_gemini') || '';
+      if (legacy.trim()) geminiKeys.push(legacy.trim());
+    }
+    return geminiKeys.join(',');
+  };
+
   const sambanovaKey = localStorage.getItem('chatterbot_key_sambanova') || '';
-  const geminiKey = localStorage.getItem('chatterbot_key_gemini') || '';
+  const geminiKey = getGeminiKeysString();
 
   // Client-side rate limiting for Mistral (max 2 requests per minute)
   if (activeSession.provider === 'mistral') {
@@ -3217,7 +3300,7 @@ async function reSubmitFromUserMessage(index) {
   const groqKey = groqKeys.join(',');
 
   const sambanovaKey = localStorage.getItem('chatterbot_key_sambanova') || '';
-  const geminiKey = localStorage.getItem('chatterbot_key_gemini') || '';
+  const geminiKey = getGeminiKeysString();
   
   const webSearchCheckbox = document.getElementById('web-search-checkbox');
   const isWebSearch = webSearchCheckbox ? webSearchCheckbox.checked : false;
@@ -3430,7 +3513,7 @@ async function callModelAPI(messagesToSend) {
   const groqKey = groqKeys.join(',');
 
   const sambanovaKey = localStorage.getItem('chatterbot_key_sambanova') || '';
-  const geminiKey = localStorage.getItem('chatterbot_key_gemini') || '';
+  const geminiKey = getGeminiKeysString();
   
   const localEndpoint = localStorage.getItem('chatterbot_local_endpoint') || '';
   const omniEndpoint = localStorage.getItem('chatterbot_omnirouter_endpoint') || '';

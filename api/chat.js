@@ -145,9 +145,14 @@ module.exports = async (req, res) => {
         for (let i = 0; i < keys.length; i++) {
             const currentKey = keys[i];
             const headers = {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${currentKey}`
+                "Content-Type": "application/json"
             };
+
+            if (provider === "gemini") {
+                headers["x-goog-api-key"] = currentKey;
+            } else {
+                headers["Authorization"] = `Bearer ${currentKey}`;
+            }
 
             // OpenRouter optional tracking headers
             if (provider === "openrouter") {

@@ -56,6 +56,7 @@ vercel_deployment_guide.md
 future_security_update.md
 chatterbot_api_keys_Admin@uday.json
 DATABASE_MIGRATION_GUIDE.md
+MODEL_VERIFICATION_CHECKLIST.md
 
 # Package dependencies and platform-specific lockfiles
 node_modules/

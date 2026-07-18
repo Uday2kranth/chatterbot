@@ -118,17 +118,29 @@ const DEFAULT_PROMPTS = [
 const PROVIDER_MODELS = {
   openrouter: [
     { value: "openrouter/free", name: "Free Automated Router [WS]", webSearch: true },
-    { value: "google/gemini-2.5-flash", name: "Gemini 2.5 Flash [WS]", webSearch: true, multimodal: true, voice: true },
-    { value: "meta-llama/llama-3-8b-instruct:free", name: "Llama 3 8B (Free)" },
-    { value: "mistralai/mistral-7b-instruct:free", name: "Mistral 7B (Free)" },
-    { value: "openchat/openchat-7b:free", name: "OpenChat 7B (Free)" }
+    { value: "nvidia/nemotron-3-ultra:free", name: "Nemotron 3 Ultra (Frontier Logic) [WS]", webSearch: true },
+    { value: "nvidia/nemotron-3-super-120b-a12b:free", name: "Nemotron 3 Super (Math/Logic) [WS]", webSearch: true },
+    { value: "openai/gpt-oss-20b:free", name: "GPT-OSS 20B (Low-Latency)" },
+    { value: "nvidia/nemotron-3-nano-30b-a3b:free", name: "Nemotron 3 Nano 30B (Sub-Agent)" },
+    { value: "poolside/laguna-m.1:free", name: "Laguna M.1 (Coding Agent)" },
+    { value: "poolside/laguna-xs-2.1:free", name: "Laguna XS 2.1 (Coding)" },
+    { value: "cohere/north-mini-code:free", name: "North Mini Code (Low-Latency)" },
+    { value: "qwen/qwen3-coder:free", name: "Qwen 3 Coder (Repo-Scale)" },
+    { value: "google/gemma-4-31b-it:free", name: "Gemma 4 31B (OCR/Vision)", multimodal: true },
+    { value: "google/gemma-4-26b-a4b-it:free", name: "Gemma 4 26B (Visual Instruction)", multimodal: true },
+    { value: "nvidia/nemotron-3-nano-omni:free", name: "Nemotron 3 Nano Omni (Multimodal)", multimodal: true, voice: true, preferredVision: true, preferredVoice: true }
   ],
   nvidia: [
-    { value: "meta/llama-3.3-70b-instruct", name: "Llama 3.3 70B Instruct [WS]", webSearch: true },
-    { value: "nvidia/llama-3.1-nemotron-70b-instruct", name: "Llama 3.1 Nemotron 70B [WS]", webSearch: true },
-    { value: "meta/llama-3.1-8b-instruct", name: "Llama 3.1 8B Instruct" },
-    { value: "meta/llama-3.1-405b-instruct", name: "Llama 3.1 405B Instruct" },
-    { value: "mistralai/mixtral-8x22b-instruct-v0.1", name: "Mixtral 8x22B Instruct" }
+    { value: "nvidia/nemotron-3-ultra", name: "Nemotron 3 Ultra (Frontier Reasoning) [WS]", webSearch: true },
+    { value: "nvidia/nemotron-3-super-120b-a12b", name: "Nemotron 3 Super (High-Throughput Math) [WS]", webSearch: true },
+    { value: "openai/gpt-oss-120b", name: "GPT-OSS 120B (Open Weights)" },
+    { value: "qwen/qwen3-32b", name: "Qwen 3 32B (Multilingual)" },
+    { value: "nvidia/nemotron-3-nano-30b-a3b", name: "Nemotron 3 Nano 30B (Sub-Agent)" },
+    { value: "poolside/laguna-m.1", name: "Laguna M.1 (Coding Agent)" },
+    { value: "poolside/laguna-xs-2.1", name: "Laguna XS 2.1 (Developer)" },
+    { value: "cohere/north-mini-code", name: "North Mini Code (Terminal/CLI)" },
+    { value: "google/gemma-4-31b-it", name: "Gemma 4 31B (OCR/Layout)", multimodal: true },
+    { value: "nvidia/nemotron-3-nano-omni", name: "Nemotron 3 Nano Omni (Multimodal)", multimodal: true, voice: true, preferredVision: true, preferredVoice: true }
   ],
   omnirouter: [
     { value: "meta-llama/llama-3-8b-instruct", name: "Llama 3 8B (Omni)" },
@@ -143,26 +155,31 @@ const PROVIDER_MODELS = {
     { value: "pixtral-12b-2409", name: "Pixtral 12B", multimodal: true, preferredVision: true }
   ],
   cerebras: [
-    { value: "llama-3.3-70b", name: "Llama 3.3 70B" },
-    { value: "llama3.1-8b", name: "Llama 3.1 8B" },
-    { value: "llama3.1-70b", name: "Llama 3.1 70B" }
+    { value: "gpt-oss-120b", name: "GPT-OSS 120B (Reasoning)" },
+    { value: "gemma-4-31b", name: "Gemma 4 31B (Chat/Vision)", multimodal: true, preferredVision: true }
   ],
   groq: [
+    { value: "meta-llama/llama-4-scout-17b-16e-instruct", name: "Llama 4 Scout 17B (Instruct)", multimodal: true, preferredVision: true },
+    { value: "openai/gpt-oss-120b", name: "GPT-OSS 120B (Reasoning)" },
+    { value: "openai/gpt-oss-20b", name: "GPT-OSS 20B (Reasoning)" },
+    { value: "qwen/qwen3-32b", name: "Qwen 3 32B (Multilingual)" },
     { value: "llama-3.3-70b-versatile", name: "Llama 3.3 70B Versatile [WS]", webSearch: true },
-    { value: "llama-3.1-8b-instant", name: "Llama 3.1 8B Instant" },
-    { value: "gemma2-9b-it", name: "Gemma 2 9B" },
-    { value: "mixtral-8x7b-32768", name: "Mixtral 8x7B" }
+    { value: "llama-3.1-8b-instant", name: "Llama 3.1 8B Instant" }
   ],
   sambanova: [
+    { value: "DeepSeek-V3.1", name: "DeepSeek V3.1" },
     { value: "Meta-Llama-3.3-70B-Instruct", name: "Llama 3.3 70B Instruct [WS]", webSearch: true },
-    { value: "Meta-Llama-3.1-8B-Instruct", name: "Llama 3.1 8B Instruct" },
-    { value: "Meta-Llama-3.1-70B-Instruct", name: "Llama 3.1 70B Instruct" },
-    { value: "Meta-Llama-3.1-405B-Instruct", name: "Llama 3.1 405B Instruct" }
+    { value: "gpt-oss-120b", name: "GPT-OSS 120B" },
+    { value: "DeepSeek-V3.2", name: "DeepSeek V3.2" },
+    { value: "gemma-4-31B-it", name: "Gemma 4 31B it", multimodal: true, preferredVision: true },
+    { value: "MiniMax-M2.7", name: "MiniMax M2.7" }
   ],
   gemini: [
     { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
     { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro", multimodal: true, voice: true },
-    { value: "gemini-2.0-flash-exp", name: "Gemini 2.0 Flash Exp", multimodal: true, voice: true }
+    { value: "gemini-2.0-flash-exp", name: "Gemini 2.0 Flash Exp", multimodal: true, voice: true },
+    { value: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite", multimodal: true, voice: true },
+    { value: "gemini-2.5-flash", name: "Gemini 2.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true }
   ]
 };
 

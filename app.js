@@ -2574,7 +2574,8 @@ function setupMultimodalAndAudio() {
             },
             body: JSON.stringify({
               file: base64Audio,
-              model: targetAudioModel
+              model: targetAudioModel,
+              user: currentUser
             })
           });
 
@@ -2657,7 +2658,8 @@ async function toggleVoiceRecording() {
               },
               body: JSON.stringify({
                 file: base64Audio,
-                model: targetAudioModel
+                model: targetAudioModel,
+                user: currentUser
               })
             });
 

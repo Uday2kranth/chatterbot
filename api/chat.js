@@ -64,26 +64,26 @@ module.exports = async (req, res) => {
     const prompt = messages[messages.length - 1]?.content || 'N/A';
 
     // 1. Resolve API Key: prioritizes client-submitted header keys.
-    // If not provided in the client header, falls back to server-side process.env keys or defaults for the Admin user.
+    // If not provided in the client header, falls back to server-side process.env keys or defaults ONLY for the Admin user.
     let apiKey = '';
     const isAdmin = (user === "Admin@uday");
 
     if (provider === "openrouter") {
-        apiKey = req.headers['x-user-openrouter-key'] || process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY;
+        apiKey = req.headers['x-user-openrouter-key'] || (isAdmin ? (process.env.OPENROUTER_API_KEY || DEFAULT_OPENROUTER_KEY) : '');
     } else if (provider === "nvidia") {
-        apiKey = req.headers['x-user-nvidia-key'] || process.env.NVIDIA_API_KEY || DEFAULT_NVIDIA_KEY;
+        apiKey = req.headers['x-user-nvidia-key'] || (isAdmin ? (process.env.NVIDIA_API_KEY || DEFAULT_NVIDIA_KEY) : '');
     } else if (provider === "omnirouter") {
-        apiKey = req.headers['x-user-omnirouter-key'] || process.env.OMNIROUTER_API_KEY || '';
+        apiKey = req.headers['x-user-omnirouter-key'] || (isAdmin ? (process.env.OMNIROUTER_API_KEY || '') : '');
     } else if (provider === "mistral") {
-        apiKey = req.headers['x-user-mistral-key'] || process.env.MISTRAL_API_KEY || DEFAULT_MISTRAL_KEY;
+        apiKey = req.headers['x-user-mistral-key'] || (isAdmin ? (process.env.MISTRAL_API_KEY || DEFAULT_MISTRAL_KEY) : '');
     } else if (provider === "cerebras") {
-        apiKey = req.headers['x-user-cerebras-key'] || process.env.CEREBRAS_API_KEY || DEFAULT_CEREBRAS_KEY;
+        apiKey = req.headers['x-user-cerebras-key'] || (isAdmin ? (process.env.CEREBRAS_API_KEY || DEFAULT_CEREBRAS_KEY) : '');
     } else if (provider === "groq") {
-        apiKey = req.headers['x-user-groq-key'] || process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
+        apiKey = req.headers['x-user-groq-key'] || (isAdmin ? (process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY) : '');
     } else if (provider === "sambanova") {
-        apiKey = req.headers['x-user-sambanova-key'] || process.env.SAMBANOVA_API_KEY || DEFAULT_SAMBANOVA_KEY;
+        apiKey = req.headers['x-user-sambanova-key'] || (isAdmin ? (process.env.SAMBANOVA_API_KEY || DEFAULT_SAMBANOVA_KEY) : '');
     } else if (provider === "gemini") {
-        apiKey = req.headers['x-user-gemini-key'] || process.env.GEMINI_API_KEY || '';
+        apiKey = req.headers['x-user-gemini-key'] || (isAdmin ? (process.env.GEMINI_API_KEY || '') : '');
     }
 
     if (!apiKey) {

@@ -17,16 +17,17 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { file, model } = req.body;
+    const { file, model, user } = req.body || {};
 
     if (!file || !model) {
         return res.status(400).json({ error: 'Missing required parameters: file (base64) and model.' });
     }
 
-    // Resolve API Key
-    const apiKey = req.headers['x-user-groq-key'] || process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY;
+    // Resolve API Key: prioritizes client header key. Falls back to env variable ONLY if user is admin.
+    const isAdmin = (user === "Admin@uday");
+    const apiKey = req.headers['x-user-groq-key'] || (isAdmin ? (process.env.GROQ_API_KEY || DEFAULT_GROQ_KEY) : '');
     if (!apiKey) {
-        return res.status(400).json({ error: 'Groq API Key required for audio transcription.' });
+        return res.status(400).json({ error: 'Groq API Key required for audio transcription. Please configure it in settings.' });
     }
 
     try {

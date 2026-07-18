@@ -54,6 +54,7 @@ scratch/
 .agents/
 vercel_deployment_guide.md
 future_security_update.md
+chatterbot_api_keys_Admin@uday.json
 
 # Dependencies and lockfiles
 node_modules/

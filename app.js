@@ -3097,8 +3097,9 @@ function updateProviderSelectDropdown() {
       const k = localStorage.getItem('chatterbot_key_sambanova') || '';
       hasKey = k.trim() !== '' || isAdmin;
     } else if (p.value === 'gemini') {
-      // Temporarily disabled/grayed out for web deployment as requested by user
-      hasKey = false;
+      const k1 = localStorage.getItem('chatterbot_key_gemini_1') || '';
+      const legacy = localStorage.getItem('chatterbot_key_gemini') || '';
+      hasKey = k1.trim() !== '' || legacy.trim() !== '' || isAdmin;
     } else if (p.value === 'omnirouter') {
       const key = localStorage.getItem('chatterbot_key_omnirouter') || '';
       const endpoint = localStorage.getItem('chatterbot_omnirouter_endpoint') || '';

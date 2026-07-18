@@ -53,6 +53,7 @@ scratch/
 .tempmediaStorage/
 .agents/
 vercel_deployment_guide.md
+future_security_update.md
 
 # Dependencies and lockfiles
 node_modules/

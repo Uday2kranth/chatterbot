@@ -155,8 +155,9 @@ const PROVIDER_MODELS = {
     { value: "pixtral-12b-2409", name: "Pixtral 12B", multimodal: true, preferredVision: true }
   ],
   cerebras: [
-    { value: "gpt-oss-120b", name: "GPT-OSS 120B (Reasoning)" },
-    { value: "gemma-4-31b", name: "Gemma 4 31B (Chat/Vision)", multimodal: true, preferredVision: true }
+    { value: "llama-3.3-70b", name: "Llama 3.3 70B" },
+    { value: "llama3.1-8b", name: "Llama 3.1 8B" },
+    { value: "llama3.1-70b", name: "Llama 3.1 70B" }
   ],
   groq: [
     { value: "openai/gpt-oss-120b", name: "GPT-OSS 120B (Reasoning)" },

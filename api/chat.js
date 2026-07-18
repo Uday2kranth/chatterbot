@@ -144,12 +144,13 @@ module.exports = async (req, res) => {
 
         for (let i = 0; i < keys.length; i++) {
             const currentKey = keys[i];
+            let fetchEndpoint = endpoint;
             const headers = {
                 "Content-Type": "application/json"
             };
 
             if (provider === "gemini") {
-                headers["x-goog-api-key"] = currentKey;
+                fetchEndpoint = `${endpoint}?key=${currentKey}`;
             } else {
                 headers["Authorization"] = `Bearer ${currentKey}`;
             }
@@ -161,7 +162,7 @@ module.exports = async (req, res) => {
             }
 
             try {
-                const response = await fetch(endpoint, {
+                const response = await fetch(fetchEndpoint, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify({

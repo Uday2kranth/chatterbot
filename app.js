@@ -159,10 +159,8 @@ const PROVIDER_MODELS = {
     { value: "gemma-4-31b", name: "Gemma 4 31B (Chat/Vision)", multimodal: true, preferredVision: true }
   ],
   groq: [
-    { value: "meta-llama/llama-4-scout-17b-16e-instruct", name: "Llama 4 Scout 17B (Instruct)", multimodal: true, preferredVision: true },
     { value: "openai/gpt-oss-120b", name: "GPT-OSS 120B (Reasoning)" },
     { value: "openai/gpt-oss-20b", name: "GPT-OSS 20B (Reasoning)" },
-    { value: "qwen/qwen3-32b", name: "Qwen 3 32B (Multilingual)" },
     { value: "llama-3.3-70b-versatile", name: "Llama 3.3 70B Versatile [WS]", webSearch: true },
     { value: "llama-3.1-8b-instant", name: "Llama 3.1 8B Instant" }
   ],
@@ -171,8 +169,7 @@ const PROVIDER_MODELS = {
     { value: "Meta-Llama-3.3-70B-Instruct", name: "Llama 3.3 70B Instruct [WS]", webSearch: true },
     { value: "gpt-oss-120b", name: "GPT-OSS 120B" },
     { value: "DeepSeek-V3.2", name: "DeepSeek V3.2" },
-    { value: "gemma-4-31B-it", name: "Gemma 4 31B it", multimodal: true, preferredVision: true },
-    { value: "MiniMax-M2.7", name: "MiniMax M2.7" }
+    { value: "gemma-4-31B-it", name: "Gemma 4 31B it", multimodal: true, preferredVision: true }
   ],
   gemini: [
     { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },

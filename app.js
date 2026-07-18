@@ -1258,6 +1258,49 @@ async function loadChatSessions() {
         localStorage.setItem('chatterbot_token_tracker', JSON.stringify(tokenTrackerData));
         delete chatSessions.token_tracker_storage;
       }
+
+      // ── Merge server sessions with local storage sessions to prevent data loss on stateless server resets ──
+      const localData = localStorage.getItem(`chatterbot_history_${currentUser}`);
+      let localSessions = {};
+      if (localData) {
+        try {
+          localSessions = JSON.parse(localData);
+          delete localSessions.api_keys_storage;
+          delete localSessions.token_tracker_storage;
+          delete localSessions.active_device_session;
+        } catch (e) {}
+      }
+
+      // Track local-only sessions to upload to the server
+      const localOnlySessions = [];
+      for (const [id, sData] of Object.entries(localSessions)) {
+        if (!chatSessions[id] && sData && !sData.deleted) {
+          localOnlySessions.push({ id, session: sData });
+        }
+      }
+
+      // Combine both histories (server sessions take priority if they share the same ID)
+      chatSessions = { ...localSessions, ...chatSessions };
+      localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
+
+      // Asynchronously upload local-only sessions to backend database
+      if (localOnlySessions.length > 0) {
+        for (const item of localOnlySessions) {
+          try {
+            await fetch('/api/sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user: currentUser,
+                id: item.id,
+                session: item.session
+              })
+            });
+          } catch (e) {
+            console.warn('Failed to upload merged local session to backend:', e);
+          }
+        }
+      }
     } else {
       throw new Error('API load failed');
     }
@@ -3054,8 +3097,9 @@ function updateProviderSelectDropdown() {
       const k = localStorage.getItem('chatterbot_key_sambanova') || '';
       hasKey = k.trim() !== '' || isAdmin;
     } else if (p.value === 'gemini') {
-      const k = localStorage.getItem('chatterbot_key_gemini') || '';
-      hasKey = k.trim() !== '';
+      const k1 = localStorage.getItem('chatterbot_key_gemini_1') || '';
+      const legacy = localStorage.getItem('chatterbot_key_gemini') || '';
+      hasKey = k1.trim() !== '' || legacy.trim() !== '';
     } else if (p.value === 'omnirouter') {
       const key = localStorage.getItem('chatterbot_key_omnirouter') || '';
       const endpoint = localStorage.getItem('chatterbot_omnirouter_endpoint') || '';

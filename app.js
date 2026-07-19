@@ -2082,7 +2082,7 @@ function renderMessages(messages) {
 
       const emailBtn = document.createElement('button');
       emailBtn.className = 'msg-action-btn';
-      emailBtn.innerHTML = `<i class="fa-regular fa-envelope"></i> <span>Email</span>`;
+      emailBtn.innerHTML = `<i class="fa-solid fa-envelope-open-text"></i> <span>Email</span>`;
       emailBtn.title = 'Email conversation pair as PNG image';
       emailBtn.addEventListener('click', () => {
         emailMessagePairAsImage(idx);
@@ -2093,7 +2093,7 @@ function renderMessages(messages) {
     // 3. Branch Session Button (Assistant messages only)
     if (msg.role === 'assistant') {
       const branchBtn = document.createElement('button');
-      branchBtn.className = 'msg-action-btn';
+      branchBtn.className = 'msg-action-btn branch-btn';
       branchBtn.innerHTML = `<i class="fa-solid fa-code-branch"></i> <span>Branch</span>`;
       branchBtn.addEventListener('click', () => {
         if (!activeChatId || !chatSessions[activeChatId]) return;
@@ -2157,7 +2157,7 @@ function renderMessages(messages) {
     }
     if (msg.role === 'user' && idx === lastUserMsgIdx) {
       const editBtn = document.createElement('button');
-      editBtn.className = 'msg-action-btn';
+      editBtn.className = 'msg-action-btn edit-action-btn';
       editBtn.innerHTML = `<i class="fa-solid fa-pen"></i> <span>Edit</span>`;
       editBtn.addEventListener('click', () => {
         const originalHTML = bubble.innerHTML;

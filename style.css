@@ -1898,6 +1898,16 @@ details.guide-details .guide-content {
   .msg-usage-badge {
     display: none !important;
   }
+  .message-actions .msg-action-btn:not(.branch-btn):not(.edit-action-btn) span {
+    display: none !important;
+  }
+  .message-actions {
+    opacity: 1 !important;
+  }
+  .message-actions .msg-action-btn:not(.branch-btn):not(.edit-action-btn) {
+    padding: 6px 10px !important;
+    font-size: 0.95rem !important;
+  }
 }
 
 

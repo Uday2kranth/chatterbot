@@ -1910,4 +1910,50 @@ details.guide-details .guide-content {
   }
 }
 
+/* Settings view tab buttons styling */
+.settings-tabs .tab-btn.active {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--accent-primary) !important;
+  box-shadow: 0 0 8px var(--accent-glow) !important;
+}
+.settings-tabs .tab-btn:hover:not(.active) {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Switch toggle custom styling */
+.switch-container input:checked + .slider-round {
+  background-color: var(--accent-primary) !important;
+}
+.slider-round {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+.slider-round:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.switch-container input:checked + .slider-round:before {
+  transform: translateX(20px);
+}
+
+/* Hide toolbar button labels on mobile viewports */
+@media (max-width: 768px) {
+  .input-toolbar-buttons button span {
+    display: none !important;
+  }
+  .input-toolbar-buttons button {
+    padding: 6px 10px !important;
+    font-size: 0.95rem !important;
+  }
+}
+
 

@@ -388,11 +388,19 @@
                 <i class="fa-solid fa-file-word" style="color:#2b579a;"></i>
                 <span style="font-weight:600;">Export Word</span>
               </button>
+              <button id="export-chat-pdf-btn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s, color 0.2s;" title="Export Entire Chat as PDF Document">
+                <i class="fa-solid fa-file-pdf" style="color:#e05252;"></i>
+                <span style="font-weight:600;">Export PDF</span>
+              </button>
+              <button id="export-chat-slides-btn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s, color 0.2s;" title="Export Entire Chat as Slide Presentation">
+                <i class="fa-solid fa-person-chalkboard" style="color:#f59e0b;"></i>
+                <span style="font-weight:600;">Export Slides</span>
+              </button>
               <button id="summarize-chat-btn" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s, color 0.2s;" title="Summarize Entire Conversation to Code Block">
                 <i class="fa-solid fa-compress"></i>
                 <span style="font-weight:600;">Summarize</span>
               </button>
-              <button id="session-prompt-btn" style="background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2s;" title="Set Session System Prompt">
+              <button id="session-prompt-btn" style="background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:0.8rem; display:flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; transition: background 0.2;" title="Set Session System Prompt">
                 <i class="fa-solid fa-gear"></i>
                 <span style="font-weight:600;">System Prompt</span>
               </button>
@@ -1473,8 +1481,76 @@
         </div>
         
         <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
-          <!-- Admin Privilege Banner -->
-          <div id="admin-privilege-alert" style="display: none;">
+          <!-- Settings Navigation Tabs -->
+          <div class="settings-tabs" style="display:flex; gap:8px; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:4px;">
+            <button id="tab-chat-settings" class="tab-btn active" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+              <i class="fa-solid fa-sliders"></i> Chat Customization
+            </button>
+            <button id="tab-api-settings" class="tab-btn" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+              <i class="fa-solid fa-key"></i> API Configuration <i id="api-tab-lock-icon" class="fa-solid fa-lock" style="font-size:0.75rem; opacity:0.8;"></i>
+            </button>
+          </div>
+
+          <!-- Chat Customization Panel -->
+          <div id="chat-settings-panel" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="settings-info-alert" style="margin-top: 0; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-circle-info" style="color: var(--accent-primary);"></i>
+              <p style="margin: 0;">Customize the features and options shown in your main Chat window. These settings synchronize automatically across your devices.</p>
+            </div>
+            
+            <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px;">
+              <!-- Toggle bookmark -->
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Bookmarked Notes</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Enable bookmark icons next to message bubbles to pin notes and formulas.</div>
+                </div>
+                <label class="switch-container" style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+                  <input type="checkbox" id="setting-toggle-bookmarks" style="opacity:0; width:0; height:0;" checked />
+                  <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
+                </label>
+              </div>
+
+              <!-- Toggle summarize button -->
+              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:16px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Summarization Button</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Show the "Summarize" option in the chat input toolbar.</div>
+                </div>
+                <label class="switch-container" style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+                  <input type="checkbox" id="setting-toggle-summarize" style="opacity:0; width:0; height:0;" checked />
+                  <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
+                </label>
+              </div>
+
+              <!-- Export formats checkboxes -->
+              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:12px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Active Chat Export Formats</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Select which document format buttons are visible in the input toolbar.</div>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:4px;">
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-export-md" checked style="accent-color:var(--accent-primary);" /> Markdown (.md)
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-export-word" checked style="accent-color:var(--accent-primary);" /> Word Document (.doc)
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-export-pdf" checked style="accent-color:var(--accent-primary);" /> PDF Document (.pdf)
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-export-slides" checked style="accent-color:var(--accent-primary);" /> Slide Deck (.html)
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- API Configuration Panel -->
+          <div id="api-settings-panel" style="display: none; flex-direction: column; gap: 20px;">
+            <!-- Admin Privilege Banner -->
+            <div id="admin-privilege-alert" style="display: none;">
             <div class="admin-badge">Admin Privileges Active</div>
             <div class="settings-info-alert" style="margin-top: 8px;">
               <i class="fa-solid fa-circle-info"></i>
@@ -1768,6 +1844,7 @@
               <button class="drawer-btn primary" id="save-settings-btn" style="padding:10px 16px; border-radius:8px; cursor:pointer; background:var(--accent-primary); border:none; color:white; font-weight:600;">Save Config</button>
             </div>
           </div>
+          </div> <!-- End API Settings Panel -->
         </div>
       </div>
 

@@ -223,10 +223,63 @@ const PROVIDER_MODELS = {
 };
 
 
+// ── Chat Customization Settings State ──
+let chatSettings = {
+  bookmarksEnabled: true,
+  summarizeEnabled: true,
+  exportMdEnabled: true,
+  exportWordEnabled: true,
+  exportPdfEnabled: true,
+  exportSlidesEnabled: true
+};
+let apiSettingsUnlocked = false;
+
+function applyChatSettings() {
+  const bookmarksBtn = document.getElementById('bookmarks-btn');
+  if (bookmarksBtn) {
+    bookmarksBtn.style.display = chatSettings.bookmarksEnabled ? 'flex' : 'none';
+  }
+
+  const exportMdBtn = document.getElementById('export-chat-md-btn');
+  if (exportMdBtn) {
+    exportMdBtn.style.display = chatSettings.exportMdEnabled ? 'flex' : 'none';
+  }
+
+  const exportWordBtn = document.getElementById('export-chat-word-btn');
+  if (exportWordBtn) {
+    exportWordBtn.style.display = chatSettings.exportWordEnabled ? 'flex' : 'none';
+  }
+
+  const exportPdfBtn = document.getElementById('export-chat-pdf-btn');
+  if (exportPdfBtn) {
+    exportPdfBtn.style.display = chatSettings.exportPdfEnabled ? 'flex' : 'none';
+  }
+
+  const exportSlidesBtn = document.getElementById('export-chat-slides-btn');
+  if (exportSlidesBtn) {
+    exportSlidesBtn.style.display = chatSettings.exportSlidesEnabled ? 'flex' : 'none';
+  }
+
+  const summarizeChatBtn = document.getElementById('summarize-chat-btn');
+  if (summarizeChatBtn) {
+    summarizeChatBtn.style.display = chatSettings.summarizeEnabled ? 'flex' : 'none';
+  }
+}
+
 // 3. Application Initialization
 function initializeApp() {
   setupTheme();
   setupUserInfo();
+  
+  // Load settings from localStorage cache
+  const localSettings = localStorage.getItem(`chatterbot_chat_settings_${currentUser}`);
+  if (localSettings) {
+    try {
+      chatSettings = { ...chatSettings, ...JSON.parse(localSettings) };
+    } catch(e) {}
+  }
+  applyChatSettings();
+
   setupSettingsDrawer();
   setupHeaderControlsDrawer();
   setupSidebarAndPrompts();
@@ -1070,38 +1123,98 @@ function setupSettingsDrawer() {
     });
   }
 
+  // ── Tab Navigation Switching Logic ──
+  const tabChat = document.getElementById('tab-chat-settings');
+  const tabApi = document.getElementById('tab-api-settings');
+  const panelChat = document.getElementById('chat-settings-panel');
+  const panelApi = document.getElementById('api-settings-panel');
+  const lockIcon = document.getElementById('api-tab-lock-icon');
+
+  const switchSettingsTab = (tabName) => {
+    if (tabName === 'chat') {
+      if (tabChat) tabChat.classList.add('active');
+      if (tabApi) tabApi.classList.remove('active');
+      if (panelChat) panelChat.style.display = 'flex';
+      if (panelApi) panelApi.style.display = 'none';
+    } else if (tabName === 'api') {
+      if (tabChat) tabChat.classList.remove('active');
+      if (tabApi) tabApi.classList.add('active');
+      if (panelChat) panelChat.style.display = 'none';
+      if (panelApi) panelApi.style.display = 'flex';
+      loadStoredAPIKeys();
+    }
+  };
+
+  if (tabChat) {
+    tabChat.addEventListener('click', () => {
+      switchSettingsTab('chat');
+    });
+  }
+
   // Profile Click Event to request password validation
   const passwordOverlay = document.getElementById('password-auth-overlay');
   const confirmUnlockBtn = document.getElementById('confirm-unlock-btn');
   const cancelUnlockBtn = document.getElementById('cancel-unlock-btn');
   const unlockPasswordInput = document.getElementById('settings-unlock-password');
-  
-  const openSettingsBtn = document.getElementById('open-settings-btn');
-  if (openSettingsBtn && passwordOverlay) {
-    openSettingsBtn.addEventListener('click', () => {
-      passwordOverlay.style.display = 'flex';
-      passwordOverlay.classList.add('open');
-      unlockPasswordInput.value = '';
-      unlockPasswordInput.focus();
+
+  if (tabApi) {
+    tabApi.addEventListener('click', () => {
+      if (apiSettingsUnlocked) {
+        switchSettingsTab('api');
+      } else {
+        if (passwordOverlay) {
+          passwordOverlay.style.display = 'flex';
+          passwordOverlay.classList.add('open');
+          unlockPasswordInput.value = '';
+          unlockPasswordInput.focus();
+        }
+      }
     });
   }
-  
+
+  const openSettingsBtn = document.getElementById('open-settings-btn');
+  if (openSettingsBtn) {
+    openSettingsBtn.addEventListener('click', () => {
+      // Auto-collapse sidebar drawer if on mobile view
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('active')) {
+        const sidebarToggle = document.getElementById('sidebar-toggle-btn');
+        if (sidebarToggle) sidebarToggle.click();
+      }
+
+      showMainAreaView('secure-settings');
+      switchSettingsTab('chat');
+
+      // Load current checkbox states from memory
+      document.getElementById('setting-toggle-bookmarks').checked = chatSettings.bookmarksEnabled;
+      document.getElementById('setting-toggle-summarize').checked = chatSettings.summarizeEnabled;
+      document.getElementById('setting-export-md').checked = chatSettings.exportMdEnabled;
+      document.getElementById('setting-export-word').checked = chatSettings.exportWordEnabled;
+      document.getElementById('setting-export-pdf').checked = chatSettings.exportPdfEnabled;
+      document.getElementById('setting-export-slides').checked = chatSettings.exportSlidesEnabled;
+    });
+  }
+
   if (cancelUnlockBtn && passwordOverlay) {
     cancelUnlockBtn.addEventListener('click', () => {
       passwordOverlay.style.display = 'none';
       passwordOverlay.classList.remove('open');
     });
   }
-  
+
   const handleUnlock = () => {
     const enteredPassword = unlockPasswordInput.value;
     const userRecord = AUTHORIZED_USERS[currentUser];
     if (userRecord && userRecord.password === enteredPassword) {
       passwordOverlay.style.display = 'none';
       passwordOverlay.classList.remove('open');
-      showMainAreaView('secure-settings');
-      loadStoredAPIKeys();
-      showToast('Secure Settings unlocked successfully.', 'success');
+      apiSettingsUnlocked = true;
+      if (lockIcon) {
+        lockIcon.className = 'fa-solid fa-lock-open';
+        lockIcon.style.color = 'var(--success-color)';
+      }
+      switchSettingsTab('api');
+      showToast('API Configuration Settings unlocked.', 'success');
     } else {
       showToast('Incorrect password. Access denied.', 'error');
       unlockPasswordInput.value = '';
@@ -1112,7 +1225,7 @@ function setupSettingsDrawer() {
   if (confirmUnlockBtn) {
     confirmUnlockBtn.addEventListener('click', handleUnlock);
   }
-  
+
   if (unlockPasswordInput) {
     unlockPasswordInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -1121,6 +1234,34 @@ function setupSettingsDrawer() {
       }
     });
   }
+
+  // ── Bind Chat Settings Checkbox Listeners ──
+  const syncChatSettings = () => {
+    chatSettings.bookmarksEnabled = document.getElementById('setting-toggle-bookmarks').checked;
+    chatSettings.summarizeEnabled = document.getElementById('setting-toggle-summarize').checked;
+    chatSettings.exportMdEnabled = document.getElementById('setting-export-md').checked;
+    chatSettings.exportWordEnabled = document.getElementById('setting-export-word').checked;
+    chatSettings.exportPdfEnabled = document.getElementById('setting-export-pdf').checked;
+    chatSettings.exportSlidesEnabled = document.getElementById('setting-export-slides').checked;
+
+    localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
+
+    // Save/Sync to backend
+    chatSessions.chat_settings_storage = { data: chatSettings, timestamp: Date.now() };
+    saveChatSessionsToStorage('chat_settings_storage');
+
+    applyChatSettings();
+    if (activeChatId && chatSessions[activeChatId]) {
+      renderMessages(chatSessions[activeChatId].messages);
+    }
+  };
+
+  document.getElementById('setting-toggle-bookmarks').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-toggle-summarize').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-export-md').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-export-word').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-export-pdf').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-export-slides').addEventListener('change', syncChatSettings);
 
   // Export Chat Markdown & Summarization bindings
   const exportChatBtn = document.getElementById('export-chat-md-btn');
@@ -1136,6 +1277,20 @@ function setupSettingsDrawer() {
   if (exportWordBtn) {
     exportWordBtn.addEventListener('click', () => {
       exportChatToWord();
+    });
+  }
+
+  const exportPdfBtn = document.getElementById('export-chat-pdf-btn');
+  if (exportPdfBtn) {
+    exportPdfBtn.addEventListener('click', () => {
+      exportChatToPDF();
+    });
+  }
+
+  const exportSlidesBtn = document.getElementById('export-chat-slides-btn');
+  if (exportSlidesBtn) {
+    exportSlidesBtn.addEventListener('click', () => {
+      exportChatToSlides();
     });
   }
   
@@ -1358,6 +1513,14 @@ async function loadChatSessions() {
         delete chatSessions.token_tracker_storage;
       }
 
+      // ── Process and extract chat settings storage ──
+      if (chatSessions.chat_settings_storage && chatSessions.chat_settings_storage.data) {
+        chatSettings = { ...chatSettings, ...chatSessions.chat_settings_storage.data };
+        localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
+        applyChatSettings();
+        delete chatSessions.chat_settings_storage;
+      }
+
       // ── Merge server sessions with local storage sessions to prevent data loss on stateless server resets ──
       const localData = localStorage.getItem(`chatterbot_history_${currentUser}`);
       let localSessions = {};
@@ -1366,6 +1529,7 @@ async function loadChatSessions() {
           localSessions = JSON.parse(localData);
           delete localSessions.api_keys_storage;
           delete localSessions.token_tracker_storage;
+          delete localSessions.chat_settings_storage;
           delete localSessions.active_device_session;
         } catch (e) {}
       }
@@ -1411,6 +1575,7 @@ async function loadChatSessions() {
         chatSessions = JSON.parse(sessionsData);
         delete chatSessions.api_keys_storage;
         delete chatSessions.token_tracker_storage;
+        delete chatSessions.chat_settings_storage;
       } catch (e) {
         chatSessions = {};
       }
@@ -1434,7 +1599,7 @@ async function loadChatSessions() {
   const urlParams = new URLSearchParams(window.location.search);
   const paramSessionId = urlParams.get('session');
   
-  const sessionIds = Object.keys(chatSessions).filter(id => id !== 'api_keys_storage' && id !== 'token_tracker_storage');
+  const sessionIds = Object.keys(chatSessions).filter(id => id !== 'api_keys_storage' && id !== 'token_tracker_storage' && id !== 'chat_settings_storage');
   if (paramSessionId && chatSessions[paramSessionId]) {
     loadChatSession(paramSessionId);
   } else if (sessionIds.length > 0) {
@@ -1486,7 +1651,7 @@ function renderHistoryList() {
   const normalizedQuery = normalizeForSearch(query);
 
   const sessions = Object.entries(chatSessions)
-    .filter(([id]) => id !== 'api_keys_storage' && id !== 'token_tracker_storage')
+    .filter(([id]) => id !== 'api_keys_storage' && id !== 'token_tracker_storage' && id !== 'chat_settings_storage')
     .filter(([id, data]) => {
       if (!query) return true;
       const normalizedTitle = normalizeForSearch(data.title);
@@ -2029,7 +2194,9 @@ function renderMessages(messages) {
       }
     });
 
-    bubbleRow.appendChild(pinIconBtn);
+    if (chatSettings.bookmarksEnabled) {
+      bubbleRow.appendChild(pinIconBtn);
+    }
     wrapper.appendChild(bubbleRow);
 
     // Message copy trigger actions
@@ -4613,4 +4780,368 @@ function emailMessagePairAsImage(idx) {
     exportArea.remove();
     showToast('html2canvas library is loading, please try again.', 'error');
   }
+}
+
+// ── Export Chat thread as PDF document ──
+function exportChatToPDF() {
+  if (!activeChatId || !chatSessions[activeChatId]) {
+    showToast('Please select or create an active chat session first.', 'error');
+    return;
+  }
+  
+  const activeSession = chatSessions[activeChatId];
+  const messages = activeSession.messages || [];
+  if (messages.length === 0) {
+    showToast('Cannot export an empty conversation.', 'error');
+    return;
+  }
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Pop-up blocked. Please allow popups to export PDFs.', 'error');
+    return;
+  }
+
+  let htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${activeSession.title || 'Chat Export'}</title>
+      <!-- KaTeX styling for formulas -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
+        .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
+        .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
+        .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+        .message { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; page-break-inside: avoid; }
+        .role { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .role.user { color: #2563eb; }
+        .role.assistant { color: #059669; }
+        .content { font-size: 1rem; word-break: break-word; }
+        pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.9rem; }
+        code { font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+        pre code { background: transparent; padding: 0; }
+        blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+        th { background: #f8fafc; }
+        @media print {
+          body { padding: 0; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1 class="title">${activeSession.title || 'Chat Export'}</h1>
+        <div class="meta">Exported on ${new Date().toLocaleString()} | User: ${currentUser}</div>
+      </div>
+      <div class="content-list">
+  `;
+
+  messages.forEach(msg => {
+    const formattedBody = renderMarkdownWithMath(msg.content);
+    htmlContent += `
+      <div class="message">
+        <div class="role ${msg.role}">${msg.role === 'user' ? '👤 User' : '🤖 Assistant'}</div>
+        <div class="content">${formattedBody}</div>
+      </div>
+    `;
+  });
+
+  htmlContent += `
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 500);
+        }
+      </script>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+  showToast('Opening PDF compilation window...', 'success');
+}
+
+// ── Export Chat thread as interactive presentation slide deck ──
+function exportChatToSlides() {
+  if (!activeChatId || !chatSessions[activeChatId]) {
+    showToast('Please select or create an active chat session first.', 'error');
+    return;
+  }
+  
+  const activeSession = chatSessions[activeChatId];
+  const messages = activeSession.messages || [];
+  if (messages.length === 0) {
+    showToast('Cannot export an empty conversation.', 'error');
+    return;
+  }
+
+  const slides = [];
+  
+  // Slide 1: Welcome title slide
+  slides.push({
+    title: activeSession.title || 'Study Session',
+    content: `<div style="text-align:center; padding: 40px 0;">
+                <h2 style="font-size:2.2rem; color:#818cf8; margin-top:20px; font-weight:800;">AI Chatbot Exam Prep Deck</h2>
+                <p style="margin-top:20px; font-size:1.1rem; opacity:0.8;">Course Review & Formula Guide</p>
+                <div style="margin-top:60px; font-size:0.95rem; opacity:0.6;">Exported: ${new Date().toLocaleDateString()} | Author: ${currentUser}</div>
+              </div>`
+  });
+
+  messages.forEach((msg, idx) => {
+    if (msg.role === 'user') {
+      const qText = renderMarkdownWithMath(msg.content);
+      slides.push({
+        title: `Question ${Math.floor(idx / 2) + 1}`,
+        content: `<div style="font-size:1.4rem; line-height:1.6; font-style:italic; border-left:6px solid #818cf8; padding-left:24px; color:#e2e8f0; margin-top:30px;">
+                    ${qText}
+                  </div>`
+      });
+    } else {
+      const rawContent = msg.content || '';
+      const sections = rawContent.split(/\n(?=### |## |# )/g);
+      
+      if (sections.length > 1) {
+        sections.forEach((section, sIdx) => {
+          const lines = section.trim().split('\n');
+          const headerText = lines[0].replace(/^#+\s+/, '');
+          const bodyText = lines.slice(1).join('\n');
+          const formattedBody = renderMarkdownWithMath(bodyText);
+          
+          slides.push({
+            title: headerText || `Takeaway ${sIdx + 1}`,
+            content: `<div style="font-size:1.1rem; line-height:1.5; color:#cbd5e1; overflow-y:auto; max-height:420px; padding-right:8px;">${formattedBody}</div>`
+          });
+        });
+      } else {
+        const formattedContent = renderMarkdownWithMath(rawContent);
+        slides.push({
+          title: `Explanation ${Math.floor(idx / 2) + 1}`,
+          content: `<div style="font-size:1.1rem; line-height:1.5; color:#cbd5e1; overflow-y:auto; max-height:420px; padding-right:8px;">${formattedContent}</div>`
+        });
+      }
+    }
+  });
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Pop-up blocked. Please allow popups to launch slides.', 'error');
+    return;
+  }
+
+  let slidesJSON = JSON.stringify(slides);
+  let slidesHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${activeSession.title || 'Slide Presentation'}</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <style>
+        :root {
+          --bg-main: #0f172a;
+          --bg-card: #1e293b;
+          --text-primary: #f8fafc;
+          --text-secondary: #94a3b8;
+          --accent: #818cf8;
+          --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          background-color: var(--bg-main);
+          color: var(--text-primary);
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        .slide-container {
+          background-color: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          width: 85%;
+          max-width: 900px;
+          height: 80vh;
+          max-height: 550px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+          position: relative;
+          padding: 40px;
+          transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .slide-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid var(--border);
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        }
+        .slide-title {
+          font-size: 1.6rem;
+          font-weight: 700;
+          color: var(--accent);
+        }
+        .slide-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          font-size: 1.15rem;
+          line-height: 1.6;
+          color: #cbd5e1;
+        }
+        .controls {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 85%;
+          max-width: 900px;
+          margin-top: 20px;
+        }
+        .btn {
+          background-color: var(--bg-card);
+          border: 1px solid var(--border);
+          color: var(--text-primary);
+          padding: 10px 20px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.9rem;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.2s;
+        }
+        .btn:hover {
+          border-color: var(--accent);
+          background-color: #273549;
+        }
+        .btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+          border-color: var(--border);
+        }
+        .slide-counter {
+          font-size: 0.95rem;
+          color: var(--text-secondary);
+          font-weight: 600;
+        }
+        pre { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; font-family: monospace; font-size: 0.85rem; margin-top: 12px; }
+        code { font-family: monospace; font-size: 0.85rem; background: #0f172a; padding: 2px 4px; border-radius: 4px; }
+        pre code { background: transparent; padding: 0; }
+        blockquote { border-left: 4px solid var(--accent); margin: 0 0 16px 0; padding-left: 16px; color: var(--text-secondary); font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
+        th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+        th { background: #1e293b; }
+        
+        @media print {
+          body { background: white; color: black; }
+          .slide-container {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            box-shadow: none;
+            page-break-after: always;
+            display: flex !important;
+            opacity: 1 !important;
+            transform: none !important;
+            padding: 20px;
+          }
+          .controls, .btn, .no-print { display: none !important; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="slide-container" id="slide-card">
+        <div class="slide-header">
+          <div class="slide-title" id="slide-title">Title</div>
+          <div class="no-print" style="display:flex; gap:8px;">
+            <button class="btn" onclick="toggleFullscreen()" title="Fullscreen Mode"><i class="fa-solid fa-expand"></i></button>
+            <button class="btn" onclick="window.print()" title="Print Slides / Save PDF"><i class="fa-solid fa-file-pdf"></i></button>
+          </div>
+        </div>
+        <div class="slide-body" id="slide-body">
+          Content
+        </div>
+      </div>
+      
+      <div class="controls no-print">
+        <button class="btn" id="prev-btn" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <div class="slide-counter" id="counter-label">Slide 1 of 1</div>
+        <button class="btn" id="next-btn" onclick="nextSlide()">Next <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+      <script>
+        const slides = ${slidesJSON};
+        let currentIdx = 0;
+
+        function updateSlide() {
+          const card = document.getElementById('slide-card');
+          card.style.opacity = 0;
+          card.style.transform = 'scale(0.98)';
+          
+          setTimeout(() => {
+            const slide = slides[currentIdx];
+            document.getElementById('slide-title').textContent = slide.title;
+            document.getElementById('slide-body').innerHTML = slide.content;
+            document.getElementById('counter-label').textContent = \`Slide \${currentIdx + 1} of \${slides.length}\`;
+            
+            document.getElementById('prev-btn').disabled = currentIdx === 0;
+            document.getElementById('next-btn').disabled = currentIdx === slides.length - 1;
+            
+            card.style.opacity = 1;
+            card.style.transform = 'scale(1)';
+          }, 150);
+        }
+
+        function nextSlide() {
+          if (currentIdx < slides.length - 1) {
+            currentIdx++;
+            updateSlide();
+          }
+        }
+
+        function prevSlide() {
+          if (currentIdx > 0) {
+            currentIdx--;
+            updateSlide();
+          }
+        }
+
+        function toggleFullscreen() {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {});
+          } else {
+            document.exitFullscreen();
+          }
+        }
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+            nextSlide();
+          } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+            prevSlide();
+          }
+        });
+
+        updateSlide();
+      </script>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(slidesHTML);
+  printWindow.document.close();
+  showToast('Launching slide presentation deck...', 'success');
 }

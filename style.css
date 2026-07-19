@@ -1690,6 +1690,33 @@ html, body {
 
   .settings-drawer { width: 100% !important; right: -100% !important; }
 
+  /* Compact Close buttons in drawer/guide headers on mobile */
+  #close-settings-view-btn span,
+  #close-model-guide-btn span,
+  #close-api-guide-btn span,
+  #close-token-tracker-btn span,
+  #close-prompts-btn span,
+  #add-prompt-btn span,
+  #reset-tracker-btn span {
+    display: none !important;
+  }
+  #close-settings-view-btn,
+  #close-model-guide-btn,
+  #close-api-guide-btn,
+  #close-token-tracker-btn,
+  #close-prompts-btn,
+  #add-prompt-btn,
+  #reset-tracker-btn {
+    padding: 6px 10px !important;
+    font-size: 0.85rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+  }
+
   ::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
 }
 

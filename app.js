@@ -3255,7 +3255,8 @@ function showMainAreaView(viewName) {
   }
 
   // Auto-close mobile sidebar drawer when switching rooms/subviews
-  if (document.body.classList.contains('mobile-view-active')) {
+  const isMobileView = document.body.classList.contains('mobile-view-active') || window.innerWidth <= 768;
+  if (isMobileView) {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) sidebar.classList.remove('open');
     const backdrop = document.getElementById('mobile-sidebar-backdrop');

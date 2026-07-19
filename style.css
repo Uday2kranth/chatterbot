@@ -1707,14 +1707,16 @@ html, body {
   #close-prompts-btn,
   #add-prompt-btn,
   #reset-tracker-btn {
-    padding: 6px 10px !important;
+    padding: 0 !important;
     font-size: 0.85rem !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     min-width: 34px !important;
+    width: 34px !important;
     height: 34px !important;
     border-radius: 50% !important;
+    flex: none !important;
   }
 
   ::-webkit-scrollbar { width: 0 !important; height: 0 !important; }

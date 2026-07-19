@@ -6,6 +6,7 @@ const DEFAULT_MISTRAL_KEY = "";
 const DEFAULT_CEREBRAS_KEY = "";
 const DEFAULT_GROQ_KEY = "";
 const DEFAULT_SAMBANOVA_KEY = "";
+const DEFAULT_NARAROUTER_KEY = "sk-nry-G1qu-m8XC4IYzvAXFXkD5BudlDQqgj6po5I2R91-AV0";
 
 // Helper to scrape DuckDuckGo search snippets for free web search RAG capabilities
 async function getWebSearchSnippets(query) {
@@ -85,7 +86,7 @@ module.exports = async (req, res) => {
     } else if (provider === "gemini") {
         apiKey = req.headers['x-user-gemini-key'] || (isAdmin ? (process.env.GEMINI_API_KEY || '') : '');
     } else if (provider === "nararouter") {
-        apiKey = req.headers['x-user-nararouter-key'] || (isAdmin ? (process.env.NARAROUTER_API_KEY || '') : '');
+        apiKey = req.headers['x-user-nararouter-key'] || (isAdmin ? (process.env.NARAROUTER_API_KEY || DEFAULT_NARAROUTER_KEY) : '');
     }
 
     if (!apiKey) {

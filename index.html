@@ -206,6 +206,10 @@
             <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
             <span>Token Tracker</span>
           </button>
+          <button class="new-chat-btn" id="exam-prep-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Exam Prep, Syllabus & Question Banks">
+            <i class="fa-solid fa-book-open-reader" style="color:var(--accent-primary);"></i>
+            <span>Exam Prep & Syllabus</span>
+          </button>
 
           <!-- Less Button (appears below Token Tracker) -->
           <button class="new-chat-btn" id="more-features-collapse-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Hide Extra Features">
@@ -1892,11 +1896,77 @@
           </div>
         </div>
       </div>
+
+      <!-- View 7: Exam Prep & Syllabus View -->
+      <div id="exam-prep-view" class="sub-view-container" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary); overflow-y: auto;">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); flex-wrap:wrap; gap:12px;">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-book-open-reader" style="color:var(--accent-primary);"></i>
+            <span>M.Sc. Data Science - Exam Prep & Syllabus (Sem IV)</span>
+          </h2>
+          <button class="drawer-btn secondary" id="close-exam-prep-view-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
+            <i class="fa-solid fa-xmark"></i> <span>Close View</span>
+          </button>
+        </div>
+
+        <div style="padding: 20px 24px; display:flex; flex-direction:column; gap:16px;">
+          <!-- Dual Dropdown Pickers Row -->
+          <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; flex: 1;">
+              <!-- Subject Picker -->
+              <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px; flex: 1;">
+                <label for="prep-subject-select" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Select Subject Paper</label>
+                <select id="prep-subject-select" class="custom-select" style="width: 100%; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;">
+                  <option value="crypto">Paper I: Cryptography (MDS-401)</option>
+                  <option value="datamining">Paper II: Data Mining (MDS-402)</option>
+                  <option value="sentiment">Paper III (A): Sentiment Analysis (MDS-403 A)</option>
+                  <option value="webmining">Paper IV (B): Web Mining (MDS-404 B)</option>
+                </select>
+              </div>
+
+              <!-- Resource / Paper Category Picker -->
+              <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px; flex: 1;">
+                <label for="prep-category-select" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Select Resource Type</label>
+                <select id="prep-category-select" class="custom-select" style="width: 100%; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;">
+                  <option value="syllabus">📜 Syllabus & Unit Breakdown</option>
+                  <option value="question-bank">🎯 High-Yield Question Bank</option>
+                  <option value="set-a">📝 Predicted Paper - Set A (Baseline)</option>
+                  <option value="set-b">📝 Predicted Paper - Set B (Alternative)</option>
+                  <option value="set-c">📝 Predicted Paper - Set C (Stress Test)</option>
+                  <option value="set-d">📝 Predicted Paper - Set D (Final Review)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Action Toolbar (Ask AI / Export PDF / Export Word / Copy) -->
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <button id="prep-ask-ai-btn" class="drawer-btn primary" style="padding: 8px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;" title="Send content to active chat session for AI tutoring">
+                <i class="fa-solid fa-brain"></i> Ask AI Tutor
+              </button>
+              <button id="prep-export-pdf-btn" class="msg-action-btn" style="padding: 8px 12px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);" title="Export current resource as PDF">
+                <i class="fa-regular fa-file-pdf"></i> PDF
+              </button>
+              <button id="prep-export-word-btn" class="msg-action-btn" style="padding: 8px 12px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);" title="Export current resource as Word document">
+                <i class="fa-regular fa-file-word"></i> Word
+              </button>
+              <button id="prep-copy-btn" class="msg-action-btn" style="padding: 8px 12px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);" title="Copy content to clipboard">
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+            </div>
+          </div>
+
+          <!-- Content Area Container -->
+          <div id="prep-content-area" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; min-height: 400px; line-height: 1.6; word-break: break-word;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
     </main>
 
   </div>
 
-  <!-- Main logic JS -->
+  <!-- Data & Logic JS -->
+  <script src="exam_prep_data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -309,6 +309,7 @@ function initializeApp() {
   setupMobileSimulator();
   setupTokenTracker();
   setupBookmarks();
+  setupExamPrep();
   setupSessionValidationLoop();
 }
 
@@ -3352,6 +3353,239 @@ function renderBookmarksView() {
   });
 }
 
+// ── Exam Prep, Syllabus & Question Banks Controller ──
+function checkExamPrepAccess() {
+  const isAllowedUser = currentUser === 'admin' || currentUser === 'uday01' || userRole === 'student' || userRole === 'admin';
+  const prepBtn = document.getElementById('exam-prep-btn');
+  if (prepBtn) {
+    prepBtn.style.display = isAllowedUser ? 'flex' : 'none';
+  }
+  return isAllowedUser;
+}
+
+function renderExamPrepContent() {
+  const subjectSelect = document.getElementById('prep-subject-select');
+  const categorySelect = document.getElementById('prep-category-select');
+  const contentArea = document.getElementById('prep-content-area');
+  
+  if (!subjectSelect || !categorySelect || !contentArea) return;
+
+  const subjectKey = subjectSelect.value;
+  const categoryKey = categorySelect.value;
+
+  if (typeof EXAM_PREP_DATA === 'undefined' || !EXAM_PREP_DATA[subjectKey]) {
+    contentArea.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:40px;">Exam preparation dataset loading...</div>';
+    return;
+  }
+
+  const subjectData = EXAM_PREP_DATA[subjectKey];
+  const rawData = subjectData[categoryKey] || '';
+
+  if (!rawData) {
+    contentArea.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:40px;">No content available for ${subjectData.title} (${categoryKey}).</div>`;
+    return;
+  }
+
+  let htmlContent = '';
+  if (categoryKey === 'syllabus') {
+    htmlContent = typeof marked !== 'undefined' ? marked.parse(rawData) : rawData.replace(/\n/g, '<br/>');
+  } else {
+    htmlContent = rawData;
+  }
+
+  contentArea.innerHTML = `
+    <div class="prep-header-badge" style="border-bottom: 2px solid var(--accent-primary); padding-bottom: 10px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h3 style="margin: 0; color: var(--accent-primary); font-size: 1.2rem; font-weight:700;">${subjectData.title}</h3>
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">RESOURCE: ${categorySelect.options[categorySelect.selectedIndex].text}</span>
+      </div>
+      <span style="font-size: 0.75rem; background: var(--bg-tertiary); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-secondary); font-weight: 600;">
+        CODE: ${subjectData.code}
+      </span>
+    </div>
+    <div class="prep-body-content" style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;">
+      ${htmlContent}
+    </div>
+  `;
+
+  if (window.renderMathInElement) {
+    window.renderMathInElement(contentArea, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+function setupExamPrep() {
+  const examPrepBtn = document.getElementById('exam-prep-btn');
+  const closeBtn = document.getElementById('close-exam-prep-view-btn');
+  const subjectSelect = document.getElementById('prep-subject-select');
+  const categorySelect = document.getElementById('prep-category-select');
+
+  const askAiBtn = document.getElementById('prep-ask-ai-btn');
+  const pdfBtn = document.getElementById('prep-export-pdf-btn');
+  const wordBtn = document.getElementById('prep-export-word-btn');
+  const copyBtn = document.getElementById('prep-copy-btn');
+
+  checkExamPrepAccess();
+
+  if (examPrepBtn) {
+    examPrepBtn.addEventListener('click', () => {
+      if (!checkExamPrepAccess()) {
+        showToast('Exam Prep & Syllabus is restricted to Student and Admin accounts.', 'error');
+        return;
+      }
+      showMainAreaView('exam-prep');
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      showMainAreaView('chat');
+    });
+  }
+
+  if (subjectSelect) {
+    subjectSelect.addEventListener('change', renderExamPrepContent);
+  }
+
+  if (categorySelect) {
+    categorySelect.addEventListener('change', renderExamPrepContent);
+  }
+
+  if (askAiBtn) {
+    askAiBtn.addEventListener('click', () => {
+      const subjectSelect = document.getElementById('prep-subject-select');
+      const categorySelect = document.getElementById('prep-category-select');
+      const contentArea = document.getElementById('prep-content-area');
+      
+      const subjectText = subjectSelect ? subjectSelect.options[subjectSelect.selectedIndex].text : 'Exam Paper';
+      const categoryText = categorySelect ? categorySelect.options[categorySelect.selectedIndex].text : 'Resource';
+      const plainText = contentArea ? contentArea.innerText.trim() : '';
+
+      if (!plainText) {
+        showToast('No content available to send to AI.', 'error');
+        return;
+      }
+
+      showMainAreaView('chat');
+      const chatInput = document.getElementById('chat-input');
+      if (chatInput) {
+        chatInput.value = `[STUDY CONTEXT - ${subjectText} (${categoryText})]:\n${plainText.substring(0, 1500)}...\n\nPlease explain the key concepts and solve/summarize the important questions above step by step.`;
+        chatInput.focus();
+        showToast('Loaded exam context into chat! Press Send to start AI tutoring.', 'success');
+      }
+    });
+  }
+
+  if (pdfBtn) {
+    pdfBtn.addEventListener('click', () => {
+      const contentArea = document.getElementById('prep-content-area');
+      if (!contentArea || !contentArea.innerText.trim()) return;
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showToast('Pop-up blocked. Please allow popups.', 'error');
+        return;
+      }
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Exam Prep PDF Export</title>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
+            h1, h2, h3 { color: #0f172a; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+            th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+            th { background: #f8fafc; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div>${contentArea.innerHTML}</div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(html);
+      printWindow.document.close();
+      showToast('Opening PDF compilation window...', 'success');
+    });
+  }
+
+  if (wordBtn) {
+    wordBtn.addEventListener('click', () => {
+      const subjectSelect = document.getElementById('prep-subject-select');
+      const categorySelect = document.getElementById('prep-category-select');
+      const contentArea = document.getElementById('prep-content-area');
+      if (!contentArea || !contentArea.innerText.trim()) return;
+
+      const subjectText = subjectSelect ? subjectSelect.options[subjectSelect.selectedIndex].text : 'Subject';
+      const categoryText = categorySelect ? categorySelect.options[categorySelect.selectedIndex].text : 'Resource';
+
+      let cleanContent = contentArea.innerHTML;
+      cleanContent = cleanContent.replace(/color\s*:\s*#[a-f0-9]{3,6}/gi, 'color:#1f2937')
+                                 .replace(/background\s*:\s*#[a-f0-9]{3,6}/gi, '')
+                                 .replace(/background-color\s*:\s*#[a-f0-9]{3,6}/gi, '');
+
+      let html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+          <title>${subjectText}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.25; color: #1f2937; padding: 30px; background-color: #ffffff; }
+            h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; }
+            h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 12px; margin-bottom: 6px; }
+            p, ul, ol, li { margin-top: 0px; margin-bottom: 6px; line-height: 1.25; }
+            .footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+          </style>
+        </head>
+        <body>
+          <div>${cleanContent}</div>
+          <div class="footer-note">
+            Exported from ChatterBot M.Sc. Data Science Exam Prep Hub.
+          </div>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${subjectText.replace(/[^a-z0-9_-]/gi, '_')}_${categoryText.replace(/[^a-z0-9_-]/gi, '_')}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Exported to Word document!', 'success');
+    });
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const contentArea = document.getElementById('prep-content-area');
+      if (!contentArea || !contentArea.innerText.trim()) return;
+      navigator.clipboard.writeText(contentArea.innerText).then(() => {
+        showToast('Exam prep content copied to clipboard!', 'success');
+      });
+    });
+  }
+}
+
 // ── Global Token Tracker Data State ──
 let tokenTrackerData = {
   total: { prompt: 0, completion: 0, total: 0 },
@@ -3688,6 +3922,7 @@ function showMainAreaView(viewName) {
   const promptsLibraryView = document.getElementById('prompts-library-view');
   const secureSettingsView = document.getElementById('secure-settings-view');
   const bookmarksView = document.getElementById('bookmarks-view');
+  const examPrepView = document.getElementById('exam-prep-view');
   
   if (!activeChatView || !modelGuideView || !apiGuideView || !tokenTrackerView || !promptsLibraryView || !secureSettingsView) return;
   
@@ -3698,6 +3933,7 @@ function showMainAreaView(viewName) {
   promptsLibraryView.style.display = 'none';
   secureSettingsView.style.display = 'none';
   if (bookmarksView) bookmarksView.style.display = 'none';
+  if (examPrepView) examPrepView.style.display = 'none';
   
   if (viewName === 'chat') {
     activeChatView.style.display = 'flex';
@@ -3729,6 +3965,11 @@ function showMainAreaView(viewName) {
     document.getElementById('active-provider-label').textContent = 'BOOKMARKS';
     document.getElementById('active-model-label').textContent = 'Bookmarked Notes & Formulas';
     renderBookmarksView();
+  } else if (viewName === 'exam-prep') {
+    if (examPrepView) examPrepView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'EXAM PREP';
+    document.getElementById('active-model-label').textContent = 'Syllabus, Question Bank & Predicted Papers';
+    renderExamPrepContent();
   }
 
   // Auto-close mobile sidebar drawer when switching rooms/subviews

@@ -6,6 +6,7 @@ const DEFAULT_MISTRAL_KEY = "";
 const DEFAULT_CEREBRAS_KEY = "";
 const DEFAULT_GROQ_KEY = "";
 const DEFAULT_SAMBANOVA_KEY = "";
+const DEFAULT_NARAROUTER_KEY = "";
 
 // Helper to scrape DuckDuckGo search snippets for free web search RAG capabilities
 async function getWebSearchSnippets(query) {

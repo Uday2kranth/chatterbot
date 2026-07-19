@@ -1617,7 +1617,7 @@ html, body {
   #custom-roles-btn { width: 100% !important; }
 
   #mobile-hamburger-btn { display: flex !important; }
-  #sidebar-toggle-btn { display: none !important; }
+  #sidebar-toggle-btn { display: flex !important; }
 
   .active-model-name {
     font-size: 0.88rem !important;

@@ -191,6 +191,7 @@ function initializeApp() {
   setupTheme();
   setupUserInfo();
   setupSettingsDrawer();
+  setupHeaderControlsDrawer();
   setupSidebarAndPrompts();
   setupModelSelectors();
   updateProviderSelectDropdown();
@@ -775,6 +776,33 @@ function updateHeaderLabels() {
 
   providerLabel.textContent = providerSelect.options[providerSelect.selectedIndex]?.text.toUpperCase() || '';
   modelLabel.textContent = modelSelect.options[modelSelect.selectedIndex]?.text || '';
+}
+
+// Header Controls Drawer Handler
+function setupHeaderControlsDrawer() {
+  const drawer = document.getElementById('chat-controls-drawer');
+  const toggleBtn = document.getElementById('toggle-header-controls-btn');
+  if (!drawer || !toggleBtn) return;
+
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    drawer.classList.add('collapsed');
+    toggleBtn.classList.remove('expanded');
+  } else {
+    drawer.classList.remove('collapsed');
+    toggleBtn.classList.add('expanded');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    const isCollapsed = drawer.classList.contains('collapsed');
+    if (isCollapsed) {
+      drawer.classList.remove('collapsed');
+      toggleBtn.classList.add('expanded');
+    } else {
+      drawer.classList.add('collapsed');
+      toggleBtn.classList.remove('expanded');
+    }
+  });
 }
 
 // Settings Drawer Handler

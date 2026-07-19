@@ -264,53 +264,61 @@
     <!-- Chat Area -->
     <main class="chat-area">
       <!-- Chat Header -->
-      <header class="chat-header">
-        <div class="active-model-info">
-          <span class="active-provider" id="active-provider-label">OPENROUTER</span>
-          <span class="active-model-name" id="active-model-label">Llama 3.1 8B (Free)</span>
-        </div>
-
-        <div class="chat-controls-top">
-          <!-- Provider Dropdown -->
-          <div class="selector-group">
-            <label for="provider-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">PROVIDER</label>
-            <select id="provider-select" class="custom-select">
-              <option value="openrouter">OpenRouter</option>
-              <option value="nvidia">NVIDIA NIM</option>
-              <option value="omnirouter">OmniRouter</option>
-              <option value="mistral">Mistral AI</option>
-              <option value="cerebras">Cerebras</option>
-              <option value="groq">Groq</option>
-              <option value="sambanova">SambaNova</option>
-              <option value="gemini">Google Gemini</option>
-            </select>
+      <header class="chat-header" style="display:flex; flex-direction:column; align-items:stretch; height:auto; padding:0;">
+        <div class="chat-header-main-row">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Hamburger button — only shown in mobile layout to open sidebar -->
+            <button id="mobile-hamburger-btn" style="display:none; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); padding:8px 12px; border-radius:8px; cursor:pointer; font-size:1rem; align-items:center; gap:6px;" title="Open Navigation Menu">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="active-model-info">
+              <span class="active-provider" id="active-provider-label">OPENROUTER</span>
+              <span class="active-model-name" id="active-model-label">Llama 3.1 8B (Free)</span>
+            </div>
           </div>
-
-          <!-- Model Dropdown -->
-          <div class="selector-group">
-            <label for="model-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">MODEL</label>
-            <select id="model-select" class="custom-select">
-              <!-- Populated dynamically via app.js -->
-            </select>
-          </div>
-
-          <!-- Roles Trigger button -->
-          <button id="custom-roles-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-primary); color:var(--accent-primary); padding: 7px 12px;" title="Configure Bot & User Roles">
-            <i class="fa-solid fa-user-gear"></i>
-            <span>Roles</span>
-          </button>
-
-          <!-- Email Export Configuration Trigger button -->
-          <button id="header-email-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-secondary); color:var(--accent-secondary); padding: 7px 12px;" title="Configure Recipient Emails for Export">
-            <i class="fa-solid fa-envelope"></i>
-            <span id="header-email-label">Email Export</span>
+          <button id="toggle-header-controls-btn" class="header-toggle-btn" title="Toggle Controls Drawer">
+            <i class="fa-solid fa-chevron-down"></i>
           </button>
         </div>
 
-        <!-- Hamburger button — only shown in mobile layout to open sidebar -->
-        <button id="mobile-hamburger-btn" style="display:none; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); padding:8px 12px; border-radius:8px; cursor:pointer; font-size:1rem; align-items:center; gap:6px;" title="Open Navigation Menu">
-          <i class="fa-solid fa-bars"></i>
-        </button>
+        <div id="chat-controls-drawer" class="chat-controls-drawer">
+          <div class="chat-controls-top">
+            <!-- Provider Dropdown -->
+            <div class="selector-group">
+              <label for="provider-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">PROVIDER</label>
+              <select id="provider-select" class="custom-select">
+                <option value="openrouter">OpenRouter</option>
+                <option value="nvidia">NVIDIA NIM</option>
+                <option value="omnirouter">OmniRouter</option>
+                <option value="mistral">Mistral AI</option>
+                <option value="cerebras">Cerebras</option>
+                <option value="groq">Groq</option>
+                <option value="sambanova">SambaNova</option>
+                <option value="gemini">Google Gemini</option>
+              </select>
+            </div>
+
+            <!-- Model Dropdown -->
+            <div class="selector-group">
+              <label for="model-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">MODEL</label>
+              <select id="model-select" class="custom-select">
+                <!-- Populated dynamically via app.js -->
+              </select>
+            </div>
+
+            <!-- Roles Trigger button -->
+            <button id="custom-roles-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-primary); color:var(--accent-primary); padding: 7px 12px;" title="Configure Bot & User Roles">
+              <i class="fa-solid fa-user-gear"></i>
+              <span>Roles</span>
+            </button>
+
+            <!-- Email Export Configuration Trigger button -->
+            <button id="header-email-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-secondary); color:var(--accent-secondary); padding: 7px 12px;" title="Configure Recipient Emails for Export">
+              <i class="fa-solid fa-envelope"></i>
+              <span id="header-email-label">Email Export</span>
+            </button>
+          </div>
+        </div>
       </header>
 
       <!-- Active System Prompt Indicator Banner -->

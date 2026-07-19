@@ -176,18 +176,8 @@ const PROVIDER_MODELS = {
     { value: "gemma-4-26b-a4b-it", name: "Gemma 4 26B MoE (AI Studio)", multimodal: true }
   ],
   nararouter: [
-    { value: "mimo-v2.5", name: "MiMo 2.5 (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
-    { value: "mimo-v2.5-pro", name: "MiMo 2.5 Pro (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
-    { value: "deepseek-v4-pro", name: "DeepSeek V4 Pro (Stable) [WS]", webSearch: true },
-    { value: "claude-sonnet-5", name: "Claude Sonnet 5 (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
-    { value: "gpt-5.4", name: "GPT 5.4 (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
-    { value: "gpt-5.6-luna", name: "GPT 5.6 Luna [TEMP] [WS][IMG]", webSearch: true, multimodal: true },
-    { value: "grok-4.5", name: "Grok 4.5 [TEMP] [WS][IMG]", webSearch: true, multimodal: true },
-    { value: "glm-5.2", name: "GLM 5.2 [TEMP]" },
-    { value: "agnes-2.5-flash", name: "Agnes 2.5 Flash [TEMP] [WS][IMG]", webSearch: true, multimodal: true },
-    { value: "qwen3.7-max", name: "Qwen 3.7 Max [TEMP] [WS]", webSearch: true },
-    { value: "mistral-large", name: "Mistral Large [TEMP] [WS]", webSearch: true },
-    { value: "tencent-hy3", name: "Tencent Hunyuan 3 [TEMP]" }
+    { value: "mistral-large", name: "Mistral Large (Free) [WS]", webSearch: true },
+    { value: "tencent-hy3", name: "Tencent Hunyuan 3 (Free)" }
   ]
 };
 

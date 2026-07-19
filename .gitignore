@@ -30,6 +30,7 @@
 *.tif
 *.bmp
 *.svg
+!icon.svg
 *.psd
 *.raw
 *.ai

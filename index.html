@@ -12,6 +12,7 @@
       alert('UNHANDLED REJECTION DETECTED:\nReason: ' + e.reason + '\nStack: ' + (e.reason && e.reason.stack ? e.reason.stack : 'N/A'));
     });
   </script>
+  <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="style.css">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -222,12 +223,22 @@
           <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
           <span>Token Tracker</span>
         </button>
+        <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Bookmarked Notes & Formulas">
+          <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
+          <span>Bookmarked Notes</span>
+        </button>
       </div>
 
       <!-- Persistent Sidebar Chat Sessions List -->
-      <div class="history-section">
-        <h3 class="history-title">Chat History</h3>
-        <div class="history-list" id="history-list">
+      <div class="history-section" style="display:flex; flex-direction:column; gap:8px;">
+        <h3 class="history-title" style="margin-bottom: 2px;">Chat History</h3>
+        
+        <div class="search-history-container" style="position:relative; margin:0 4px 4px 4px;">
+          <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--text-muted);"></i>
+          <input type="text" id="search-history-input" placeholder="Search chats or content..." style="width:100%; padding:6px 10px 6px 28px; font-size:0.75rem; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); outline:none; transition:border-color 0.2s;" />
+        </div>
+
+        <div class="history-list" id="history-list" style="flex:1; min-height:0; overflow-y:auto;">
           <!-- Populated dynamically via app.js -->
         </div>
       </div>
@@ -1756,6 +1767,28 @@
               <button class="drawer-btn secondary" id="cancel-settings-btn" style="padding:10px 16px; border-radius:8px; cursor:pointer; background:none; border:1px solid var(--border-color); color:var(--text-primary);">Cancel</button>
               <button class="drawer-btn primary" id="save-settings-btn" style="padding:10px 16px; border-radius:8px; cursor:pointer; background:var(--accent-primary); border:none; color:white; font-weight:600;">Save Config</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View 6: Bookmarks View -->
+      <div id="bookmarks-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
+            <span>Bookmarked Notes & Formulas</span>
+          </h2>
+          <button class="drawer-btn secondary" id="close-bookmarks-view-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
+            <i class="fa-solid fa-xmark"></i> <span>Close Bookmarks</span>
+          </button>
+        </div>
+        
+        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.45; margin:0;">
+            Below is the collection of your bookmarked study notes, mathematical formulas, and helpful explanations across all chat sessions.
+          </p>
+          <div id="bookmarks-container" style="display:flex; flex-direction:column; gap:16px;">
+            <!-- Populated dynamically via JS -->
           </div>
         </div>
       </div>

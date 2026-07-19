@@ -51,6 +51,13 @@ function checkSession() {
 
 if (checkSession()) {
   document.addEventListener('DOMContentLoaded', initializeApp);
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('ServiceWorker registered successfully:', reg.scope))
+        .catch(err => console.warn('ServiceWorker registration failed:', err));
+    });
+  }
 }
 
 // 2. Global State Definitions
@@ -62,6 +69,7 @@ let originalModelBeforeImage = null;
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
+let activeAbortController = null;
 
 // 2b. Curated Prompt Library Default Scenarios
 const DEFAULT_PROMPTS = [
@@ -230,6 +238,7 @@ function initializeApp() {
   setupMultimodalAndAudio();
   setupMobileSimulator();
   setupTokenTracker();
+  setupBookmarks();
   setupSessionValidationLoop();
 }
 
@@ -399,6 +408,14 @@ function setupSidebarAndPrompts() {
   const cancelPromptsBtn = document.getElementById('cancel-prompts-btn');
   const promptsOverlay = document.getElementById('prompts-modal-overlay');
   
+  // 0. Search history input listener
+  const searchHistoryInput = document.getElementById('search-history-input');
+  if (searchHistoryInput) {
+    searchHistoryInput.addEventListener('input', () => {
+      renderHistoryList();
+    });
+  }
+
   // 1. Sidebar Toggle collapse state
   sidebarToggle.addEventListener('click', () => {
     const isMobile = document.body.classList.contains('mobile-view-active');
@@ -1455,14 +1472,24 @@ async function saveChatSessionsToStorage(sessionIdToSave = null) {
 
 function renderHistoryList() {
   const historyList = document.getElementById('history-list');
+  if (!historyList) return;
   historyList.innerHTML = '';
+
+  const searchInput = document.getElementById('search-history-input');
+  const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
   const sessions = Object.entries(chatSessions)
     .filter(([id]) => id !== 'api_keys_storage' && id !== 'token_tracker_storage')
+    .filter(([id, data]) => {
+      if (!query) return true;
+      const titleMatch = data.title && data.title.toLowerCase().includes(query);
+      const contentMatch = data.messages && data.messages.some(m => m.content && m.content.toLowerCase().includes(query));
+      return titleMatch || contentMatch;
+    })
     .sort((a, b) => b[1].timestamp - a[1].timestamp);
 
   if (sessions.length === 0) {
-    historyList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:15px 0;">No active history.</div>`;
+    historyList.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:15px 0;">${query ? 'No matching chats found.' : 'No active history.'}</div>`;
     return;
   }
 
@@ -1746,6 +1773,32 @@ function setupChatHandlers() {
       if (!sendBtn.disabled) {
         submitPrompt();
       }
+    } else if (e.key === 'ArrowUp' && chatInput.value === '') {
+      // Edit last user message shortcut
+      const editButtons = Array.from(document.querySelectorAll('.message.user .msg-action-btn')).filter(btn => btn.innerHTML.includes('fa-pen'));
+      if (editButtons.length > 0) {
+        e.preventDefault();
+        const lastEditBtn = editButtons[editButtons.length - 1];
+        lastEditBtn.click();
+      }
+    }
+  });
+
+  // Global keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    // Esc to abort active generation
+    if (e.key === 'Escape') {
+      if (activeAbortController) {
+        activeAbortController.abort();
+        activeAbortController = null;
+        showToast('Generation cancelled.', 'info');
+      }
+    }
+    // Ctrl + / to toggle sidebar drawer
+    if (e.ctrlKey && e.key === '/') {
+      e.preventDefault();
+      const sidebarToggle = document.getElementById('sidebar-toggle-btn');
+      if (sidebarToggle) sidebarToggle.click();
     }
   });
 
@@ -1937,6 +1990,25 @@ function renderMessages(messages) {
       });
     });
     actions.appendChild(copyBtn);
+
+    // 1b. Pin/Bookmark Button
+    const bookmarkBtn = document.createElement('button');
+    const isBookmarked = msg.isBookmarked || false;
+    bookmarkBtn.className = `msg-action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`;
+    bookmarkBtn.innerHTML = `<i class="${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i> <span>${isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>`;
+    bookmarkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      msg.isBookmarked = !msg.isBookmarked;
+      saveChatSessionsToStorage();
+      renderMessages(messages);
+      showToast(msg.isBookmarked ? 'Saved to Bookmarked Notes!' : 'Removed from bookmarks.', 'success');
+      
+      const bookmarksView = document.getElementById('bookmarks-view');
+      if (bookmarksView && bookmarksView.style.display === 'flex') {
+        renderBookmarksView();
+      }
+    });
+    actions.appendChild(bookmarkBtn);
 
     // 2. Read Aloud (Speak) Button
     const speakBtn = document.createElement('button');
@@ -2198,6 +2270,9 @@ async function submitPrompt() {
   typingIndicator.style.display = 'flex';
   statusLabel.textContent = 'Generating...';
 
+  // Initialize abort controller
+  activeAbortController = new AbortController();
+
   // Check web search toggle state
   const webSearchCheckbox = document.getElementById('web-search-checkbox');
   const isWebSearch = webSearchCheckbox ? webSearchCheckbox.checked : false;
@@ -2336,7 +2411,8 @@ async function submitPrompt() {
         body: JSON.stringify({
           model: activeSession.model,
           messages: messagesToSend
-        })
+        }),
+        signal: activeAbortController ? activeAbortController.signal : undefined
       });
       
       responseOk = response.ok;
@@ -2360,7 +2436,11 @@ async function submitPrompt() {
       }
     } catch (err) {
       responseOk = false;
-      responseData = { error: `Connection refused. Make sure Ollama/LM Studio is running at ${localEndpoint} with CORS enabled.` };
+      if (err.name === 'AbortError') {
+        responseData = { error: 'Generation stopped by user.' };
+      } else {
+        responseData = { error: `Connection refused. Make sure Ollama/LM Studio is running at ${localEndpoint} with CORS enabled.` };
+      }
     }
   } else if (activeSession.provider === 'omnirouter' && omniEndpoint.trim() !== '') {
     // ── Client-side Direct Query to Custom OmniRouter Endpoint ──
@@ -2375,7 +2455,8 @@ async function submitPrompt() {
         body: JSON.stringify({
           model: activeSession.model,
           messages: messagesToSend
-        })
+        }),
+        signal: activeAbortController ? activeAbortController.signal : undefined
       });
       
       responseOk = response.ok;
@@ -2399,7 +2480,11 @@ async function submitPrompt() {
       }
     } catch (err) {
       responseOk = false;
-      responseData = { error: `Failed to connect to OmniRouter endpoint: ${err.message}` };
+      if (err.name === 'AbortError') {
+        responseData = { error: 'Generation stopped by user.' };
+      } else {
+        responseData = { error: `Failed to connect to OmniRouter endpoint: ${err.message}` };
+      }
     }
   } else {
     // ── Traditional Server-side Chat Pipeline ──
@@ -2426,14 +2511,19 @@ async function submitPrompt() {
           sessionId: activeChatId,
           sessionTitle: activeSession.title,
           webSearch: isWebSearch
-        })
+        }),
+        signal: activeAbortController ? activeAbortController.signal : undefined
       });
 
       responseOk = response.ok;
       responseData = await response.json();
     } catch (err) {
       responseOk = false;
-      responseData = { error: err.message };
+      if (err.name === 'AbortError') {
+        responseData = { error: 'Generation stopped by user.' };
+      } else {
+        responseData = { error: err.message };
+      }
     }
   }
 
@@ -2469,6 +2559,8 @@ async function submitPrompt() {
     statusLabel.textContent = 'Disconnected';
   } finally {
     typingIndicator.style.display = 'none';
+    activeAbortController = null;
+    sendBtn.disabled = chatInput.value.trim().length === 0;
   }
 }
 
@@ -2903,6 +2995,110 @@ function setupMobileSimulator() {
   });
 }
 
+// ── Bookmarked Notes Component Controller ──
+function setupBookmarks() {
+  const bookmarksBtn = document.getElementById('bookmarks-btn');
+  const closeBtn = document.getElementById('close-bookmarks-view-btn');
+
+  if (bookmarksBtn) {
+    bookmarksBtn.addEventListener('click', () => {
+      showMainAreaView('bookmarks');
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      showMainAreaView('chat');
+    });
+  }
+}
+
+function renderBookmarksView() {
+  const container = document.getElementById('bookmarks-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const bookmarkedMsgs = [];
+  for (const [sessionId, session] of Object.entries(chatSessions)) {
+    if (sessionId === 'api_keys_storage' || sessionId === 'token_tracker_storage') continue;
+    const msgs = session.messages || [];
+    msgs.forEach((m, idx) => {
+      if (m.isBookmarked) {
+        bookmarkedMsgs.push({
+          sessionId,
+          sessionTitle: session.title || 'Untitled Session',
+          message: m,
+          msgIndex: idx
+        });
+      }
+    });
+  }
+
+  if (bookmarkedMsgs.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:40px 20px; border:1px dashed var(--border-color); border-radius:12px; color:var(--text-muted); background:var(--bg-tertiary);">
+        <i class="fa-regular fa-bookmark" style="font-size:2rem; margin-bottom:12px; display:block; color:var(--text-muted);"></i>
+        <div style="font-weight:600; font-size:0.95rem; margin-bottom:4px;">No Bookmarks Yet</div>
+        <div style="font-size:0.8rem;">Click the bookmark button on any AI or User message in chat to save it here for quick reference during exams.</div>
+      </div>
+    `;
+    return;
+  }
+
+  bookmarkedMsgs.forEach(item => {
+    const card = document.createElement('div');
+    card.style.cssText = 'padding:16px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-tertiary); display:flex; flex-direction:column; gap:10px; position:relative;';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:4px;';
+    
+    const meta = document.createElement('span');
+    meta.style.cssText = 'font-size:0.75rem; font-weight:600; color:var(--accent-primary);';
+    meta.textContent = `${item.message.role === 'user' ? 'USER NOTE' : 'AI EXPLANATION'} in "${item.sessionTitle}"`;
+
+    const cardActions = document.createElement('div');
+    cardActions.style.cssText = 'display:flex; align-items:center; gap:8px;';
+
+    const goBtn = document.createElement('button');
+    goBtn.className = 'msg-action-btn';
+    goBtn.style.padding = '4px 8px';
+    goBtn.innerHTML = `<i class="fa-solid fa-arrow-right-to-bracket"></i> Go to Chat`;
+    goBtn.addEventListener('click', () => {
+      loadChatSession(item.sessionId);
+      showMainAreaView('chat');
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'msg-action-btn';
+    removeBtn.style.padding = '4px 8px';
+    removeBtn.style.color = 'var(--error-color)';
+    removeBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Remove`;
+    removeBtn.addEventListener('click', () => {
+      const originalSession = chatSessions[item.sessionId];
+      if (originalSession && originalSession.messages && originalSession.messages[item.msgIndex]) {
+        originalSession.messages[item.msgIndex].isBookmarked = false;
+        saveChatSessionsToStorage();
+        renderBookmarksView();
+        showToast('Bookmark removed.', 'info');
+      }
+    });
+
+    cardActions.appendChild(goBtn);
+    cardActions.appendChild(removeBtn);
+    header.appendChild(meta);
+    header.appendChild(cardActions);
+
+    const body = document.createElement('div');
+    body.className = 'message-bubble';
+    body.style.cssText = 'background:transparent; border:none; padding:0;';
+    body.innerHTML = renderMarkdownWithMath(item.message.content);
+
+    card.appendChild(header);
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
 // ── Global Token Tracker Data State ──
 let tokenTrackerData = {
   total: { prompt: 0, completion: 0, total: 0 },
@@ -3240,6 +3436,7 @@ function showMainAreaView(viewName) {
   const tokenTrackerView = document.getElementById('token-tracker-view');
   const promptsLibraryView = document.getElementById('prompts-library-view');
   const secureSettingsView = document.getElementById('secure-settings-view');
+  const bookmarksView = document.getElementById('bookmarks-view');
   
   if (!activeChatView || !modelGuideView || !apiGuideView || !tokenTrackerView || !promptsLibraryView || !secureSettingsView) return;
   
@@ -3249,6 +3446,7 @@ function showMainAreaView(viewName) {
   tokenTrackerView.style.display = 'none';
   promptsLibraryView.style.display = 'none';
   secureSettingsView.style.display = 'none';
+  if (bookmarksView) bookmarksView.style.display = 'none';
   
   if (viewName === 'chat') {
     activeChatView.style.display = 'flex';
@@ -3275,6 +3473,11 @@ function showMainAreaView(viewName) {
     secureSettingsView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'SECURITY';
     document.getElementById('active-model-label').textContent = 'Secure Settings & API Keys';
+  } else if (viewName === 'bookmarks') {
+    if (bookmarksView) bookmarksView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'BOOKMARKS';
+    document.getElementById('active-model-label').textContent = 'Bookmarked Notes & Formulas';
+    renderBookmarksView();
   }
 
   // Auto-close mobile sidebar drawer when switching rooms/subviews

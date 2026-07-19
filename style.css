@@ -1864,3 +1864,37 @@ details.guide-details .guide-content {
   }
 }
 
+/* ── PWA & Convenience Improvements Styles ── */
+#search-history-input:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 2px var(--accent-glow) !important;
+}
+
+#bookmarks-container {
+  padding-bottom: 24px;
+}
+
+.bookmark-btn.bookmarked {
+  color: var(--accent-primary) !important;
+}
+
+/* Hide Bookmarks View Close Button text on mobile just like other drawer close buttons */
+@media (max-width: 768px) {
+  #close-bookmarks-view-btn span {
+    display: none !important;
+  }
+  #close-bookmarks-view-btn {
+    padding: 0 !important;
+    font-size: 0.85rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 34px !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    flex: none !important;
+  }
+}
+
+

@@ -3360,6 +3360,14 @@ function checkExamPrepAccess() {
   if (prepBtn) {
     prepBtn.style.display = isAllowedUser ? 'flex' : 'none';
   }
+
+  // Restrict Ask AI, PDF, Word, and Copy action buttons ONLY to Admin and uday01 accounts
+  const isAdminOrUday = currentUser === 'admin' || currentUser === 'uday01' || userRole === 'admin';
+  const actionToolbar = document.getElementById('prep-action-toolbar');
+  if (actionToolbar) {
+    actionToolbar.style.display = isAdminOrUday ? 'flex' : 'none';
+  }
+
   return isAllowedUser;
 }
 

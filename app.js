@@ -177,6 +177,7 @@ const PROVIDER_MODELS = {
   ],
   nararouter: [
     { value: "mistral-large", name: "Mistral Large (Free) [WS]", webSearch: true },
+    { value: "mistral-medium-3-5", name: "Mistral Medium 3.5 (Free) [WS]", webSearch: true },
     { value: "tencent-hy3", name: "Tencent Hunyuan 3 (Free)" }
   ]
 };

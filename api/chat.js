@@ -149,11 +149,7 @@ module.exports = async (req, res) => {
                 "Content-Type": "application/json"
             };
 
-            if (provider === "gemini") {
-                fetchEndpoint = `${endpoint}?key=${currentKey}`;
-            } else {
-                headers["Authorization"] = `Bearer ${currentKey}`;
-            }
+            headers["Authorization"] = `Bearer ${currentKey}`;
 
             // OpenRouter optional tracking headers
             if (provider === "openrouter") {

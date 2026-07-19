@@ -182,31 +182,37 @@
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>Prompts Library</span>
         </button>
-        <!-- Collapsible More Features Panel -->
-        <details class="more-features-details" style="width:100%; margin-top:4px; outline:none;">
-          <summary style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; font-size:0.8rem; font-weight:600; color:var(--text-secondary); background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; list-style:none; cursor:pointer; transition: border-color 0.2s; user-select:none;">
-            <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-square-plus" style="color:var(--accent-primary);"></i> More</span>
-            <i class="fa-solid fa-chevron-right chevron-icon" style="font-size:0.7rem; transition:transform 0.2s; color:var(--text-muted);"></i>
-          </summary>
-          <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px; padding:4px 0 0 0;">
-            <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Bookmarked Notes & Formulas">
-              <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
-              <span>Bookmarked Notes</span>
-            </button>
-            <button class="new-chat-btn" id="model-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Model Capabilities Guide">
-              <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
-              <span>Model Guide</span>
-            </button>
-            <button class="new-chat-btn" id="api-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified API Key Generation Guide">
-              <i class="fa-solid fa-key" style="color:var(--accent-primary);"></i>
-              <span>API Guide</span>
-            </button>
-            <button class="new-chat-btn" id="token-tracker-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified Token Tracker">
-              <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
-              <span>Token Tracker</span>
-            </button>
-          </div>
-        </details>
+        <!-- More Button (visible initially) -->
+        <button class="new-chat-btn" id="more-features-expand-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Show More Features">
+          <i class="fa-solid fa-square-plus" style="color:var(--accent-primary);"></i>
+          <span>More</span>
+        </button>
+
+        <!-- Hidden container for extra features -->
+        <div id="more-features-container" style="display:none; flex-direction:column; gap:4px; margin-top:4px; width:100%;">
+          <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Bookmarked Notes & Formulas">
+            <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
+            <span>Bookmarked Notes</span>
+          </button>
+          <button class="new-chat-btn" id="model-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Model Capabilities Guide">
+            <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
+            <span>Model Guide</span>
+          </button>
+          <button class="new-chat-btn" id="api-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified API Key Generation Guide">
+            <i class="fa-solid fa-key" style="color:var(--accent-primary);"></i>
+            <span>API Guide</span>
+          </button>
+          <button class="new-chat-btn" id="token-tracker-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified Token Tracker">
+            <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
+            <span>Token Tracker</span>
+          </button>
+
+          <!-- Less Button (appears below Token Tracker) -->
+          <button class="new-chat-btn" id="more-features-collapse-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Hide Extra Features">
+            <i class="fa-solid fa-square-minus" style="color:var(--accent-primary);"></i>
+            <span>Less</span>
+          </button>
+        </div>
       </div>
 
       <!-- Persistent Sidebar Chat Sessions List -->

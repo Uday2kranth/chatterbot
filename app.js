@@ -465,6 +465,34 @@ function setupSidebarAndPrompts() {
   const cancelPromptsBtn = document.getElementById('cancel-prompts-btn');
   const promptsOverlay = document.getElementById('prompts-modal-overlay');
   
+  // More/Less features sidebar controls
+  const expandBtn = document.getElementById('more-features-expand-btn');
+  const collapseBtn = document.getElementById('more-features-collapse-btn');
+  const moreContainer = document.getElementById('more-features-container');
+
+  if (expandBtn && collapseBtn && moreContainer) {
+    const isExpanded = localStorage.getItem('chatterbot_more_features_expanded') === 'true';
+    if (isExpanded) {
+      moreContainer.style.display = 'flex';
+      expandBtn.style.display = 'none';
+    } else {
+      moreContainer.style.display = 'none';
+      expandBtn.style.display = 'flex';
+    }
+
+    expandBtn.addEventListener('click', () => {
+      moreContainer.style.display = 'flex';
+      expandBtn.style.display = 'none';
+      localStorage.setItem('chatterbot_more_features_expanded', 'true');
+    });
+
+    collapseBtn.addEventListener('click', () => {
+      moreContainer.style.display = 'none';
+      expandBtn.style.display = 'flex';
+      localStorage.setItem('chatterbot_more_features_expanded', 'false');
+    });
+  }
+
   // 0. Search history input listener
   const searchHistoryInput = document.getElementById('search-history-input');
   if (searchHistoryInput) {
@@ -5014,6 +5042,22 @@ function exportChatToSlides() {
             max-height: none !important;
             overflow: visible !important;
             display: block !important;
+          }
+          .slide-container, .slide-header, .slide-body, .slide-body *, .slide-title {
+            background: white !important;
+            background-color: white !important;
+            color: black !important;
+            border-color: #cbd5e1 !important;
+          }
+          /* Custom overrides for pre/code/tables in print layout */
+          pre, code, pre code {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+          }
+          th {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
           }
           .controls, .btn, .no-print { display: none !important; }
         }

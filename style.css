@@ -1895,6 +1895,9 @@ details.guide-details .guide-content {
     border-radius: 50% !important;
     flex: none !important;
   }
+  .msg-usage-badge {
+    display: none !important;
+  }
 }
 
 

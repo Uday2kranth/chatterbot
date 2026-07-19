@@ -1478,12 +1478,29 @@ function renderHistoryList() {
   const searchInput = document.getElementById('search-history-input');
   const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
+  const normalizeForSearch = (str) => {
+    if (!str || typeof str !== 'string') return '';
+    return str.toLowerCase().replace(/grog/g, 'groq').trim();
+  };
+
+  const normalizedQuery = normalizeForSearch(query);
+
   const sessions = Object.entries(chatSessions)
     .filter(([id]) => id !== 'api_keys_storage' && id !== 'token_tracker_storage')
     .filter(([id, data]) => {
       if (!query) return true;
-      const titleMatch = data.title && data.title.toLowerCase().includes(query);
-      const contentMatch = data.messages && data.messages.some(m => m.content && m.content.toLowerCase().includes(query));
+      const normalizedTitle = normalizeForSearch(data.title);
+      const titleMatch = normalizedTitle.includes(normalizedQuery);
+      
+      const contentMatch = data.messages && Array.isArray(data.messages) && data.messages.some(m => {
+        if (!m || !m.content) return false;
+        if (typeof m.content === 'string') {
+          return normalizeForSearch(m.content).includes(normalizedQuery);
+        } else if (Array.isArray(m.content)) {
+          return m.content.some(item => item && item.type === 'text' && typeof item.text === 'string' && normalizeForSearch(item.text).includes(normalizedQuery));
+        }
+        return false;
+      });
       return titleMatch || contentMatch;
     })
     .sort((a, b) => b[1].timestamp - a[1].timestamp);
@@ -1774,12 +1791,14 @@ function setupChatHandlers() {
         submitPrompt();
       }
     } else if (e.key === 'ArrowUp' && chatInput.value === '') {
-      // Edit last user message shortcut
-      const editButtons = Array.from(document.querySelectorAll('.message.user .msg-action-btn')).filter(btn => btn.innerHTML.includes('fa-pen'));
-      if (editButtons.length > 0) {
-        e.preventDefault();
-        const lastEditBtn = editButtons[editButtons.length - 1];
-        lastEditBtn.click();
+      e.preventDefault();
+      const userMessages = document.querySelectorAll('.message.user');
+      if (userMessages.length > 0) {
+        const lastUserMsg = userMessages[userMessages.length - 1];
+        const editBtn = Array.from(lastUserMsg.querySelectorAll('button')).find(btn => btn.innerHTML.includes('fa-pen') || btn.textContent.includes('Edit'));
+        if (editBtn) {
+          editBtn.click();
+        }
       }
     }
   });
@@ -1974,7 +1993,44 @@ function renderMessages(messages) {
       bubble.appendChild(userImg);
     }
 
-    wrapper.appendChild(bubble);
+    // Create a container to hold the bubble and the persistent bookmark icon beside it
+    const bubbleRow = document.createElement('div');
+    bubbleRow.className = 'bubble-row';
+    bubbleRow.style.display = 'flex';
+    bubbleRow.style.alignItems = 'center';
+    bubbleRow.style.gap = '8px';
+    bubbleRow.style.width = '100%';
+    if (msg.role === 'user') {
+      bubbleRow.style.flexDirection = 'row-reverse';
+    } else {
+      bubbleRow.style.flexDirection = 'row';
+    }
+
+    bubbleRow.appendChild(bubble);
+
+    // Persistent bookmark icon beside the bubble
+    const pinIconBtn = document.createElement('button');
+    const isBookmarked = msg.isBookmarked || false;
+    pinIconBtn.className = `bookmark-icon-btn ${isBookmarked ? 'bookmarked' : ''}`;
+    pinIconBtn.style.cssText = 'background:transparent; border:none; cursor:pointer; padding:6px; color:var(--text-muted); transition:color 0.2s; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;';
+    pinIconBtn.title = isBookmarked ? 'Remove Bookmark' : 'Bookmark message';
+    pinIconBtn.innerHTML = `<i class="${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark" style="font-size:1rem; ${isBookmarked ? 'color:var(--accent-primary) !important;' : ''}"></i>`;
+
+    pinIconBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      msg.isBookmarked = !msg.isBookmarked;
+      saveChatSessionsToStorage();
+      renderMessages(messages);
+      showToast(msg.isBookmarked ? 'Saved to Bookmarked Notes!' : 'Removed from bookmarks.', 'success');
+      
+      const bookmarksView = document.getElementById('bookmarks-view');
+      if (bookmarksView && bookmarksView.style.display === 'flex') {
+        renderBookmarksView();
+      }
+    });
+
+    bubbleRow.appendChild(pinIconBtn);
+    wrapper.appendChild(bubbleRow);
 
     // Message copy trigger actions
     const actions = document.createElement('div');
@@ -1990,25 +2046,6 @@ function renderMessages(messages) {
       });
     });
     actions.appendChild(copyBtn);
-
-    // 1b. Pin/Bookmark Button
-    const bookmarkBtn = document.createElement('button');
-    const isBookmarked = msg.isBookmarked || false;
-    bookmarkBtn.className = `msg-action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`;
-    bookmarkBtn.innerHTML = `<i class="${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i> <span>${isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>`;
-    bookmarkBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      msg.isBookmarked = !msg.isBookmarked;
-      saveChatSessionsToStorage();
-      renderMessages(messages);
-      showToast(msg.isBookmarked ? 'Saved to Bookmarked Notes!' : 'Removed from bookmarks.', 'success');
-      
-      const bookmarksView = document.getElementById('bookmarks-view');
-      if (bookmarksView && bookmarksView.style.display === 'flex') {
-        renderBookmarksView();
-      }
-    });
-    actions.appendChild(bookmarkBtn);
 
     // 2. Read Aloud (Speak) Button
     const speakBtn = document.createElement('button');
@@ -2544,19 +2581,27 @@ async function submitPrompt() {
       statusLabel.textContent = 'Ready';
     } else {
       // Fetch error feedback
-      const errMsg = data.error || 'Server error occurred during request.';
-      showToast(errMsg, 'error');
-      activeSession.messages.push({ role: 'assistant', content: `❌ **Failed to fetch model pipeline response.**\n\n*Error Detail:* ${errMsg}` });
-      saveChatSessionsToStorage();
-      renderMessages(activeSession.messages);
-      statusLabel.textContent = 'Error';
+      const errMsg = data ? data.error : 'Server error occurred during request.';
+      if (errMsg === 'Generation stopped by user.') {
+        statusLabel.textContent = 'Ready';
+      } else {
+        showToast(errMsg, 'error');
+        activeSession.messages.push({ role: 'assistant', content: `❌ **Failed to fetch model pipeline response.**\n\n*Error Detail:* ${errMsg}` });
+        saveChatSessionsToStorage();
+        renderMessages(activeSession.messages);
+        statusLabel.textContent = 'Error';
+      }
     }
   } catch (err) {
-    showToast('Failed to connect to backend serverless function.', 'error');
-    activeSession.messages.push({ role: 'assistant', content: `❌ **Network Connection Error.**\n\n*Error Detail:* ${err.message}` });
-    saveChatSessionsToStorage();
-    renderMessages(activeSession.messages);
-    statusLabel.textContent = 'Disconnected';
+    if (err.name === 'AbortError' || err.message === 'Generation stopped by user.') {
+      statusLabel.textContent = 'Ready';
+    } else {
+      showToast('Failed to connect to backend serverless function.', 'error');
+      activeSession.messages.push({ role: 'assistant', content: `❌ **Network Connection Error.**\n\n*Error Detail:* ${err.message}` });
+      saveChatSessionsToStorage();
+      renderMessages(activeSession.messages);
+      statusLabel.textContent = 'Disconnected';
+    }
   } finally {
     typingIndicator.style.display = 'none';
     activeAbortController = null;

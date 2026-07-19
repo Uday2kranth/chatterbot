@@ -230,7 +230,15 @@ let chatSettings = {
   exportMdEnabled: true,
   exportWordEnabled: true,
   exportPdfEnabled: true,
-  exportSlidesEnabled: true
+  exportSlidesEnabled: true,
+  bubbleCopyEnabled: true,
+  bubbleSpeakEnabled: true,
+  bubbleImageEnabled: true,
+  bubbleEmailEnabled: true,
+  bubbleSlidesEnabled: true,
+  bubblePdfEnabled: true,
+  bubbleBranchEnabled: true,
+  bubbleTokensEnabled: true
 };
 let apiSettingsUnlocked = false;
 
@@ -263,6 +271,11 @@ function applyChatSettings() {
   const summarizeChatBtn = document.getElementById('summarize-chat-btn');
   if (summarizeChatBtn) {
     summarizeChatBtn.style.display = chatSettings.summarizeEnabled ? 'flex' : 'none';
+  }
+
+  // Refresh message bubble actions dynamically
+  if (activeChatId && chatSessions[activeChatId]) {
+    renderMessages(chatSessions[activeChatId].messages);
   }
 }
 
@@ -1186,6 +1199,16 @@ function setupSettingsDrawer() {
       document.getElementById('setting-export-pdf').checked = chatSettings.exportPdfEnabled;
       document.getElementById('setting-export-slides').checked = chatSettings.exportSlidesEnabled;
       
+      // Load bubble actions checkbox states
+      document.getElementById('setting-bubble-copy').checked = chatSettings.bubbleCopyEnabled !== false;
+      document.getElementById('setting-bubble-speak').checked = chatSettings.bubbleSpeakEnabled !== false;
+      document.getElementById('setting-bubble-image').checked = chatSettings.bubbleImageEnabled !== false;
+      document.getElementById('setting-bubble-email').checked = chatSettings.bubbleEmailEnabled !== false;
+      document.getElementById('setting-bubble-slides').checked = chatSettings.bubbleSlidesEnabled !== false;
+      document.getElementById('setting-bubble-pdf').checked = chatSettings.bubblePdfEnabled !== false;
+      document.getElementById('setting-bubble-branch').checked = chatSettings.bubbleBranchEnabled !== false;
+      document.getElementById('setting-bubble-tokens').checked = chatSettings.bubbleTokensEnabled !== false;
+      
       const settingsEmailInput = document.getElementById('settings-email-input');
       if (settingsEmailInput) {
         settingsEmailInput.value = localStorage.getItem('chatterbot_user_emails') || localStorage.getItem('chatterbot_user_email') || '';
@@ -1242,6 +1265,16 @@ function setupSettingsDrawer() {
     chatSettings.exportPdfEnabled = document.getElementById('setting-export-pdf').checked;
     chatSettings.exportSlidesEnabled = document.getElementById('setting-export-slides').checked;
 
+    // Sync bubble actions
+    chatSettings.bubbleCopyEnabled = document.getElementById('setting-bubble-copy').checked;
+    chatSettings.bubbleSpeakEnabled = document.getElementById('setting-bubble-speak').checked;
+    chatSettings.bubbleImageEnabled = document.getElementById('setting-bubble-image').checked;
+    chatSettings.bubbleEmailEnabled = document.getElementById('setting-bubble-email').checked;
+    chatSettings.bubbleSlidesEnabled = document.getElementById('setting-bubble-slides').checked;
+    chatSettings.bubblePdfEnabled = document.getElementById('setting-bubble-pdf').checked;
+    chatSettings.bubbleBranchEnabled = document.getElementById('setting-bubble-branch').checked;
+    chatSettings.bubbleTokensEnabled = document.getElementById('setting-bubble-tokens').checked;
+
     localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
 
     // Save/Sync to backend
@@ -1260,6 +1293,15 @@ function setupSettingsDrawer() {
   document.getElementById('setting-export-word').addEventListener('change', syncChatSettings);
   document.getElementById('setting-export-pdf').addEventListener('change', syncChatSettings);
   document.getElementById('setting-export-slides').addEventListener('change', syncChatSettings);
+
+  document.getElementById('setting-bubble-copy').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-speak').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-image').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-email').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-slides').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-pdf').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-branch').addEventListener('change', syncChatSettings);
+  document.getElementById('setting-bubble-tokens').addEventListener('change', syncChatSettings);
 
   // Export Chat Markdown & Summarization bindings
   const exportChatBtn = document.getElementById('export-chat-md-btn');
@@ -2181,7 +2223,9 @@ function renderMessages(messages) {
         showToast('Message copied to clipboard!', 'success');
       });
     });
-    actions.appendChild(copyBtn);
+    if (chatSettings.bubbleCopyEnabled !== false) {
+      actions.appendChild(copyBtn);
+    }
 
     // 2. Read Aloud (Speak) Button
     const speakBtn = document.createElement('button');
@@ -2203,9 +2247,11 @@ function renderMessages(messages) {
         showToast('Speaking message...', 'info');
       }
     });
-    actions.appendChild(speakBtn);
+    if (chatSettings.bubbleSpeakEnabled !== false) {
+      actions.appendChild(speakBtn);
+    }
 
-    // 2b. Export to Image Button (Assistant messages only, to capture user query + AI response pair)
+    // 2b. Export to Image Button (Assistant messages only)
     if (msg.role === 'assistant') {
       const exportImgBtn = document.createElement('button');
       exportImgBtn.className = 'msg-action-btn';
@@ -2214,7 +2260,9 @@ function renderMessages(messages) {
       exportImgBtn.addEventListener('click', () => {
         exportMessagePairToImage(idx);
       });
-      actions.appendChild(exportImgBtn);
+      if (chatSettings.bubbleImageEnabled !== false) {
+        actions.appendChild(exportImgBtn);
+      }
 
       const emailBtn = document.createElement('button');
       emailBtn.className = 'msg-action-btn';
@@ -2223,11 +2271,37 @@ function renderMessages(messages) {
       emailBtn.addEventListener('click', () => {
         emailMessagePairAsImage(idx);
       });
-      actions.appendChild(emailBtn);
+      if (chatSettings.bubbleEmailEnabled !== false) {
+        actions.appendChild(emailBtn);
+      }
+
+      // Export message to Slides
+      const slideBtn = document.createElement('button');
+      slideBtn.className = 'msg-action-btn';
+      slideBtn.innerHTML = `<i class="fa-solid fa-person-chalkboard"></i> <span>Slides</span>`;
+      slideBtn.title = 'Export message to Slides presentation';
+      slideBtn.addEventListener('click', () => {
+        exportMessageToSlides(msg.content, idx);
+      });
+      if (chatSettings.bubbleSlidesEnabled !== false) {
+        actions.appendChild(slideBtn);
+      }
+
+      // Export message to PDF
+      const pdfBtn = document.createElement('button');
+      pdfBtn.className = 'msg-action-btn';
+      pdfBtn.innerHTML = `<i class="fa-regular fa-file-pdf"></i> <span>PDF</span>`;
+      pdfBtn.title = 'Export message to PDF document';
+      pdfBtn.addEventListener('click', () => {
+        exportMessageToPDF(msg.content, idx);
+      });
+      if (chatSettings.bubblePdfEnabled !== false) {
+        actions.appendChild(pdfBtn);
+      }
     }
 
     // 3. Branch Session Button (Assistant messages only)
-    if (msg.role === 'assistant') {
+    if (msg.role === 'assistant' && chatSettings.bubbleBranchEnabled !== false) {
       const branchBtn = document.createElement('button');
       branchBtn.className = 'msg-action-btn branch-btn';
       branchBtn.innerHTML = `<i class="fa-solid fa-code-branch"></i> <span>Branch</span>`;
@@ -4894,6 +4968,10 @@ function exportChatToSlides() {
     }
   });
 
+  launchSlideViewer(slides, activeSession.title || 'Slide Presentation');
+}
+
+function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     showToast('Pop-up blocked. Please allow popups to launch slides.', 'error');
@@ -4905,7 +4983,7 @@ function exportChatToSlides() {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${activeSession.title || 'Slide Presentation'}</title>
+      <title>${docTitle}</title>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
       <style>
@@ -4939,18 +5017,15 @@ function exportChatToSlides() {
           max-height: 550px;
           display: flex;
           flex-direction: column;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-          position: relative;
-          padding: 40px;
-          transition: transform 0.3s ease, opacity 0.3s ease;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+          transition: opacity 0.15s, transform 0.15s;
         }
         .slide-header {
+          padding: 24px 32px 16px 32px;
+          border-bottom: 1px solid var(--border);
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border-bottom: 1px solid var(--border);
-          padding-bottom: 20px;
-          margin-bottom: 20px;
         }
         .slide-title {
           font-size: 1.6rem;
@@ -4959,30 +5034,24 @@ function exportChatToSlides() {
         }
         .slide-body {
           flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          font-size: 1.15rem;
-          line-height: 1.6;
-          color: #cbd5e1;
+          padding: 32px;
+          overflow-y: auto;
         }
         .controls {
+          margin-top: 24px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          width: 85%;
-          max-width: 900px;
-          margin-top: 20px;
+          gap: 20px;
         }
         .btn {
-          background-color: var(--bg-card);
-          border: 1px solid var(--border);
+          background-color: #1e293b;
           color: var(--text-primary);
-          padding: 10px 20px;
+          border: 1px solid var(--border);
+          padding: 8px 16px;
           border-radius: 8px;
           cursor: pointer;
-          font-weight: 600;
           font-size: 0.9rem;
+          font-weight: 600;
           display: flex;
           align-items: center;
           gap: 8px;
@@ -5070,6 +5139,7 @@ function exportChatToSlides() {
           <div class="no-print" style="display:flex; gap:8px;">
             <button class="btn" onclick="toggleFullscreen()" title="Fullscreen Mode"><i class="fa-solid fa-expand"></i></button>
             <button class="btn" onclick="window.print()" title="Print Slides / Save PDF"><i class="fa-solid fa-file-pdf"></i></button>
+            <button class="btn" onclick="exportCurrentSlideToWord()" title="Export Slide to Word / Save Document"><i class="fa-solid fa-file-word"></i></button>
           </div>
         </div>
         <div class="slide-body" id="slide-body">
@@ -5127,7 +5197,6 @@ function exportChatToSlides() {
             document.exitFullscreen();
           }
         }
-
         window.addEventListener('keydown', (e) => {
           if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
             nextSlide();
@@ -5135,6 +5204,47 @@ function exportChatToSlides() {
             prevSlide();
           }
         });
+
+        function exportCurrentSlideToWord() {
+          const slide = slides[currentIdx];
+          let cleanContent = slide.content ? slide.content.replace(/\\n/g, '<br/>') : '';
+          // Ensure high-contrast dark text inside Microsoft Word by cleaning up light color tags
+          cleanContent = cleanContent.replace(/color\s*:\s*#[a-f0-9]{3,6}/gi, 'color:#1f2937')
+                                     .replace(/background\s*:\s*#[a-f0-9]{3,6}/gi, '')
+                                     .replace(/background-color\s*:\s*#[a-f0-9]{3,6}/gi, '');
+          let html = \`
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+              <title>\${slide.title}</title>
+              <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.25; color: #1f2937; padding: 30px; background-color: #ffffff; }
+                h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; margin-top: 12px; }
+                h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 12px; margin-bottom: 6px; }
+                p, ul, ol, li { margin-top: 0px; margin-bottom: 6px; line-height: 1.25; }
+                .content-body { font-size: 11pt; color: #1f2937; }
+                .footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+              </style>
+            </head>
+            <body>
+              <h1>\${slide.title}</h1>
+              <div class="content-body">\${cleanContent}</div>
+              <div class="footer-note">
+                Exported from ChatterBot Slide Presentation.
+              </div>
+            </body>
+            </html>
+          \`;
+          
+          const blob = new Blob(['\\ufeff' + html], { type: 'application/msword' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = \`\${slide.title.replace(/[^a-z0-9_-]/gi, '_')}.doc\`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
 
         updateSlide();
       </script>
@@ -5145,4 +5255,123 @@ function exportChatToSlides() {
   printWindow.document.write(slidesHTML);
   printWindow.document.close();
   showToast('Launching slide presentation deck...', 'success');
+}
+
+function exportMessageToSlides(rawContent, msgIdx) {
+  const slides = [];
+  const sections = rawContent.split(/\n(?=### |## |# )/g);
+  
+  if (sections.length > 1) {
+    sections.forEach((section, sIdx) => {
+      const lines = section.trim().split('\n');
+      const headerText = lines[0].replace(/^#+\s+/, '');
+      const bodyText = lines.slice(1).join('\n');
+      const formattedBody = renderMarkdownWithMath(bodyText);
+      
+      slides.push({
+        title: headerText || `Takeaway ${sIdx + 1}`,
+        content: `<div style="font-size:1.1rem; line-height:1.5; color:#cbd5e1; overflow-y:auto; max-height:420px; padding-right:8px;">${formattedBody}</div>`
+      });
+    });
+  } else {
+    const formattedContent = renderMarkdownWithMath(rawContent);
+    slides.push({
+      title: `Takeaway ${msgIdx + 1}`,
+      content: `<div style="font-size:1.1rem; line-height:1.5; color:#cbd5e1; overflow-y:auto; max-height:420px; padding-right:8px;">${formattedContent}</div>`
+    });
+  }
+
+  launchSlideViewer(slides, `Message Slides`);
+}
+
+function exportMessageToPDF(rawContent, msgIdx) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Pop-up blocked. Please allow popups to export PDFs.', 'error');
+    return;
+  }
+
+  const formattedContent = renderMarkdownWithMath(rawContent);
+  let htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Message PDF Export</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
+        .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
+        .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
+        .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+        .content { font-size: 1rem; word-break: break-word; }
+        pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.9rem; }
+        code { font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+        pre code { background: transparent; padding: 0; }
+        blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.9rem; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+        th { background: #f8fafc; color: #0f172a; }
+        @media print {
+          body { padding: 0; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1 class="title">Message Export</h1>
+        <div class="meta">Exported on ${new Date().toLocaleString()}</div>
+      </div>
+      <div class="content">${formattedContent}</div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+            window.close();
+          }, 500);
+        };
+      </script>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+  showToast('Opening PDF compilation window...', 'success');
+}
+
+function exportMessageToWord(rawContent, msgIdx) {
+  const cleanContent = rawContent ? rawContent.replace(/\n/g, '<br/>') : '';
+  let html = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <title>Message Export</title>
+      <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1f2937; padding: 30px; background-color: #ffffff; }
+        h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; }
+        .content-body { font-size: 11pt; color: #1f2937; }
+        .footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }
+      </style>
+    </head>
+    <body>
+      <h1>Message Export</h1>
+      <div class="content-body">${cleanContent}</div>
+      <div class="footer-note">
+        Exported from ChatterBot Multi-Model AI Dashboard.
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Message_${msgIdx + 1}_export.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showToast('Message exported successfully as Word Document!', 'success');
 }

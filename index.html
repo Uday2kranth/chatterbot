@@ -1533,6 +1533,40 @@
                 </div>
                 <input type="text" id="settings-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none; margin-top:4px;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
               </div>
+
+              <!-- Message Bubble Actions Checkboxes -->
+              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:12px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Message Bubble Actions</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Select which actions and details are visible below/beside message bubbles.</div>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:4px;">
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-copy" checked style="accent-color:var(--accent-primary);" /> Copy
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-speak" checked style="accent-color:var(--accent-primary);" /> Speak
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-image" checked style="accent-color:var(--accent-primary);" /> Image
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-email" checked style="accent-color:var(--accent-primary);" /> Email
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-slides" checked style="accent-color:var(--accent-primary);" /> Slides
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-pdf" checked style="accent-color:var(--accent-primary);" /> PDF
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-branch" checked style="accent-color:var(--accent-primary);" /> Branch
+                  </label>
+                  <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
+                    <input type="checkbox" id="setting-bubble-tokens" checked style="accent-color:var(--accent-primary);" /> Token Stats
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 

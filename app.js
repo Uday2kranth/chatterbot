@@ -176,14 +176,18 @@ const PROVIDER_MODELS = {
     { value: "gemma-4-26b-a4b-it", name: "Gemma 4 26B MoE (AI Studio)", multimodal: true }
   ],
   nararouter: [
-    { value: "deepseek-chat", name: "DeepSeek Chat (Stable)" },
-    { value: "gpt-4o", name: "GPT-4o (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
-    { value: "gpt-4o-mini", name: "GPT-4o Mini (Stable) [WS]", webSearch: true },
-    { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro (Stable) [WS][IMG]", webSearch: true, multimodal: true },
-    { value: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet (Stable) [WS][IMG]", webSearch: true, multimodal: true },
-    { value: "glm-5.2", name: "GLM 5.2 [TEMP - Will error if removed]" },
-    { value: "mistral-large", name: "Mistral Large [TEMP - Will error if removed]" },
-    { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash [TEMP - Will error if removed] [WS][IMG]", webSearch: true, multimodal: true }
+    { value: "mimo-v2.5", name: "MiMo 2.5 (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
+    { value: "mimo-v2.5-pro", name: "MiMo 2.5 Pro (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
+    { value: "deepseek-v4-pro", name: "DeepSeek V4 Pro (Stable) [WS]", webSearch: true },
+    { value: "claude-sonnet-5", name: "Claude Sonnet 5 (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
+    { value: "gpt-5.4", name: "GPT 5.4 (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
+    { value: "gpt-5.6-luna", name: "GPT 5.6 Luna [TEMP] [WS][IMG]", webSearch: true, multimodal: true },
+    { value: "grok-4.5", name: "Grok 4.5 [TEMP] [WS][IMG]", webSearch: true, multimodal: true },
+    { value: "glm-5.2", name: "GLM 5.2 [TEMP]" },
+    { value: "agnes-2.5-flash", name: "Agnes 2.5 Flash [TEMP] [WS][IMG]", webSearch: true, multimodal: true },
+    { value: "qwen3.7-max", name: "Qwen 3.7 Max [TEMP] [WS]", webSearch: true },
+    { value: "mistral-large", name: "Mistral Large [TEMP] [WS]", webSearch: true },
+    { value: "tencent-hy3", name: "Tencent Hunyuan 3 [TEMP]" }
   ]
 };
 

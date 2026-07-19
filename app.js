@@ -15,6 +15,19 @@ const AUTHORIZED_USERS = {
   "uday03": { password: "uday@03", role: "guest" }
 };
 
+function getGeminiKeysString() {
+  const geminiKeys = [];
+  for (let i = 1; i <= 5; i++) {
+    const val = localStorage.getItem(`chatterbot_key_gemini_${i}`) || '';
+    if (val.trim()) geminiKeys.push(val.trim());
+  }
+  if (geminiKeys.length === 0) {
+    const legacy = localStorage.getItem('chatterbot_key_gemini') || '';
+    if (legacy.trim()) geminiKeys.push(legacy.trim());
+  }
+  return geminiKeys.join(',');
+}
+
 function checkSession() {
   const sessionData = localStorage.getItem('chatterbot_session');
   if (!sessionData) {
@@ -2199,18 +2212,7 @@ async function submitPrompt() {
   }
   const groqKey = groqKeys.join(',');
 
-  const getGeminiKeysString = () => {
-    const geminiKeys = [];
-    for (let i = 1; i <= 5; i++) {
-      const val = localStorage.getItem(`chatterbot_key_gemini_${i}`) || '';
-      if (val.trim()) geminiKeys.push(val.trim());
-    }
-    if (geminiKeys.length === 0) {
-      const legacy = localStorage.getItem('chatterbot_key_gemini') || '';
-      if (legacy.trim()) geminiKeys.push(legacy.trim());
-    }
-    return geminiKeys.join(',');
-  };
+
 
   const sambanovaKey = localStorage.getItem('chatterbot_key_sambanova') || '';
   const geminiKey = getGeminiKeysString();

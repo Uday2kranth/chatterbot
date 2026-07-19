@@ -5327,7 +5327,6 @@ function exportMessageToPDF(rawContent, msgIdx) {
         window.onload = function() {
           setTimeout(function() {
             window.print();
-            window.close();
           }, 500);
         };
       </script>

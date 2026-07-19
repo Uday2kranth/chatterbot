@@ -5206,38 +5206,28 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
         });
 
         function exportCurrentSlideToWord() {
-          let contentHtml = '';
-          slides.forEach((s, idx) => {
-            let cleanContent = s.content ? s.content.replace(/\\n/g, '<br/>') : '';
-            // Ensure high-contrast dark text inside Microsoft Word by cleaning up light color tags
-            cleanContent = cleanContent.replace(/color\s*:\s*#[a-f0-9]{3,6}/gi, 'color:#1f2937')
-                                       .replace(/background\s*:\s*#[a-f0-9]{3,6}/gi, '')
-                                       .replace(/background-color\s*:\s*#[a-f0-9]{3,6}/gi, '');
-            contentHtml += \`
-              <div class="slide-section" style="\${idx > 0 ? 'page-break-before: always;' : ''} margin-bottom: 20px;">
-                <h1 style="color: #8b5cf6; font-size: 20pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; margin-top: 6px;">\${s.title}</h1>
-                <div class="content-body" style="font-size: 11pt; color: #1f2937;">\${cleanContent}</div>
-              </div>
-            \`;
-          });
-
+          const slide = slides[currentIdx];
+          let cleanContent = slide.content ? slide.content.replace(/\\n/g, '<br/>') : '';
+          // Ensure high-contrast dark text inside Microsoft Word by cleaning up light color tags
+          cleanContent = cleanContent.replace(/color\s*:\s*#[a-f0-9]{3,6}/gi, 'color:#1f2937')
+                                     .replace(/background\s*:\s*#[a-f0-9]{3,6}/gi, '')
+                                     .replace(/background-color\s*:\s*#[a-f0-9]{3,6}/gi, '');
           let html = \`
             <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head>
-              <title>Slides Deck Export</title>
+              <title>\${slide.title}</title>
               <style>
-                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.05; color: #1f2937; padding: 30px; background-color: #ffffff; }
-                h1 { color: #8b5cf6; font-size: 20pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; margin-top: 6px; }
-                h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 8px; margin-bottom: 4px; line-height: 1.1; }
-                p, div, span { margin-top: 0in !important; margin-bottom: 2pt !important; line-height: 1.05 !important; mso-line-height-rule: exactly; }
-                ul, ol { margin-top: 0in !important; margin-bottom: 0in !important; margin-left: 0.25in !important; padding-top: 0in !important; padding-bottom: 0in !important; }
-                li { margin-top: 0in !important; margin-bottom: 2pt !important; line-height: 1.05 !important; mso-line-height-rule: exactly; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.25; color: #1f2937; padding: 30px; background-color: #ffffff; }
+                h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; margin-top: 12px; }
+                h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 12px; margin-bottom: 6px; }
+                p, ul, ol, li { margin-top: 0px; margin-bottom: 6px; line-height: 1.25; }
                 .content-body { font-size: 11pt; color: #1f2937; }
                 .footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }
               </style>
             </head>
             <body>
-              \${contentHtml}
+              <h1>\${slide.title}</h1>
+              <div class="content-body">\${cleanContent}</div>
               <div class="footer-note">
                 Exported from ChatterBot Slide Presentation.
               </div>
@@ -5249,8 +5239,7 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          const docName = (document.getElementById('slide-title') ? document.getElementById('slide-title').textContent : 'slides') + '_presentation';
-          a.download = \`\${docName.replace(/[^a-z0-9_-]/gi, '_')}.doc\`;
+          a.download = \`\${slide.title.replace(/[^a-z0-9_-]/gi, '_')}.doc\`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);

@@ -960,6 +960,7 @@ html, body {
 /* Copy to Clipboard overlay trigger button */
 .message-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
   opacity: 0;
@@ -1903,6 +1904,7 @@ details.guide-details .guide-content {
   }
   .message-actions {
     opacity: 1 !important;
+    flex-wrap: wrap !important;
   }
   .message-actions .msg-action-btn:not(.branch-btn):not(.edit-action-btn) {
     padding: 6px 10px !important;

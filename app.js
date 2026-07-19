@@ -997,28 +997,19 @@ function setupSettingsDrawer() {
   }
 
   // Profile Click Event to request password validation
-  const userProfile = document.querySelector('.user-profile');
-  const userInfo = document.querySelector('.user-info');
   const passwordOverlay = document.getElementById('password-auth-overlay');
   const confirmUnlockBtn = document.getElementById('confirm-unlock-btn');
   const cancelUnlockBtn = document.getElementById('cancel-unlock-btn');
   const unlockPasswordInput = document.getElementById('settings-unlock-password');
   
-  const openPasswordPrompt = (e) => {
-    // Don't open if clicked on logout-btn
-    if (e.target.closest('#logout-btn')) return;
-    
-    passwordOverlay.style.display = 'flex';
-    passwordOverlay.classList.add('open');
-    unlockPasswordInput.value = '';
-    unlockPasswordInput.focus();
-  };
-
-  if (userProfile && passwordOverlay) {
-    userProfile.addEventListener('click', openPasswordPrompt);
-  }
-  if (userInfo && passwordOverlay) {
-    userInfo.addEventListener('click', openPasswordPrompt);
+  const openSettingsBtn = document.getElementById('open-settings-btn');
+  if (openSettingsBtn && passwordOverlay) {
+    openSettingsBtn.addEventListener('click', () => {
+      passwordOverlay.style.display = 'flex';
+      passwordOverlay.classList.add('open');
+      unlockPasswordInput.value = '';
+      unlockPasswordInput.focus();
+    });
   }
   
   if (cancelUnlockBtn && passwordOverlay) {

@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-user-openrouter-key, x-user-nvidia-key, x-user-omnirouter-key, x-user-mistral-key, x-user-cerebras-key, x-user-groq-key, x-user-sambanova-key, x-user-gemini-key');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-user-openrouter-key, x-user-nvidia-key, x-user-omnirouter-key, x-user-mistral-key, x-user-cerebras-key, x-user-groq-key, x-user-sambanova-key, x-user-gemini-key, x-user-nararouter-key');
 
     // Handle OPTIONS preflight request
     if (req.method === 'OPTIONS') {
@@ -84,6 +84,8 @@ module.exports = async (req, res) => {
         apiKey = req.headers['x-user-sambanova-key'] || (isAdmin ? (process.env.SAMBANOVA_API_KEY || DEFAULT_SAMBANOVA_KEY) : '');
     } else if (provider === "gemini") {
         apiKey = req.headers['x-user-gemini-key'] || (isAdmin ? (process.env.GEMINI_API_KEY || '') : '');
+    } else if (provider === "nararouter") {
+        apiKey = req.headers['x-user-nararouter-key'] || (isAdmin ? (process.env.NARAROUTER_API_KEY || '') : '');
     }
 
     if (!apiKey) {
@@ -110,6 +112,8 @@ module.exports = async (req, res) => {
         endpoint = 'https://api.sambanova.ai/v1/chat/completions';
     } else if (provider === "gemini") {
         endpoint = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+    } else if (provider === "nararouter") {
+        endpoint = 'https://router.bynara.id/v1/chat/completions';
     } else {
         return res.status(400).json({ error: `Unknown provider specified: ${provider}` });
     }
@@ -173,7 +177,7 @@ module.exports = async (req, res) => {
                 }
 
                 const errData = await response.json().catch(() => ({}));
-                lastErrorText = errData.error?.message || errData.error || response.statusText || 'Unknown Provider Error';
+                lastErrorText = errData.error?.message || errData.message || errData.error || response.statusText || 'Unknown Provider Error';
                 lastStatus = response.status;
 
                 console.warn(`Key rotation: Key index ${i} failed for provider "${provider}" with status ${response.status}: ${lastErrorText}`);

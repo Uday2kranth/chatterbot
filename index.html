@@ -438,6 +438,51 @@
           </button>
         </div>
         <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+          <!-- Combined Free Capacity Dashboard Card -->
+          <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.05) 100%); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+            <h3 style="margin: 0; font-size: 0.98rem; font-weight: 700; color: var(--accent-secondary); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-gauge-high"></i>
+              <span>🚀 Combined Free Developer Capacity Dashboard</span>
+            </h3>
+            <p style="margin: 0; font-size: 0.8rem; line-height: 1.45; color: var(--text-secondary);">
+              If you configure all supported online developer provider keys in your settings (excluding local server APIs), your chatbot is powered by a massive pool of free daily compute resource limits:
+            </p>
+            <div style="display: flex; align-items: baseline; gap: 6px; margin: 4px 0;">
+              <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); text-shadow: 0 0 20px rgba(139, 92, 246, 0.4);">~149,300,000+</span>
+              <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Tokens / Day</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 6px; font-size: 0.72rem; color: var(--text-secondary);">
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">Google AI Studio:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~50,000,000+ TPD</div>
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">Mistral AI Console:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~33,300,000+ TPD</div>
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">Groq Console:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~20,000,000+ TPD</div>
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">SambaNova Cloud:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~20,000,000+ TPD</div>
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">OpenRouter API:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~10,000,000+ TPD</div>
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">NVIDIA NIM Gateway:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~10,000,000+ TPD</div>
+              </div>
+              <div style="background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <div style="color: var(--text-muted);">NaraRouter Gateway:</div>
+                <div style="font-weight: 700; color: var(--accent-secondary);">~6,000,000+ TPD</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Model Picker Suffix Explanation Card (IMPORTANT) -->
           <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
             <h3 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
@@ -577,13 +622,14 @@
               </summary>
               <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
                 <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
-                  <strong>Rate Limits:</strong> Multi-key rotated. Sustained rates are dynamically distributed.
+                  <strong>Rate Limits:</strong> Multi-key rotated. Google AI Studio quotas are <strong>model-specific and applied at the project level</strong> (not pooled). Running out of requests on one model does not affect the others.
                 </p>
                 <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
                   <thead>
                     <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
                       <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
                       <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">TPD (Tokens/Day)</th>
                       <th style="padding:6px 8px; color:var(--text-primary);">Limits (RPM / RPD)</th>
                       <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
                     </tr>
@@ -592,30 +638,35 @@
                     <tr style="border-bottom:1px solid var(--border-color);">
                       <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-3.5-flash</td>
                       <td style="padding:6px 8px;">1,048,576</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">~375,000,000</td>
                       <td style="padding:6px 8px;">10 RPM / 1,500 RPD</td>
                       <td style="padding:6px 8px; color:var(--text-secondary);">Flagship flash model. Ultra-low latency, code gen, translation.</td>
                     </tr>
                     <tr style="border-bottom:1px solid var(--border-color);">
                       <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-3.1-flash-lite</td>
                       <td style="padding:6px 8px;">1,048,576</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">~375,000,000</td>
                       <td style="padding:6px 8px;">15 RPM / 1,500 RPD</td>
                       <td style="padding:6px 8px; color:var(--text-secondary);">Default lightweight routing model. Highly optimized.</td>
                     </tr>
                     <tr style="border-bottom:1px solid var(--border-color);">
                       <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-3.1-pro-preview</td>
                       <td style="padding:6px 8px;">1,048,576</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">~1,600,000</td>
                       <td style="padding:6px 8px;">2 RPM / 50 RPD</td>
                       <td style="padding:6px 8px; color:var(--text-secondary);">Next-generation stable preview model. Deep complex logic.</td>
                     </tr>
                     <tr style="border-bottom:1px solid var(--border-color);">
                       <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemma-4-31b-it</td>
                       <td style="padding:6px 8px;">262,144</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">~375,000,000</td>
                       <td style="padding:6px 8px;">15 RPM / 1,500 RPD</td>
                       <td style="padding:6px 8px; color:var(--text-secondary);">Gemma 4 Dense model. Outstanding instruction following + visual processing.</td>
                     </tr>
                     <tr style="border-bottom:1px solid var(--border-color);">
                       <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemma-4-26b-a4b-it</td>
                       <td style="padding:6px 8px;">262,144</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">~375,000,000</td>
                       <td style="padding:6px 8px;">15 RPM / 1,500 RPD</td>
                       <td style="padding:6px 8px; color:var(--text-secondary);">Gemma 4 Mixture-of-Experts (MoE) variant optimized for rapid code logic.</td>
                     </tr>
@@ -758,41 +809,15 @@
             <details class="guide-details">
               <summary>
                 <span style="display:flex; align-items:center; gap:8px;">
-                  <i class="fa-solid fa-server" style="color:var(--accent-primary);"></i>
-                  <span>5. Cerebras (Ultra-Fast Inference)</span>
+                  <i class="fa-solid fa-server" style="color:var(--text-muted);"></i>
+                  <span style="color:var(--text-muted); text-decoration:line-through;">5. Cerebras (Ultra-Fast Inference) [DEACTIVATED]</span>
                 </span>
                 <i class="fa-solid fa-chevron-down caret-icon"></i>
               </summary>
               <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
-                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
-                  <strong>Limits:</strong> 1,000,000 tokens daily cap. Enforces a **hard 8,192 context window cap** per request.
+                <p style="margin:0; font-size:0.8rem; color:var(--error-color); line-height:1.4; font-weight:600;">
+                  ⚠️ DEACTIVATED / CARD REQUIRED: Cerebras has deprecated its credit-card-free tier. New developer accounts now mandate adding a verified payment method to activate key credentials, removing it from our zero-credit free catalog.
                 </p>
-                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
-                  <thead>
-                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
-                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
-                      <th style="padding:6px 8px; color:var(--text-primary);">Context Cap</th>
-                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr style="border-bottom:1px solid var(--border-color);">
-                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">llama-3.3-70b</td>
-                      <td style="padding:6px 8px;">8,192 (Hard)</td>
-                      <td style="padding:6px 8px; color:var(--text-secondary);">Ultra-fast high-accuracy 70B parameter flagship reasoning engine.</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid var(--border-color);">
-                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">llama3.1-8b</td>
-                      <td style="padding:6px 8px;">8,192 (Hard)</td>
-                      <td style="padding:6px 8px; color:var(--text-secondary);">Instant low-latency responses for quick questions and interactions.</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid var(--border-color);">
-                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">llama3.1-70b</td>
-                      <td style="padding:6px 8px;">8,192 (Hard)</td>
-                      <td style="padding:6px 8px; color:var(--text-secondary);">High-throughput 70B model for general complex text logic.</td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
             </details>
 
@@ -847,6 +872,85 @@
                       <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">MiniMax-M2.7</td>
                       <td style="padding:6px 8px;">60 RPM / 12K RPD</td>
                       <td style="padding:6px 8px; color:var(--text-secondary);">Developer Tier. Curated high throughput reasoning engine.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <!-- NaraRouter Detail Accordion -->
+            <details class="guide-details" open>
+              <summary>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid fa-route" style="color:var(--accent-primary);"></i>
+                  <span>5. NaraRouter (Unified AI Gateway)</span>
+                </span>
+                <i class="fa-solid fa-chevron-down caret-icon"></i>
+              </summary>
+              <div class="guide-content" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="margin:0; font-size:0.8rem; color:var(--text-secondary); line-height:1.4;">
+                  <strong>Free Tier Quotas:</strong> 5M to 7M tokens daily allowance (resets every 24 hours). 10 Requests Per Minute (RPM) hard rate limit. No credit card required.
+                </p>
+                <p style="margin:0; font-size:0.75rem; color:var(--error-color); line-height:1.4; font-weight:600;">
+                  ⚠️ Warning: SOTA [TEMP] models are subject to sudden removal or migration. If a model is deprecated/removed by NaraRouter, calling it will throw an API request error in the chat interface.
+                </p>
+                <table style="width:100%; border-collapse:collapse; font-size:0.75rem; border:1px solid var(--border-color); text-align:left;">
+                  <thead>
+                    <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color);">
+                      <th style="padding:6px 8px; color:var(--text-primary);">Model Identifier</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Type</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Context</th>
+                      <th style="padding:6px 8px; color:var(--text-primary);">Specialty & Key Strengths</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">deepseek-chat</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">Stable</td>
+                      <td style="padding:6px 8px;">64,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Production-ready logical reasoning, coding, and chat logic.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gpt-4o</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">Stable</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Flagship multi-modal vision, diagrams, tables parsing.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gpt-4o-mini</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">Stable</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Fast low-latency responses for general conversation tasks.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">gemini-1.5-pro</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">Stable</td>
+                      <td style="padding:6px 8px;">1,000,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Massive context processing for long documents, codebases, translations.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--accent-secondary);">claude-3-5-sonnet</td>
+                      <td style="padding:6px 8px; color:var(--accent-primary); font-weight:600;">Stable</td>
+                      <td style="padding:6px 8px;">200,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Deep logical planning, math, and software engineering.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color); background:rgba(239, 68, 68, 0.03);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--error-color);">glm-5.2</td>
+                      <td style="padding:6px 8px; color:var(--text-muted);">SOTA [TEMP]</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Advanced bilingual logic preview. May be removed suddenly.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color); background:rgba(239, 68, 68, 0.03);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--error-color);">mistral-large</td>
+                      <td style="padding:6px 8px; color:var(--text-muted);">SOTA [TEMP]</td>
+                      <td style="padding:6px 8px;">128,000</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Mistral reasoning flagship. May be removed suddenly.</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid var(--border-color); background:rgba(239, 68, 68, 0.03);">
+                      <td style="padding:6px 8px; font-family:monospace; font-weight:600; color:var(--error-color);">gemini-2.0-flash</td>
+                      <td style="padding:6px 8px; color:var(--text-muted);">SOTA [TEMP]</td>
+                      <td style="padding:6px 8px;">1,048,576</td>
+                      <td style="padding:6px 8px; color:var(--text-secondary);">Next-generation flash reasoning. May be removed suddenly.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1551,6 +1655,20 @@
               <div class="api-input-wrapper">
                 <input type="password" id="sambanova-key-input" class="api-input" placeholder="SambaNova API Key">
                 <button class="toggle-pwd-btn" data-target="sambanova-key-input" type="button" aria-label="Toggle Password Visibility">
+                  <i class="fa-solid fa-eye-slash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- NaraRouter Field (Single Slot) -->
+            <div class="api-input-group">
+              <div class="api-input-label">
+                <span>NaraRouter API Key</span>
+                <a href="https://router.bynara.id/" target="_blank" style="font-size:0.75rem; color:var(--accent-primary); text-decoration:none;">Get Key <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              </div>
+              <div class="api-input-wrapper">
+                <input type="password" id="nararouter-key-input" class="api-input" placeholder="NaraRouter API Key (sk-nry-...)">
+                <button class="toggle-pwd-btn" data-target="nararouter-key-input" type="button" aria-label="Toggle Password Visibility">
                   <i class="fa-solid fa-eye-slash"></i>
                 </button>
               </div>

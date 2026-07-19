@@ -154,11 +154,7 @@ const PROVIDER_MODELS = {
     { value: "open-mistral-nemo", name: "Mistral Nemo" },
     { value: "pixtral-12b-2409", name: "Pixtral 12B", multimodal: true, preferredVision: true }
   ],
-  cerebras: [
-    { value: "llama-3.3-70b", name: "Llama 3.3 70B" },
-    { value: "llama3.1-8b", name: "Llama 3.1 8B" },
-    { value: "llama3.1-70b", name: "Llama 3.1 70B" }
-  ],
+  cerebras: [],
   groq: [
     { value: "openai/gpt-oss-120b", name: "GPT-OSS 120B (Reasoning)" },
     { value: "openai/gpt-oss-20b", name: "GPT-OSS 20B (Reasoning)" },
@@ -178,6 +174,16 @@ const PROVIDER_MODELS = {
     { value: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Preview)", multimodal: true, voice: true },
     { value: "gemma-4-31b-it", name: "Gemma 4 31B (AI Studio) [WS]", webSearch: true, multimodal: true, preferredVision: true },
     { value: "gemma-4-26b-a4b-it", name: "Gemma 4 26B MoE (AI Studio)", multimodal: true }
+  ],
+  nararouter: [
+    { value: "deepseek-chat", name: "DeepSeek Chat (Stable)" },
+    { value: "gpt-4o", name: "GPT-4o (Stable) [WS][IMG]", webSearch: true, multimodal: true, preferredVision: true },
+    { value: "gpt-4o-mini", name: "GPT-4o Mini (Stable) [WS]", webSearch: true },
+    { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro (Stable) [WS][IMG]", webSearch: true, multimodal: true },
+    { value: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet (Stable) [WS][IMG]", webSearch: true, multimodal: true },
+    { value: "glm-5.2", name: "GLM 5.2 [TEMP - Will error if removed]" },
+    { value: "mistral-large", name: "Mistral Large [TEMP - Will error if removed]" },
+    { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash [TEMP - Will error if removed] [WS][IMG]", webSearch: true, multimodal: true }
   ]
 };
 
@@ -837,6 +843,8 @@ function setupSettingsDrawer() {
     localStorage.setItem('chatterbot_omnirouter_endpoint', document.getElementById('omnirouter-endpoint-input').value.trim());
     // 7. Save SambaNova
     localStorage.setItem('chatterbot_key_sambanova', document.getElementById('sambanova-key-input').value.trim());
+    // 7b. Save NaraRouter
+    localStorage.setItem('chatterbot_key_nararouter', document.getElementById('nararouter-key-input').value.trim());
     // 8. Save Gemini (5 keys)
     for (let i = 1; i <= 5; i++) {
       const val = document.getElementById(`gemini-key-${i}`).value.trim();
@@ -930,11 +938,12 @@ function setupSettingsDrawer() {
           const keysObj = JSON.parse(event.target.result);
           
           // Save loaded keys to LocalStorage
-          if (keysObj.omnirouter !== undefined) localStorage.setItem('chatterbot_key_omnirouter', keysObj.omnirouter || '');
-          if (keysObj.omnirouter_endpoint !== undefined) localStorage.setItem('chatterbot_omnirouter_endpoint', keysObj.omnirouter_endpoint || '');
-          if (keysObj.cerebras !== undefined) localStorage.setItem('chatterbot_key_cerebras', keysObj.cerebras || '');
-          if (keysObj.sambanova !== undefined) localStorage.setItem('chatterbot_key_sambanova', keysObj.sambanova || '');
-          if (keysObj.gemini !== undefined) {
+           if (keysObj.omnirouter !== undefined) localStorage.setItem('chatterbot_key_omnirouter', keysObj.omnirouter || '');
+           if (keysObj.omnirouter_endpoint !== undefined) localStorage.setItem('chatterbot_omnirouter_endpoint', keysObj.omnirouter_endpoint || '');
+           if (keysObj.cerebras !== undefined) localStorage.setItem('chatterbot_key_cerebras', keysObj.cerebras || '');
+           if (keysObj.sambanova !== undefined) localStorage.setItem('chatterbot_key_sambanova', keysObj.sambanova || '');
+           if (keysObj.nararouter !== undefined) localStorage.setItem('chatterbot_key_nararouter', keysObj.nararouter || '');
+           if (keysObj.gemini !== undefined) {
             if (Array.isArray(keysObj.gemini)) {
               keysObj.gemini.forEach((key, idx) => {
                 localStorage.setItem(`chatterbot_key_gemini_${idx + 1}`, key || '');
@@ -1165,6 +1174,12 @@ function setupSettingsDrawer() {
       if (sambanovaInput) {
         sambanovaInput.disabled = false;
         sambanovaInput.value = localStorage.getItem('chatterbot_key_sambanova') || '';
+      }
+      // Load NaraRouter
+      const nararouterInput = document.getElementById('nararouter-key-input');
+      if (nararouterInput) {
+        nararouterInput.disabled = false;
+        nararouterInput.value = localStorage.getItem('chatterbot_key_nararouter') || '';
       }
       // Load Gemini (5 keys)
       for (let i = 1; i <= 5; i++) {
@@ -2144,6 +2159,7 @@ async function submitPrompt() {
 
   const sambanovaKey = localStorage.getItem('chatterbot_key_sambanova') || '';
   const geminiKey = getGeminiKeysString();
+  const nararouterKey = localStorage.getItem('chatterbot_key_nararouter') || '';
 
   // Client-side rate limiting for Mistral (max 2 requests per minute)
   if (activeSession.provider === 'mistral') {
@@ -2319,7 +2335,8 @@ async function submitPrompt() {
           'x-user-cerebras-key': cerebrasKey,
           'x-user-groq-key': groqKey,
           'x-user-sambanova-key': sambanovaKey,
-          'x-user-gemini-key': geminiKey
+          'x-user-gemini-key': geminiKey,
+          'x-user-nararouter-key': nararouterKey
         },
         body: JSON.stringify({
           user: currentUser,
@@ -2735,8 +2752,7 @@ async function toggleVoiceRecording() {
       isRecording = true;
       
       // Update UI status to show recording state
-      recordBtn.innerHTML = `<i class="fa-solid fa-square" style="color:var(--error-color);"></i> <span>Stop Recording</span>`;
-      if (voiceBtnText) voiceBtnText.textContent = "Recording...";
+      recordBtn.innerHTML = `<i class="fa-solid fa-square" style="color:var(--error-color);"></i> <span id="voice-btn-text">Stop Recording</span>`;
       if (voiceIcon) {
         voiceIcon.className = "fa-solid fa-circle-dot fa-beat";
         voiceIcon.style.color = "var(--error-color)";
@@ -2752,8 +2768,7 @@ async function toggleVoiceRecording() {
       mediaRecorder.stop();
     }
     isRecording = false;
-    recordBtn.innerHTML = `<i class="fa-solid fa-circle-dot" style="color:var(--error-color);"></i> <span>Record Live Voice</span>`;
-    if (voiceBtnText) voiceBtnText.textContent = "Voice";
+    recordBtn.innerHTML = `<i class="fa-solid fa-microphone" style="color:var(--accent-primary);"></i> <span id="voice-btn-text">Record</span>`;
     if (voiceIcon) {
       voiceIcon.className = "fa-solid fa-microphone";
       voiceIcon.style.color = "var(--accent-primary)";
@@ -2983,6 +2998,7 @@ async function syncAPIKeysToServer() {
     cerebras: localStorage.getItem('chatterbot_key_cerebras') || '',
     groq: [],
     sambanova: localStorage.getItem('chatterbot_key_sambanova') || '',
+    nararouter: localStorage.getItem('chatterbot_key_nararouter') || '',
     gemini: localStorage.getItem('chatterbot_key_gemini') || '',
     local_endpoint: localStorage.getItem('chatterbot_local_endpoint') || '',
     local_models: localStorage.getItem('chatterbot_local_models') || '',
@@ -3070,6 +3086,7 @@ function updateProviderSelectDropdown() {
     { value: 'groq', name: 'Groq' },
     { value: 'sambanova', name: 'SambaNova' },
     { value: 'gemini', name: 'Google Gemini' },
+    { value: 'nararouter', name: 'NaraRouter' },
     { value: 'local', name: 'Local LLM' }
   ];
   
@@ -3088,8 +3105,8 @@ function updateProviderSelectDropdown() {
       const k1 = localStorage.getItem('chatterbot_key_mistral_1') || '';
       hasKey = k1.trim() !== '' || isAdmin;
     } else if (p.value === 'cerebras') {
-      const k = localStorage.getItem('chatterbot_key_cerebras') || '';
-      hasKey = k.trim() !== '' || isAdmin;
+      // Temporarily disabled: Cerebras deprecated its credit-card-free tier and now requires billing/card verification.
+      hasKey = false;
     } else if (p.value === 'groq') {
       const k1 = localStorage.getItem('chatterbot_key_groq_1') || '';
       hasKey = k1.trim() !== '' || isAdmin;
@@ -3104,6 +3121,9 @@ function updateProviderSelectDropdown() {
       const key = localStorage.getItem('chatterbot_key_omnirouter') || '';
       const endpoint = localStorage.getItem('chatterbot_omnirouter_endpoint') || '';
       hasKey = key.trim() !== '' || endpoint.trim() !== '';
+    } else if (p.value === 'nararouter') {
+      const key = localStorage.getItem('chatterbot_key_nararouter') || '';
+      hasKey = key.trim() !== '' || isAdmin;
     } else if (p.value === 'local') {
       const endpoint = localStorage.getItem('chatterbot_local_endpoint') || '';
       hasKey = endpoint.trim() !== '';

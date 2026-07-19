@@ -1966,4 +1966,39 @@ details.guide-details .guide-content {
   display: none !important;
 }
 
+/* Exam Prep & Syllabus View Spacing Rules */
+.prep-body-content h3 {
+  margin-top: 2.2rem !important;
+  margin-bottom: 1.2rem !important;
+  color: var(--accent-primary) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.prep-body-content h4 {
+  margin-top: 1.8rem !important;
+  margin-bottom: 0.8rem !important;
+  color: var(--text-primary) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+}
+
+.prep-body-content ul, .prep-body-content ol {
+  margin-top: 0.8rem !important;
+  margin-bottom: 1.8rem !important;
+  padding-left: 1.4rem !important;
+}
+
+.prep-body-content li {
+  margin-bottom: 1.1rem !important;
+  line-height: 1.75 !important;
+}
+
+.prep-body-content p {
+  margin-bottom: 1.4rem !important;
+  line-height: 1.75 !important;
+}
+
 

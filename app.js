@@ -1251,11 +1251,8 @@ async function loadChatSessions() {
     } else {
       chatSessions = {};
     }
-    updateProviderSelectDropdown();
-    return;
-  }
-
-  try {
+  } else {
+    try {
     const response = await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}`);
     if (response.ok) {
       chatSessions = await response.json();
@@ -1372,6 +1369,7 @@ async function loadChatSessions() {
         tokenTrackerData = JSON.parse(localTracker);
       } catch(e) {}
     }
+  }
   }
 
   // Refresh visible providers since keys have been loaded

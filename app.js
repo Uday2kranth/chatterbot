@@ -278,6 +278,10 @@ function initializeApp() {
       chatSettings = { ...chatSettings, ...JSON.parse(localSettings) };
     } catch(e) {}
   }
+  if (chatSettings.userEmails) {
+    localStorage.setItem('chatterbot_user_emails', chatSettings.userEmails);
+    localStorage.setItem('chatterbot_user_email', chatSettings.userEmails);
+  }
   applyChatSettings();
 
   setupSettingsDrawer();
@@ -733,89 +737,50 @@ function setupSidebarAndPrompts() {
     });
   }
 
-  // 11. Header Email Export Modal Popup logic
-  const headerEmailBtn = document.getElementById('header-email-btn');
-  const emailConfigOverlay = document.getElementById('email-config-modal-overlay');
-  const closeEmailConfigBtn = document.getElementById('close-email-config-btn');
-  const cancelEmailConfigBtn = document.getElementById('cancel-email-config-btn');
-  const saveEmailConfigBtn = document.getElementById('save-email-config-btn');
-  const modalEmailInput = document.getElementById('modal-email-input');
-
-  const updateToolbarEmailLabel = () => {
-    const emailsStr = localStorage.getItem('chatterbot_user_emails') || localStorage.getItem('chatterbot_user_email') || '';
-    let labelText = 'Email Export';
-    if (emailsStr) {
-      const emailList = emailsStr.split(',').map(e => e.trim()).filter(Boolean);
-      if (emailList.length > 0) {
-        labelText = `Email Export (${emailList.length})`;
-      }
-    }
-
-    const headerEmailLabel = document.getElementById('header-email-label');
-    if (headerEmailLabel) {
-      headerEmailLabel.textContent = labelText;
-    }
-  };
-
-  // Initial load
-  updateToolbarEmailLabel();
-
-  const openEmailConfigModal = (e) => {
-    e.preventDefault();
+  // 11. Settings Recipient Email Configuration logic
+  const settingsEmailInput = document.getElementById('settings-email-input');
+  if (settingsEmailInput) {
+    // Initial load
     const currentEmails = localStorage.getItem('chatterbot_user_emails') || localStorage.getItem('chatterbot_user_email') || '';
-    modalEmailInput.value = currentEmails;
-    if (emailConfigOverlay) {
-      emailConfigOverlay.classList.add('open');
-    }
-    if (modalEmailInput) {
-      modalEmailInput.focus();
-    }
-  };
+    settingsEmailInput.value = currentEmails;
 
-  if (headerEmailBtn && emailConfigOverlay && modalEmailInput) {
-    headerEmailBtn.addEventListener('click', openEmailConfigModal);
-  }
-
-  const closeEmailModal = () => {
-    if (emailConfigOverlay) emailConfigOverlay.classList.remove('open');
-  };
-
-  if (closeEmailConfigBtn) closeEmailConfigBtn.addEventListener('click', closeEmailModal);
-  if (cancelEmailConfigBtn) cancelEmailConfigBtn.addEventListener('click', closeEmailModal);
-  if (emailConfigOverlay) {
-    emailConfigOverlay.addEventListener('click', (e) => {
-      if (e.target === emailConfigOverlay) closeEmailModal();
-    });
-  }
-
-  if (saveEmailConfigBtn && modalEmailInput) {
-    saveEmailConfigBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const rawVal = modalEmailInput.value.trim();
+    settingsEmailInput.addEventListener('change', () => {
+      const rawVal = settingsEmailInput.value.trim();
       if (!rawVal) {
-        showToast('Please enter at least one recipient email address.', 'error');
+        localStorage.removeItem('chatterbot_user_emails');
+        localStorage.removeItem('chatterbot_user_email');
+        if (chatSettings.userEmails) {
+          delete chatSettings.userEmails;
+          localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
+          chatSessions.chat_settings_storage = { data: chatSettings, timestamp: Date.now() };
+          saveChatSessionsToStorage('chat_settings_storage');
+        }
+        showToast('Recipient email removed.', 'info');
         return;
       }
 
-      // Validate comma-separated emails
       const emailsList = rawVal.split(',').map(email => email.trim()).filter(Boolean);
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       
       for (const email of emailsList) {
         if (!emailPattern.test(email)) {
           showToast(`"${email}" is not a valid email address format.`, 'error');
+          // Revert to stored value
+          settingsEmailInput.value = localStorage.getItem('chatterbot_user_emails') || '';
           return;
         }
       }
 
       const formattedVal = emailsList.join(', ');
       localStorage.setItem('chatterbot_user_emails', formattedVal);
-      // Keep in sync with old key for compatibility
       localStorage.setItem('chatterbot_user_email', formattedVal);
 
-      updateToolbarEmailLabel();
+      chatSettings.userEmails = formattedVal;
+      localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
+      chatSessions.chat_settings_storage = { data: chatSettings, timestamp: Date.now() };
+      saveChatSessionsToStorage('chat_settings_storage');
+
       showToast('Recipient email configuration saved successfully!', 'success');
-      closeEmailModal();
     });
   }
 }
@@ -1192,6 +1157,11 @@ function setupSettingsDrawer() {
       document.getElementById('setting-export-word').checked = chatSettings.exportWordEnabled;
       document.getElementById('setting-export-pdf').checked = chatSettings.exportPdfEnabled;
       document.getElementById('setting-export-slides').checked = chatSettings.exportSlidesEnabled;
+      
+      const settingsEmailInput = document.getElementById('settings-email-input');
+      if (settingsEmailInput) {
+        settingsEmailInput.value = localStorage.getItem('chatterbot_user_emails') || localStorage.getItem('chatterbot_user_email') || '';
+      }
     });
   }
 
@@ -1439,28 +1409,7 @@ function setupSettingsDrawer() {
 
 // Chat sessions handling (History list & LocalStorage)
 async function loadChatSessions() {
-  if (userRole === 'guest') {
-    const sessionsData = localStorage.getItem(`chatterbot_history_${currentUser}`);
-    if (sessionsData) {
-      try {
-        chatSessions = JSON.parse(sessionsData);
-        delete chatSessions.api_keys_storage;
-        delete chatSessions.token_tracker_storage;
-      } catch (e) {
-        chatSessions = {};
-      }
-    } else {
-      chatSessions = {};
-    }
-    // Fallback load token tracker from localStorage
-    const localTracker = localStorage.getItem('chatterbot_token_tracker');
-    if (localTracker) {
-      try {
-        tokenTrackerData = JSON.parse(localTracker);
-      } catch(e) {}
-    }
-  } else {
-    try {
+  try {
     const response = await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}`);
     if (response.ok) {
       chatSessions = await response.json();
@@ -1517,6 +1466,14 @@ async function loadChatSessions() {
       if (chatSessions.chat_settings_storage && chatSessions.chat_settings_storage.data) {
         chatSettings = { ...chatSettings, ...chatSessions.chat_settings_storage.data };
         localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
+        if (chatSettings.userEmails) {
+          localStorage.setItem('chatterbot_user_emails', chatSettings.userEmails);
+          localStorage.setItem('chatterbot_user_email', chatSettings.userEmails);
+          const settingsEmailInput = document.getElementById('settings-email-input');
+          if (settingsEmailInput) {
+            settingsEmailInput.value = chatSettings.userEmails;
+          }
+        }
         applyChatSettings();
         delete chatSessions.chat_settings_storage;
       }
@@ -1588,7 +1545,6 @@ async function loadChatSessions() {
       } catch(e) {}
     }
   }
-  }
 
   // Refresh visible providers since keys have been loaded
   updateProviderSelectDropdown();
@@ -1614,7 +1570,7 @@ async function saveChatSessionsToStorage(sessionIdToSave = null) {
   // Always save to localStorage as a robust client fallback
   localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
 
-  if (userRole === 'guest') return;
+
 
   // Persist session payload to backend database
   const idToSave = sessionIdToSave || activeChatId;
@@ -1841,18 +1797,7 @@ async function deleteChatSession(id) {
     // Save locally
     localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
     
-    if (userRole === 'guest') {
-      renderHistoryList();
-      if (activeChatId === id) {
-        const keys = Object.keys(chatSessions);
-        if (keys.length > 0) {
-          loadChatSession(keys[0]);
-        } else {
-          createNewChatSession();
-        }
-      }
-      return;
-    }
+
 
     // Delete on backend DB
     try {
@@ -1914,11 +1859,7 @@ function setupChatHandlers() {
       // Save locally
       localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
       
-      if (userRole === 'guest') {
-        createNewChatSession("Study Session 1", true);
-        showToast('All chat records deleted.', 'info');
-        return;
-      }
+
 
       // Clear database
       try {
@@ -2292,17 +2233,15 @@ function renderMessages(messages) {
         saveChatSessionsToStorage();
         
         // Sync to server
-        if (userRole !== 'guest') {
-          fetch('/api/sessions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user: currentUser,
-              id: newSessionId,
-              session: newSession
-            })
-          }).catch(err => console.error('Failed to sync branched session to server:', err));
-        }
+        fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user: currentUser,
+            id: newSessionId,
+            session: newSession
+          })
+        }).catch(err => console.error('Failed to sync branched session to server:', err));
         
         activeChatId = newSessionId;
         localStorage.setItem('chatterbot_active_chat_id', newSessionId);
@@ -3455,7 +3394,6 @@ function updateTokenTracker(provider, model, usage) {
 }
 
 async function saveTokenTrackerToServer() {
-  if (userRole === 'guest') return;
   try {
     await fetch('/api/sessions', {
       method: 'POST',
@@ -3478,7 +3416,6 @@ async function saveTokenTrackerToServer() {
 
 // ── Unified API Key Synchronizer ──
 async function syncAPIKeysToServer() {
-  if (userRole === 'guest') return;
   const keysObj = {
     omnirouter: localStorage.getItem('chatterbot_key_omnirouter') || '',
     omnirouter_endpoint: localStorage.getItem('chatterbot_omnirouter_endpoint') || '',
@@ -5046,17 +4983,37 @@ function exportChatToSlides() {
         th { background: #1e293b; }
         
         @media print {
-          body { background: white; color: black; }
+          body {
+            background: white !important;
+            color: black !important;
+            display: block !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
           .slide-container {
-            width: 100%;
-            height: 100vh;
-            border: none;
-            box-shadow: none;
-            page-break-after: always;
-            display: flex !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            display: block !important;
             opacity: 1 !important;
             transform: none !important;
-            padding: 20px;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+          }
+          .slide-body {
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            display: block !important;
+          }
+          .slide-body div {
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            display: block !important;
           }
           .controls, .btn, .no-print { display: none !important; }
         }

@@ -145,36 +145,7 @@
     </div>
   </div>
 
-  <!-- Email Export Configuration Modal Overlay -->
-  <div class="drawer-overlay" id="email-config-modal-overlay" style="align-items: center; justify-content: center; z-index: 2500; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); display: flex;">
-    <div class="prompts-modal" id="email-config-modal" style="width: 90%; max-width: 500px; margin: auto; background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); display: flex; flex-direction: column; max-height: 80vh; position: relative;">
-      <div class="drawer-header" style="border-bottom: 1px solid var(--border-color); padding: 20px 24px; display:flex; justify-content:space-between; align-items:center;">
-        <h2 class="drawer-title" style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-          <i class="fa-solid fa-envelope" style="color:var(--accent-primary);"></i>
-          <span>Email Export Configuration</span>
-        </h2>
-        <button class="drawer-close" id="close-email-config-btn" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;" aria-label="Close Email Config">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="drawer-body" style="padding: 24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto;">
-        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin:0;">
-          Configure recipient email address(es) for exporting conversation pair snapshots. 
-          You can specify multiple recipients by separating their email IDs with commas.
-        </p>
-        
-        <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-          <label for="modal-email-input" style="font-weight:600; font-size:0.85rem; color:var(--text-primary);">Recipient Email Addresses</label>
-          <input type="text" id="modal-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
-          <span style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Use commas (,) to separate multiple email recipients.</span>
-        </div>
-      </div>
-      <div class="drawer-footer" style="border-top: 1px solid var(--border-color); padding: 20px 24px; display:flex; gap:12px;">
-        <button class="drawer-btn secondary" id="cancel-email-config-btn" style="flex:1; padding: 10px;">Cancel</button>
-        <button class="drawer-btn primary" id="save-email-config-btn" style="flex:1; padding: 10px; font-weight:600;">Save & Apply</button>
-      </div>
-    </div>
-  </div>
+
 
 
   <!-- Sub-views are now embedded directly in the chat-area below -->
@@ -211,22 +182,31 @@
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>Prompts Library</span>
         </button>
-        <button class="new-chat-btn" id="model-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Model Capabilities Guide">
-          <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
-          <span>Model Guide</span>
-        </button>
-        <button class="new-chat-btn" id="api-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified API Key Generation Guide">
-          <i class="fa-solid fa-key" style="color:var(--accent-primary);"></i>
-          <span>API Guide</span>
-        </button>
-        <button class="new-chat-btn" id="token-tracker-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified Token Tracker">
-          <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
-          <span>Token Tracker</span>
-        </button>
-        <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Bookmarked Notes & Formulas">
-          <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
-          <span>Bookmarked Notes</span>
-        </button>
+        <!-- Collapsible More Features Panel -->
+        <details class="more-features-details" style="width:100%; margin-top:4px; outline:none;">
+          <summary style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; font-size:0.8rem; font-weight:600; color:var(--text-secondary); background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; list-style:none; cursor:pointer; transition: border-color 0.2s; user-select:none;">
+            <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-square-plus" style="color:var(--accent-primary);"></i> More</span>
+            <i class="fa-solid fa-chevron-right chevron-icon" style="font-size:0.7rem; transition:transform 0.2s; color:var(--text-muted);"></i>
+          </summary>
+          <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px; padding:4px 0 0 0;">
+            <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Bookmarked Notes & Formulas">
+              <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
+              <span>Bookmarked Notes</span>
+            </button>
+            <button class="new-chat-btn" id="model-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Model Capabilities Guide">
+              <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
+              <span>Model Guide</span>
+            </button>
+            <button class="new-chat-btn" id="api-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified API Key Generation Guide">
+              <i class="fa-solid fa-key" style="color:var(--accent-primary);"></i>
+              <span>API Guide</span>
+            </button>
+            <button class="new-chat-btn" id="token-tracker-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified Token Tracker">
+              <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
+              <span>Token Tracker</span>
+            </button>
+          </div>
+        </details>
       </div>
 
       <!-- Persistent Sidebar Chat Sessions List -->
@@ -321,12 +301,6 @@
             <button id="custom-roles-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-primary); color:var(--accent-primary); padding: 7px 12px;" title="Configure Bot & User Roles">
               <i class="fa-solid fa-user-gear"></i>
               <span>Roles</span>
-            </button>
-
-            <!-- Email Export Configuration Trigger button -->
-            <button id="header-email-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-secondary); color:var(--accent-secondary); padding: 7px 12px;" title="Configure Recipient Emails for Export">
-              <i class="fa-solid fa-envelope"></i>
-              <span id="header-email-label">Email Export</span>
             </button>
           </div>
         </div>
@@ -1500,25 +1474,25 @@
             
             <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px;">
               <!-- Toggle bookmark -->
-              <div style="display:flex; align-items:center; justify-content:space-between;">
-                <div>
+              <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                <div style="flex:1;">
                   <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Bookmarked Notes</div>
-                  <div style="font-size:0.75rem; color:var(--text-muted);">Enable bookmark icons next to message bubbles to pin notes and formulas.</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.3;">Enable bookmark icons next to message bubbles to pin notes and formulas.</div>
                 </div>
-                <label class="switch-container" style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
-                  <input type="checkbox" id="setting-toggle-bookmarks" style="opacity:0; width:0; height:0;" checked />
+                <label class="switch-container" style="position:relative; display:inline-flex; align-items:center; width:44px; height:24px; cursor:pointer; flex-shrink:0; margin:0; line-height:0; align-self:center; margin-left:12px;">
+                  <input type="checkbox" id="setting-toggle-bookmarks" style="display:none;" checked />
                   <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
                 </label>
               </div>
 
               <!-- Toggle summarize button -->
-              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:16px;">
-                <div>
+              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:16px; width:100%;">
+                <div style="flex:1;">
                   <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Summarization Button</div>
-                  <div style="font-size:0.75rem; color:var(--text-muted);">Show the "Summarize" option in the chat input toolbar.</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.3;">Show the "Summarize" option in the chat input toolbar.</div>
                 </div>
-                <label class="switch-container" style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
-                  <input type="checkbox" id="setting-toggle-summarize" style="opacity:0; width:0; height:0;" checked />
+                <label class="switch-container" style="position:relative; display:inline-flex; align-items:center; width:44px; height:24px; cursor:pointer; flex-shrink:0; margin:0; line-height:0; align-self:center; margin-left:12px;">
+                  <input type="checkbox" id="setting-toggle-summarize" style="display:none;" checked />
                   <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
                 </label>
               </div>
@@ -1543,6 +1517,15 @@
                     <input type="checkbox" id="setting-export-slides" checked style="accent-color:var(--accent-primary);" /> Slide Deck (.html)
                   </label>
                 </div>
+              </div>
+
+              <!-- Recipient Email Configuration -->
+              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Email Export Recipients</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Configure recipient email address(es) for exporting conversation pair snapshots. Separate multiple emails with commas.</div>
+                </div>
+                <input type="text" id="settings-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none; margin-top:4px;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
               </div>
             </div>
           </div>

@@ -1956,4 +1956,12 @@ details.guide-details .guide-content {
   }
 }
 
+/* Sidebar 'More' details dropdown styling */
+.more-features-details[open] .chevron-icon {
+  transform: rotate(90deg) !important;
+}
+.more-features-details summary::-webkit-details-marker {
+  display: none !important;
+}
+
 

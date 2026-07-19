@@ -5217,10 +5217,10 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
             <head>
               <title>\${slide.title}</title>
               <style>
-                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.25; color: #1f2937; padding: 30px; background-color: #ffffff; }
-                h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; margin-top: 12px; }
-                h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 12px; margin-bottom: 6px; }
-                p, ul, ol, li { margin-top: 0px; margin-bottom: 6px; line-height: 1.25; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.05; color: #1f2937; padding: 30px; background-color: #ffffff; }
+                h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 12px; margin-top: 6px; }
+                h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 8px; margin-bottom: 4px; line-height: 1.1; }
+                p, ul, ol, li, div { margin-top: 0in !important; margin-bottom: 3pt !important; line-height: 1.05 !important; mso-line-height-rule: exactly; }
                 .content-body { font-size: 11pt; color: #1f2937; }
                 .footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }
               </style>

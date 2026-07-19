@@ -1574,7 +1574,24 @@ html, body {
     flex-shrink: 0;
   }
 
-  .input-area-container > div:first-child { display: none !important; }
+  .input-toolbar {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .input-info-text {
+    display: none !important;
+  }
+
+  .input-toolbar-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
 
   .chat-input-textarea {
     font-size: 0.9rem !important;
@@ -1717,5 +1734,33 @@ details.guide-details .guide-content {
   line-height: 1.45;
   border-top: 1px solid var(--border-color);
   color: var(--text-secondary);
+}
+
+/* ── KaTeX Math Formula Responsive Scrolling Overrides ── */
+.katex-display {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  max-width: 100% !important;
+  padding: 8px 0 !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.katex {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* ── Chrome Desktop-site Mode Keyboard Overflow Override ── */
+@media (max-height: 600px) {
+  html, body {
+    overflow: auto !important;
+  }
+  .dashboard-container {
+    height: auto !important;
+    min-height: 100% !important;
+  }
 }
 

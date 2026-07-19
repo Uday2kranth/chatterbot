@@ -82,11 +82,10 @@ The backend in `/api/sessions.js` saves user chat sessions directly to a local J
 * **How it behaves on Vercel:** Vercel serverless environments are **stateless and read-only** (except for temporary `/tmp` space). Writes to `db/database.json` are ephemeral. Any session modifications will be lost once the serverless function container recycles or spins down. 
 * **Production Recommendation:** For production deployments on Vercel, migrate the `db/database.json` storage backend to a managed cloud database such as **Supabase**, **MongoDB**, **Vercel KV**, or **Firebase**.
 
-### 🔒 Client-Side Credential Exposure
-* User account credentials inside `login.html` are validated using a hardcoded client-side dictionary `AUTHORIZED_USERS`.
-* Anyone who visits the deployed website can inspect the page source in their browser tools and view all usernames and passwords.
-* **Security Recommendation:** Exclude `db/database.json` from git versioning (added to `.gitignore`). To secure user accounts for production, move credential validation logic to a secure serverless check (`/api/auth.js`) queryable against encrypted database records.
-* **API Keys Security:** All user API keys (e.g., OpenRouter, Groq, Mistral, NVIDIA) are stored locally in the user's browser `localStorage` and sent via secure headers. They are never saved on the server or pushed to public files.
+### 🔒 Secure Backend Authentication
+* User credentials are validated securely on the backend via the `/api/login` endpoint (not client-side).
+* Supports overriding user registries dynamically in production using the `AUTHORIZED_USERS_JSON` Vercel environment variable.
+* **API Keys Security:** All user-specific API keys (e.g. OpenRouter, Groq, Mistral, NVIDIA) remain stored strictly in the user's browser `localStorage` and are sent dynamically via secure request headers. They are never logged or stored on the server.
 
 ---
 

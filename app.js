@@ -9,7 +9,10 @@ const AUTHORIZED_USERS = {
   "Akash": { password: "labbe@kiransir", role: "student" },
   "Sai_Ram": { password: "sai@ram", role: "student" },
   "Tharun": { password: "mama@kiransir", role: "student" },
-  "Ban": { password: "DataScientist", role: "student" }
+  "Ban": { password: "DataScientist", role: "student" },
+  "uday01": { password: "uday@01", role: "guest" },
+  "uday02": { password: "uday@02", role: "guest" },
+  "uday03": { password: "uday@03", role: "guest" }
 };
 
 function checkSession() {
@@ -421,7 +424,7 @@ function setupSidebarAndPrompts() {
         return;
       }
 
-      const custom = JSON.parse(localStorage.getItem('chatterbot_custom_prompts') || '[]');
+      const custom = JSON.parse(localStorage.getItem(`chatterbot_custom_prompts_${currentUser}`) || '[]');
       const newPrompt = {
         id: 'prompt_' + Date.now(),
         title: title,
@@ -431,7 +434,7 @@ function setupSidebarAndPrompts() {
       };
 
       custom.push(newPrompt);
-      localStorage.setItem('chatterbot_custom_prompts', JSON.stringify(custom));
+      localStorage.setItem(`chatterbot_custom_prompts_${currentUser}`, JSON.stringify(custom));
 
       formContainer.style.display = 'none';
       clearPromptForm();
@@ -1216,6 +1219,23 @@ function setupSettingsDrawer() {
 
 // Chat sessions handling (History list & LocalStorage)
 async function loadChatSessions() {
+  if (userRole === 'guest') {
+    const sessionsData = localStorage.getItem(`chatterbot_history_${currentUser}`);
+    if (sessionsData) {
+      try {
+        chatSessions = JSON.parse(sessionsData);
+        delete chatSessions.api_keys_storage;
+        delete chatSessions.token_tracker_storage;
+      } catch (e) {
+        chatSessions = {};
+      }
+    } else {
+      chatSessions = {};
+    }
+    updateProviderSelectDropdown();
+    return;
+  }
+
   try {
     const response = await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}`);
     if (response.ok) {
@@ -1358,6 +1378,8 @@ async function loadChatSessions() {
 async function saveChatSessionsToStorage(sessionIdToSave = null) {
   // Always save to localStorage as a robust client fallback
   localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
+
+  if (userRole === 'guest') return;
 
   // Persist session payload to backend database
   const idToSave = sessionIdToSave || activeChatId;
@@ -1557,6 +1579,19 @@ async function deleteChatSession(id) {
     // Save locally
     localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
     
+    if (userRole === 'guest') {
+      renderHistoryList();
+      if (activeChatId === id) {
+        const keys = Object.keys(chatSessions);
+        if (keys.length > 0) {
+          loadChatSession(keys[0]);
+        } else {
+          createNewChatSession();
+        }
+      }
+      return;
+    }
+
     // Delete on backend DB
     try {
       await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}&id=${encodeURIComponent(id)}`, {
@@ -1617,6 +1652,12 @@ function setupChatHandlers() {
       // Save locally
       localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
       
+      if (userRole === 'guest') {
+        createNewChatSession("Study Session 1", true);
+        showToast('All chat records deleted.', 'info');
+        return;
+      }
+
       // Clear database
       try {
         await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}&id=all`, {
@@ -1761,7 +1802,7 @@ function renderMessages(messages) {
 
     const sender = document.createElement('span');
     sender.className = 'message-sender';
-    sender.textContent = msg.role === 'user' ? currentUser : 'Assistant';
+    sender.textContent = msg.role === 'user' ? 'User' : 'Assistant';
     wrapper.appendChild(sender);
 
     const bubble = document.createElement('div');
@@ -1922,15 +1963,17 @@ function renderMessages(messages) {
         saveChatSessionsToStorage();
         
         // Sync to server
-        fetch('/api/sessions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user: currentUser,
-            id: newSessionId,
-            session: newSession
-          })
-        }).catch(err => console.error('Failed to sync branched session to server:', err));
+        if (userRole !== 'guest') {
+          fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user: currentUser,
+              id: newSessionId,
+              session: newSession
+            })
+          }).catch(err => console.error('Failed to sync branched session to server:', err));
+        }
         
         activeChatId = newSessionId;
         localStorage.setItem('chatterbot_active_chat_id', newSessionId);
@@ -2962,6 +3005,7 @@ function updateTokenTracker(provider, model, usage) {
 }
 
 async function saveTokenTrackerToServer() {
+  if (userRole === 'guest') return;
   try {
     await fetch('/api/sessions', {
       method: 'POST',
@@ -2984,6 +3028,7 @@ async function saveTokenTrackerToServer() {
 
 // ── Unified API Key Synchronizer ──
 async function syncAPIKeysToServer() {
+  if (userRole === 'guest') return;
   const keysObj = {
     omnirouter: localStorage.getItem('chatterbot_key_omnirouter') || '',
     omnirouter_endpoint: localStorage.getItem('chatterbot_omnirouter_endpoint') || '',
@@ -3206,8 +3251,8 @@ function renderPromptsLibrary() {
   container.innerHTML = '';
   
   // Load custom user prompts
-  const custom = JSON.parse(localStorage.getItem('chatterbot_custom_prompts') || '[]');
-  const allPrompts = [...DEFAULT_PROMPTS, ...custom];
+  const custom = JSON.parse(localStorage.getItem(`chatterbot_custom_prompts_${currentUser}`) || '[]');
+  const allPrompts = userRole === 'guest' ? custom : [...DEFAULT_PROMPTS, ...custom];
   
   allPrompts.forEach(p => {
     const card = document.createElement('div');
@@ -3295,7 +3340,7 @@ function renderPromptsLibrary() {
         e.stopPropagation();
         if (confirm(`Are you sure you want to delete the custom prompt "${p.title}"?`)) {
           const filtered = custom.filter(cp => cp.id !== p.id);
-          localStorage.setItem('chatterbot_custom_prompts', JSON.stringify(filtered));
+          localStorage.setItem(`chatterbot_custom_prompts_${currentUser}`, JSON.stringify(filtered));
           renderPromptsLibrary();
           showToast('Custom prompt deleted successfully.', 'info');
         }

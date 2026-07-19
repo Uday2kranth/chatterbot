@@ -27,7 +27,10 @@ module.exports = async (req, res) => {
         "Akash": { password: "labbe@kiransir", role: "student" },
         "Sai_Ram": { password: "sai@ram", role: "student" },
         "Tharun": { password: "mama@kiransir", role: "student" },
-        "Ban": { password: "DataScientist", role: "student" }
+        "Ban": { password: "DataScientist", role: "student" },
+        "uday01": { password: "uday@01", role: "guest" },
+        "uday02": { password: "uday@02", role: "guest" },
+        "uday03": { password: "uday@03", role: "guest" }
     };
 
     // Parse users database from environment variable if defined

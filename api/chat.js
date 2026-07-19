@@ -19,22 +19,67 @@ async function getWebSearchSnippets(query) {
         if (!response.ok) return '';
         const html = await response.text();
         
+        const blocks = html.split('<div class="links_main links_deep result__body">');
         const snippets = [];
-        const regex = /<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
-        let match;
-        while ((match = regex.exec(html)) !== null && snippets.length < 8) {
-            let snippet = match[1]
+        let count = 0;
+        
+        for (let i = 1; i < blocks.length; i++) {
+            const block = blocks[i];
+            
+            // Skip ads
+            if (block.includes('ad_provider') || block.includes('result--ad')) {
+                continue;
+            }
+            
+            const aMatch = /<a\s+[^>]*class="[^\"]*result__a[^\"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/.exec(block);
+            if (!aMatch) continue;
+            
+            let rawUrl = aMatch[1];
+            let title = aMatch[2]
                 .replace(/<[^>]*>/g, '')
                 .replace(/&amp;/g, '&')
                 .replace(/&quot;/g, '"')
                 .replace(/&#x27;/g, "'")
                 .replace(/\s+/g, ' ')
                 .trim();
-            if (snippet) snippets.push(snippet);
+            
+            let cleanUrl = rawUrl;
+            if (rawUrl.includes('uddg=')) {
+                const parts = rawUrl.split('uddg=');
+                if (parts[1]) {
+                    const encodedUrl = parts[1].split('&')[0];
+                    try {
+                        cleanUrl = decodeURIComponent(encodedUrl);
+                    } catch (e) {
+                        cleanUrl = encodedUrl;
+                    }
+                }
+            } else if (rawUrl.startsWith('//')) {
+                cleanUrl = 'https:' + rawUrl;
+            }
+            
+            const snippetMatch = /<a\s+[^>]*class="[^\"]*result__snippet[^\"]*"[^>]*>([\s\S]*?)<\/a>/.exec(block);
+            let snippet = snippetMatch 
+                ? snippetMatch[1]
+                    .replace(/<[^>]*>/g, '')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#x27;/g, "'")
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                : '';
+                
+            count++;
+            snippets.push(`[Web Reference ${count}]
+Title: "${title}"
+URL: "${cleanUrl}"
+Snippet: "${snippet}"`);
+            
+            if (count >= 8) break;
         }
         
         if (snippets.length === 0) return '';
-        return snippets.map((s, idx) => `[Web Context ${idx + 1}]: "${s}"`).join('\n\n');
+        return snippets.join('\n\n');
     } catch (err) {
         console.error('Failed to query DuckDuckGo search:', err);
         return '';
@@ -130,7 +175,15 @@ module.exports = async (req, res) => {
     if (searchContext) {
         apiMessages.unshift({
             role: "system",
-            content: `IMPORTANT: The user has enabled Web Search. The following up-to-date search snippets are actual live results retrieved from the internet right now:\n\n${searchContext}\n\nInstructions:\n1. You MUST use these search snippets as your primary source of truth to answer the user's question.\n2. Do NOT say you cannot search the internet, do NOT say you cannot access live data, and do NOT refuse to answer due to your knowledge cutoff.\n3. Act as if you have full web-browsing capabilities and this context is the live reality of today.\n4. Answer the user's query confidently and factually based on this data.`
+            content: `You are in STRICT WEB GROUNDING MODE. Live search results have been retrieved for this query:
+
+${searchContext}
+
+STRICT DIRECTIVES:
+1. Exclusively answer using the search snippets provided above.
+2. If the snippets do not contain the answer, reply: "I'm sorry, but that information is not available in the current live search results." Do NOT attempt to answer using your own knowledge base.
+3. Every statement or point you write must end with an inline citation link back to the source URL: [Title](URL).
+4. Blend this data seamlessly with the user's formatting requests (such as writing a detailed 12-mark exam answer).`
         });
     }
 

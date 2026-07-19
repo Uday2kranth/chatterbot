@@ -170,19 +170,19 @@ module.exports = async (req, res) => {
         searchContext = await getWebSearchSnippets(prompt);
     }
 
-    // Incorporate search context if present
+    // Incorporate search context if present or if web search is enabled (strict mode)
     let apiMessages = [...messages];
-    if (searchContext) {
+    if (webSearch) {
         apiMessages.unshift({
             role: "system",
             content: `You are in STRICT WEB GROUNDING MODE. Live search results have been retrieved for this query:
 
-${searchContext}
+${searchContext || "No live search results could be retrieved for this query."}
 
 STRICT DIRECTIVES:
 1. Exclusively answer using the search snippets provided above.
 2. If the snippets do not contain the answer, reply: "I'm sorry, but that information is not available in the current live search results." Do NOT attempt to answer using your own knowledge base.
-3. Every statement or point you write must end with an inline citation link back to the source URL: [Title](URL).
+3. Every statement or point you write must end with an inline citation link back to the source URL and its resource name using this exact format: [Clickable Link](URL) (Resource/Site Name).
 4. Blend this data seamlessly with the user's formatting requests (such as writing a detailed 12-mark exam answer).`
         });
     }

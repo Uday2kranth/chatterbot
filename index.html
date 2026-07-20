@@ -1913,6 +1913,15 @@
           <!-- Dual Dropdown Pickers Row -->
           <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
             <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; flex: 1;">
+              <!-- Scheme Picker -->
+              <div style="display: flex; flex-direction: column; gap: 4px; min-width: 160px; flex: 1;">
+                <label for="prep-scheme-select" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Select Scheme</label>
+                <select id="prep-scheme-select" class="custom-select" style="width: 100%; padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); outline: none;">
+                  <option value="irregular">Irregulars</option>
+                  <option value="balraju">Balraju</option>
+                </select>
+              </div>
+
               <!-- Subject Picker -->
               <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px; flex: 1;">
                 <label for="prep-subject-select" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Select Subject Paper</label>

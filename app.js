@@ -3430,6 +3430,7 @@ function renderExamPrepContent() {
 function setupExamPrep() {
   const examPrepBtn = document.getElementById('exam-prep-btn');
   const closeBtn = document.getElementById('close-exam-prep-view-btn');
+  const schemeSelect = document.getElementById('prep-scheme-select');
   const subjectSelect = document.getElementById('prep-subject-select');
   const categorySelect = document.getElementById('prep-category-select');
 
@@ -3439,6 +3440,34 @@ function setupExamPrep() {
   const copyBtn = document.getElementById('prep-copy-btn');
 
   checkExamPrepAccess();
+
+  function updateSubjectsDropdown() {
+    if (!schemeSelect || !subjectSelect) return;
+    const scheme = schemeSelect.value;
+    if (scheme === 'irregular') {
+      subjectSelect.innerHTML = `
+        <option value="crypto">Paper I: Cryptography (MDS-401)</option>
+        <option value="datamining">Paper II: Data Mining (MDS-402)</option>
+        <option value="sentiment">Paper III (A): Sentiment Analysis (MDS-403 A)</option>
+        <option value="webmining">Paper IV (B): Web Mining (MDS-404 B)</option>
+      `;
+    } else if (scheme === 'balraju') {
+      subjectSelect.innerHTML = `
+        <option value="crypto">Paper I: Cryptography (MDS-401)</option>
+        <option value="datamining">Paper II: Data Mining (MDS-402)</option>
+        <option value="scalable">Paper IV (C): Scalable Architecture (MDS-404 C)</option>
+        <option value="subject6">Paper III (B): Subject 6 (Coming Soon)</option>
+      `;
+    }
+    renderExamPrepContent();
+  }
+
+  if (schemeSelect) {
+    schemeSelect.addEventListener('change', updateSubjectsDropdown);
+  }
+
+  // Populate default subject options list
+  updateSubjectsDropdown();
 
   if (examPrepBtn) {
     examPrepBtn.addEventListener('click', () => {

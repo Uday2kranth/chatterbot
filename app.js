@@ -3124,6 +3124,45 @@ function renderMessages(messages) {
       }
     }
 
+// Helper to format Mermaid code into a clean linear sequence
+function formatMermaidToSimplifiedLinear(mermaidCode) {
+  if (!mermaidCode) return '';
+  const lines = mermaidCode.split('\n');
+  const nodeMap = {};
+  const mainSequence = [];
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
+
+    const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
+    for (const m of nodeDefs) {
+      nodeMap[m[1]] = m[2].trim();
+    }
+
+    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
+    if (connMatch) {
+      const from = connMatch[1];
+      const to = connMatch[3];
+      if (!mainSequence.includes(from)) mainSequence.push(from);
+      if (!mainSequence.includes(to)) mainSequence.push(to);
+    }
+  });
+
+  if (mainSequence.length < 2) return mermaidCode;
+
+  let mermaid = 'graph TD\n';
+  mainSequence.forEach((nId, idx) => {
+    const label = nodeMap[nId] || nId;
+    mermaid += `  node_simple_${idx}["${label}"]\n`;
+  });
+  for (let i = 0; i < mainSequence.length - 1; i++) {
+    mermaid += `  node_simple_${i} --> node_simple_${i+1}\n`;
+  }
+
+  return mermaid;
+}
+
 // Helper to format Mermaid code into a clean, human-readable ASCII text flowchart schema
 function formatMermaidToAsciiSchema(mermaidCode) {
   if (!mermaidCode) return '';
@@ -3178,19 +3217,28 @@ function formatMermaidToAsciiSchema(mermaidCode) {
   return ascii;
 }
 
-    // Attach Interactive Diagram View Toggle Toolbar (Vector Diagram vs Text Schema)
+    // Attach Interactive 3-Mode Diagram View Toggle Toolbar
     document.querySelectorAll('.mermaid-diagram-card').forEach((card) => {
       if (card.querySelector('.diagram-card-toolbar')) return; // Already initialized
 
       const mermaidElement = card.querySelector('.mermaid');
       if (!mermaidElement) return;
 
+      mermaidElement.classList.add('mermaid-full');
       const rawCode = mermaidElement.getAttribute('data-raw-code') || mermaidElement.textContent;
       if (!mermaidElement.getAttribute('data-raw-code')) {
         mermaidElement.setAttribute('data-raw-code', rawCode);
       }
 
-      // Create text schema container (hidden by default)
+      // Create simplified linear container
+      const simpleMermaidCode = formatMermaidToSimplifiedLinear(rawCode);
+      const simpleContainer = document.createElement('div');
+      simpleContainer.className = 'mermaid mermaid-simple';
+      simpleContainer.style.display = 'none';
+      simpleContainer.textContent = simpleMermaidCode;
+      card.appendChild(simpleContainer);
+
+      // Create text schema container
       const textSchemaContainer = document.createElement('pre');
       textSchemaContainer.className = 'diagram-text-schema';
       textSchemaContainer.style.display = 'none';
@@ -3203,10 +3251,12 @@ function formatMermaidToAsciiSchema(mermaidCode) {
       textSchemaContainer.style.fontSize = '0.85rem';
       textSchemaContainer.style.overflowX = 'auto';
       textSchemaContainer.textContent = formatMermaidToAsciiSchema(rawCode);
-
       card.appendChild(textSchemaContainer);
 
-      // Create toolbar header
+      // Set default mode attribute
+      card.setAttribute('data-active-mode', 'full');
+
+      // Create toolbar header with 3-Way Mode Segmented Buttons
       const toolbar = document.createElement('div');
       toolbar.className = 'diagram-card-toolbar';
       toolbar.style.display = 'flex';
@@ -3223,35 +3273,73 @@ function formatMermaidToAsciiSchema(mermaidCode) {
       titleLabel.style.display = 'flex';
       titleLabel.style.alignItems = 'center';
       titleLabel.style.gap = '6px';
-      titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Vector Flowchart Diagram</span>`;
+      titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Multi-Branch Diagram</span>`;
 
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'msg-action-btn';
-      toggleBtn.style.padding = '3px 10px';
-      toggleBtn.style.fontSize = '0.75rem';
-      toggleBtn.style.borderRadius = '6px';
-      toggleBtn.title = 'Switch between visual diagram and raw text code';
-      toggleBtn.innerHTML = `<i class="fa-solid fa-code"></i> <span>View Text Schema</span>`;
+      const btnGroup = document.createElement('div');
+      btnGroup.style.display = 'flex';
+      btnGroup.style.gap = '4px';
 
-      toggleBtn.addEventListener('click', () => {
-        const isShowingVector = mermaidElement.style.display !== 'none';
-        if (isShowingVector) {
-          mermaidElement.style.display = 'none';
-          textSchemaContainer.style.display = 'block';
-          toggleBtn.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>View Vector Diagram</span>`;
-          titleLabel.innerHTML = `<i class="fa-solid fa-code"></i> <span>Text Schema View</span>`;
+      const btnFull = document.createElement('button');
+      btnFull.className = 'msg-action-btn active';
+      btnFull.style.padding = '3px 8px';
+      btnFull.style.fontSize = '0.75rem';
+      btnFull.title = 'Show full multi-branch diagram with all decision splits';
+      btnFull.innerHTML = `<i class="fa-solid fa-sitemap"></i> <span>Full Vector</span>`;
+
+      const btnSimple = document.createElement('button');
+      btnSimple.className = 'msg-action-btn';
+      btnSimple.style.padding = '3px 8px';
+      btnSimple.style.fontSize = '0.75rem';
+      btnSimple.title = 'Show clean 1-line simplified flowchart';
+      btnSimple.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Clean Linear</span>`;
+
+      const btnText = document.createElement('button');
+      btnText.className = 'msg-action-btn';
+      btnText.style.padding = '3px 8px';
+      btnText.style.fontSize = '0.75rem';
+      btnText.title = 'Show ASCII text flowchart schema';
+      btnText.innerHTML = `<i class="fa-solid fa-code"></i> <span>ASCII Schema</span>`;
+
+      let simpleRendered = false;
+
+      const setMode = (mode) => {
+        card.setAttribute('data-active-mode', mode);
+        btnFull.classList.toggle('active', mode === 'full');
+        btnSimple.classList.toggle('active', mode === 'simple');
+        btnText.classList.toggle('active', mode === 'text');
+
+        mermaidElement.style.display = mode === 'full' ? 'block' : 'none';
+        simpleContainer.style.display = mode === 'simple' ? 'block' : 'none';
+        textSchemaContainer.style.display = mode === 'text' ? 'block' : 'none';
+
+        if (mode === 'full') {
+          titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Multi-Branch Diagram</span>`;
+        } else if (mode === 'simple') {
+          titleLabel.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Clean Linear Flow</span>`;
+          if (!simpleRendered && window.mermaid) {
+            try {
+              window.mermaid.run({ nodes: [simpleContainer] });
+              simpleRendered = true;
+            } catch(e){}
+          }
         } else {
-          mermaidElement.style.display = 'block';
-          textSchemaContainer.style.display = 'none';
-          toggleBtn.innerHTML = `<i class="fa-solid fa-code"></i> <span>View Text Schema</span>`;
-          titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Vector Flowchart Diagram</span>`;
+          titleLabel.innerHTML = `<i class="fa-solid fa-code"></i> <span>ASCII Text Schema</span>`;
         }
-      });
+      };
+
+      btnFull.addEventListener('click', () => setMode('full'));
+      btnSimple.addEventListener('click', () => setMode('simple'));
+      btnText.addEventListener('click', () => setMode('text'));
+
+      btnGroup.appendChild(btnFull);
+      btnGroup.appendChild(btnSimple);
+      btnGroup.appendChild(btnText);
 
       toolbar.appendChild(titleLabel);
-      toolbar.appendChild(toggleBtn);
+      toolbar.appendChild(btnGroup);
       card.insertBefore(toolbar, card.firstChild);
     });
+  }, 100);
   }, 100);
 
   // Scroll to bottom
@@ -6115,30 +6203,38 @@ function exportChatToPDF() {
       <div class="content-list">
   `;
 
-  messages.forEach(msg => {
-    if (msg.isArena) {
-      const formattedA = renderMarkdownWithMath(msg.modelAContent || '');
-      const formattedB = renderMarkdownWithMath(msg.modelBContent || '');
-      htmlContent += `
-        <div class="message" style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-          <div class="role assistant" style="color: #7c3aed; font-size: 1rem; margin-bottom: 12px;">⚔️ Model Arena Comparison View</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px;">
-              <div style="font-weight: 700; color: #2563eb; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">
-                🤖 MODEL A: ${(msg.modelAProvider || '').toUpperCase()} (${msg.modelAName || ''})
-              </div>
-              <div class="content">${formattedA}</div>
-            </div>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px;">
-              <div style="font-weight: 700; color: #7c3aed; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">
-                ⚡ MODEL B: ${(msg.modelBProvider || '').toUpperCase()} (${msg.modelBName || ''})
-              </div>
-              <div class="content">${formattedB}</div>
-            </div>
-          </div>
-        </div>
-      `;
-    } else {
+  const messagesContainer = document.getElementById('messages-container');
+  if (messagesContainer) {
+    const msgEls = messagesContainer.querySelectorAll('.message');
+    msgEls.forEach(msgEl => {
+      const cloned = msgEl.cloneNode(true);
+      cloned.querySelectorAll('.message-actions, .diagram-card-toolbar, .code-copy-btn').forEach(el => el.remove());
+
+      cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
+        const activeMode = card.getAttribute('data-active-mode') || 'full';
+        const fullEl = card.querySelector('.mermaid-full');
+        const simpleEl = card.querySelector('.mermaid-simple');
+        const textEl = card.querySelector('.diagram-text-schema');
+
+        if (activeMode === 'full') {
+          if (fullEl) fullEl.style.display = 'block';
+          if (simpleEl) simpleEl.remove();
+          if (textEl) textEl.remove();
+        } else if (activeMode === 'simple') {
+          if (simpleEl) simpleEl.style.display = 'block';
+          if (fullEl) fullEl.remove();
+          if (textEl) textEl.remove();
+        } else if (activeMode === 'text') {
+          if (textEl) textEl.style.display = 'block';
+          if (fullEl) fullEl.remove();
+          if (simpleEl) simpleEl.remove();
+        }
+      });
+
+      htmlContent += cloned.outerHTML;
+    });
+  } else {
+    messages.forEach(msg => {
       const formattedBody = renderMarkdownWithMath(msg.content || '');
       htmlContent += `
         <div class="message">
@@ -6146,8 +6242,8 @@ function exportChatToPDF() {
           <div class="content">${formattedBody}</div>
         </div>
       `;
-    }
-  });
+    });
+  }
 
   htmlContent += `
       </div>

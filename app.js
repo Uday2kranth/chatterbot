@@ -3256,7 +3256,10 @@ function renderMessages(messages) {
       if (!mermaidElement) return;
 
       mermaidElement.classList.add('mermaid-full');
-      const rawCode = mermaidElement.getAttribute('data-raw-code') || mermaidElement.textContent;
+      const rawCode = card.getAttribute('data-raw-code') || mermaidElement.getAttribute('data-raw-code') || mermaidElement.textContent;
+      if (!card.getAttribute('data-raw-code')) {
+        card.setAttribute('data-raw-code', rawCode);
+      }
       if (!mermaidElement.getAttribute('data-raw-code')) {
         mermaidElement.setAttribute('data-raw-code', rawCode);
       }
@@ -6242,8 +6245,16 @@ function exportChatToPDF() {
 
       cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
         const activeMode = card.getAttribute('data-active-mode') || 'full';
-        const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
-        const rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
+        let rawCode = card.getAttribute('data-raw-code');
+        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
+          const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
+          rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
+        }
+
+        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
+          // If raw code is missing, preserve active visual content without resetting
+          return;
+        }
 
         if (activeMode === 'full') {
           card.innerHTML = `<div class="mermaid">${rawCode}</div>`;
@@ -6694,8 +6705,16 @@ function exportMessageToPDF(rawContent, msgIdx) {
 
       cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
         const activeMode = card.getAttribute('data-active-mode') || 'full';
-        const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
-        const rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
+        let rawCode = card.getAttribute('data-raw-code');
+        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
+          const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
+          rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
+        }
+
+        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
+          // If raw code is missing, preserve active visual content without resetting
+          return;
+        }
 
         if (activeMode === 'full') {
           card.innerHTML = `<div class="mermaid">${rawCode}</div>`;

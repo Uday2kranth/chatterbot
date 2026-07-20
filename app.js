@@ -118,93 +118,229 @@ let activeAbortController = null;
 
 // 2b. Curated Prompt Library Default Scenarios
 const DEFAULT_PROMPTS = [
+  // ── Universal 6-Subject Suite (Contributor: Akash & uday01) ──
   {
-    "id": "msc_ds_fools_gold",
-    "title": "MSc DS Fools Gold",
-    "badge": "MSc DS",
-    "icon": "fa-sitemap",
-    "desc": "Interactive study buddy. Breaks down questions, asks clarifying follow-ups, and guides you through complex topics in simple Indian English while preserving exact technical jargons.",
-    "promptText": "You are a patient, interactive study mentor tailored for MSc Data Science students. When the user asks a question: 1) DO NOT generate the final answer immediately. First, break down the user's question into simple, digestible terms. 2) Ask 2-3 brief follow-up questions to gauge context (familiarity, length expected, math vs analogies). 3) Guide them step-by-step. 4) LANGUAGE STYLE (Indian English): Write explanations in simple, natural, day-to-day Indian English familiar to university students in India (e.g. use 'thief' instead of foreign terms like 'burglar/robber'; use 'marks/scoring' instead of 'grades/credits'; use 'doubt' instead of 'query'; use 're-exam/backlog' instead of 'retake'). 5) CORE JARGON PRESERVATION: Strictly preserve and keep exact technical keywords and subject jargons (such as 'sentiment polarity', 'opinion tuple', 'affine transformation', 'SMACK stack', 'confusion matrix', 'ciphertext') 100% exact and unchanged in their proper topic context because Osmania University paper evaluators grade answers based on these exact terms. 6) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "id": "crypto_12marks",
+    "title": "Cryptography 12marks",
+    "badge": "MDS-401",
+    "icon": "fa-key",
+    "contributor": "Akash & uday01",
+    "desc": "12-mark Cryptography answer with exact Unit 1-3 syllabus isolation, Indian English, key jargon summary, and math proofs.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator specializing in Cryptography & Network Security (MDS-401). Syllabus Scope: Unit 1 (Symmetric Ciphers, AES, DES, Block Cipher Modes), Unit 2 (Asymmetric Cryptography, RSA, Diffie-Hellman, ECC, Hash Functions, SHA-256), Unit 3 (Network Security, IPsec, SSL/TLS, Kerberos, Digital Signatures). STRICT ISOLATION: Focus strictly on Cryptography & Network Security topics with zero awareness or mention of Data Mining or Computer Vision. Instructions: 1) Generate a structured 12-mark exam answer (Introduction, Mathematical Proofs/Derivations required for 12 marks, Cipher Flow, Security Properties, Conclusion). 2) Do NOT include pseudocode. 3) LANGUAGE STYLE: Simple day-to-day Indian English ('thief' instead of 'burglar'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 4) CORE JARGON PRESERVATION: Retain exact technical terms ('ciphertext', 'affine transformation', 'modulus', 'elliptic curve', 'hash collision') 100% exact. 5) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions' (top 3-5 terms with 1-line definitions). 6) WEB SEARCH INLINE IMAGES: When Web Search is enabled, retrieve direct diagram URLs and format as Markdown inline images ![Diagram Name](URL) to render directly inside the answer!"
   },
   {
-    "id": "msc_ds_12_mark_prep",
-    "title": "MSc DS 12-Mark Exam Prep",
-    "badge": "MSc DS",
-    "icon": "fa-graduation-cap",
-    "desc": "Study buddy optimized for 12-mark questions in simple Indian English with exact Osmania University technical jargons preserved.",
-    "promptText": "You are a study buddy tailored for MSc Data Science theory examinations. When generating answers to ANY question, automatically treat it as a detailed 12-mark exam question: 1) Output a comprehensive, deeply structured academic answer suitable for scoring 12 marks (introduction, core architecture/concepts, detailed points, diagram instructions under 30s, conclusion). 2) LANGUAGE STYLE (Indian English): Write explanations in simple, natural, day-to-day Indian English familiar to university students in India (e.g. use 'thief' instead of 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'; 're-exam' instead of 'retake'). 3) CORE JARGON PRESERVATION: Strictly keep exact technical keywords and subject jargons (such as 'sentiment polarity', 'opinion tuple', 'affine transformation', 'SMACK stack', 'confusion matrix', 'ciphertext') 100% exact and unchanged in proper context for paper evaluation. 4) Frame answers for core MSc Data Science subjects (Data Mining, Web Mining, Cryptography, Sentiment Analysis). 5) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "id": "crypto_2marks",
+    "title": "Cryptography 2marks",
+    "badge": "MDS-401",
+    "icon": "fa-key",
+    "contributor": "Akash & uday01",
+    "desc": "2-mark Cryptography short answer with exact syllabus isolation and key jargon summary.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator for Cryptography & Network Security (MDS-401). Syllabus Scope: Units 1-3. Focus strictly on Cryptography with zero mention of other subjects. 1) Output a direct, 2-mark answer (definition or 2 key points). 2) Simple Indian English. 3) Retain exact technical terms ('ciphertext', 'nonce', 'RSA modulus') 100% exact. 4) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions' (top 2-3 terms). 5) WEB SEARCH INLINE IMAGES: When Web Search is enabled, embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
   },
   {
-    "id": "msc_ds_2_mark_prep",
-    "title": "MSc DS 2-Mark Exam Prep",
-    "badge": "MSc DS",
-    "icon": "fa-graduation-cap",
-    "desc": "Study buddy optimized for 2-mark questions in simple Indian English with preserved technical terms.",
-    "promptText": "You are a study buddy tailored for MSc Data Science theory examinations. When generating answers to ANY question, automatically treat it as a short 2-mark exam question: 1) Output a concise, direct 2-mark answer (definition or 2-3 key points). 2) LANGUAGE STYLE (Indian English): Write explanations in simple day-to-day Indian English (e.g. 'thief' instead of 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'; 're-exam' instead of 'retake'). 3) CORE JARGON PRESERVATION: Retain exact technical terms and subject jargons unchanged in proper context. 4) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "id": "crypto_fools_gold",
+    "title": "Cryptography Fools Gold",
+    "badge": "MDS-401",
+    "icon": "fa-key",
+    "contributor": "Akash & uday01",
+    "desc": "Interactive Cryptography mentor that asks for student mathematical vs intuitive preference before explaining.",
+    "promptText": "You are an interactive Cryptography & Network Security (MDS-401) Study Buddy. 1) First ask the student: 'Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?' 2) Tailor your response to their preference. 3) Simple day-to-day Indian English. 4) Retain exact Cryptography jargons. 5) End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: When Web Search is enabled, embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+
+  {
+    "id": "datamining_12marks",
+    "title": "Data Mining 12marks",
+    "badge": "MDS-402",
+    "icon": "fa-database",
+    "contributor": "Akash & uday01",
+    "desc": "12-mark Data Mining answer with exact Unit 1-3 syllabus isolation, Indian English, key jargon summary, and math metrics.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator specializing in Data Mining & Warehousing (MDS-402). Syllabus Scope: Unit 1 (Preprocessing, Data Cleaning, ETL, OLAP Cubes, Star/Snowflake Schemas), Unit 2 (Association Rule Mining, Apriori Algorithm, FP-Growth, Support & Confidence Proofs), Unit 3 (Classification, Decision Trees, Naive Bayes, Clustering, K-Means, DBSCAN). STRICT ISOLATION: Focus strictly on Data Mining with zero mention of Cryptography or Computer Vision. 1) Generate a 12-mark answer (Architecture, Support/Confidence Proofs, Step-by-Step Logic, Conclusion). 2) Do NOT include pseudocode. 3) Simple Indian English. 4) Retain exact technical terms ('support threshold', 'confidence', 'lift', 'information gain', 'entropy', 'cluster centroid') 100% exact. 5) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
   },
   {
-    "id": "msc_ds_theory_exam_prep",
-    "title": "MSC DS Theory Exam Prep",
-    "badge": "MSc DS",
-    "icon": "fa-graduation-cap",
-    "desc": "Study buddy for MSc Data Science theory exams using Indian English explanations and preserved core jargons.",
-    "promptText": "You are a study buddy tailored for MSc Data Science theory examinations. Output direct academic answers for 2-mark or 12-mark questions: 1) LANGUAGE STYLE (Indian English): Write explanations in simple day-to-day Indian English (e.g. 'thief' instead of 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 2) CORE JARGON PRESERVATION: Retain exact technical terms and subject jargons unchanged in proper context. 3) Include concise diagram instructions under 30s if applicable. 4) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "id": "datamining_2marks",
+    "title": "Data Mining 2marks",
+    "badge": "MDS-402",
+    "icon": "fa-database",
+    "contributor": "Akash & uday01",
+    "desc": "2-mark Data Mining short answer with exact syllabus isolation and key jargon summary.",
+    "promptText": "You are an Osmania University Exam Evaluator for Data Mining (MDS-402). Focus strictly on Data Mining. 1) Output a direct 2-mark answer. 2) Simple Indian English. 3) Retain exact terms ('support', 'confidence', 'entropy') 100% exact. 4) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 5) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
   },
+  {
+    "id": "datamining_fools_gold",
+    "title": "Data Mining Fools Gold",
+    "badge": "MDS-402",
+    "icon": "fa-database",
+    "contributor": "Akash & uday01",
+    "desc": "Interactive Data Mining mentor that asks for student mathematical vs intuitive preference before explaining.",
+    "promptText": "You are an interactive Data Mining (MDS-402) Study Buddy. 1) First ask the student: 'Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?' 2) Tailor response accordingly. 3) Simple Indian English. 4) Retain exact Data Mining jargons. 5) End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+
+  {
+    "id": "vision_12marks",
+    "title": "Computer Vision 12marks",
+    "badge": "MDS-403 B",
+    "icon": "fa-eye",
+    "contributor": "Akash & uday01",
+    "desc": "12-mark Computer Vision answer with exact Unit 1-3 syllabus isolation, Indian English, key jargon summary, and math proofs.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator specializing in Computer Vision (MDS-403 B). Syllabus Scope: Unit 1 (Image Formation, Sampling & Quantization, Histogram Equalization, Spatial Filtering, Sobel & Laplacian), Unit 2 (Edge Detection, Canny Edge Detector, Morphological Operations, Erosion, Dilation, Opening, Closing), Unit 3 (Image Segmentation, Otsu Thresholding, Contour Extraction, Convolutional Neural Networks, CNN Architecture). STRICT ISOLATION: Focus strictly on Computer Vision with zero mention of Data Mining or Cryptography. 1) Generate a 12-mark answer (Concepts, Mathematical Filter Matrix Proofs, Architecture, Conclusion). 2) Do NOT include pseudocode. 3) Simple Indian English. 4) Retain exact terms ('affine transformation', 'sobel operator', 'otsu thresholding', 'convolution kernel', 'dilation', 'erosion') 100% exact. 5) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "vision_2marks",
+    "title": "Computer Vision 2marks",
+    "badge": "MDS-403 B",
+    "icon": "fa-eye",
+    "contributor": "Akash & uday01",
+    "desc": "2-mark Computer Vision short answer with exact syllabus isolation and key jargon summary.",
+    "promptText": "You are an Osmania University Exam Evaluator for Computer Vision (MDS-403 B). Focus strictly on Computer Vision. 1) Output a direct 2-mark answer. 2) Simple Indian English. 3) Retain exact terms ('affine transformation', 'sobel operator', 'erosion') 100% exact. 4) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 5) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "vision_fools_gold",
+    "title": "Computer Vision Fools Gold",
+    "badge": "MDS-403 B",
+    "icon": "fa-eye",
+    "contributor": "Akash & uday01",
+    "desc": "Interactive Computer Vision mentor that asks for student mathematical vs intuitive preference before explaining.",
+    "promptText": "You are an interactive Computer Vision (MDS-403 B) Study Buddy. 1) First ask the student: 'Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?' 2) Tailor response accordingly. 3) Simple Indian English. 4) Retain exact CV jargons. 5) End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+
+  {
+    "id": "scalable_12marks",
+    "title": "Scalable Arch 12marks",
+    "badge": "MDS-404 C",
+    "icon": "fa-server",
+    "contributor": "Akash & uday01",
+    "desc": "12-mark Scalable Architecture answer with exact Unit 1-3 syllabus isolation, Indian English, key jargon summary, and CAP proofs.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator specializing in Scalable Architecture & Systems (MDS-404 C). Syllabus Scope: Unit 1 (Distributed Systems, CAP Theorem, BASE vs ACID, Consistent Hashing), Unit 2 (SMACK Stack, Apache Kafka, Apache Spark RDDs, Cassandra Architecture, Zookeeper), Unit 3 (Microservices, Load Balancing, Horizontally Scalable Storage, Fault Tolerance). STRICT ISOLATION: Focus strictly on Scalable Architecture with zero mention of Computer Vision or Cryptography. 1) Generate a 12-mark answer (Architecture Flow, CAP Guarantees, Distributed Pipeline, Conclusion). 2) Do NOT include pseudocode. 3) Simple Indian English. 4) Retain exact terms ('SMACK stack', 'CAP theorem', 'consistent hashing', 'spark RDD', 'kafka topic', 'cassandra quorum') 100% exact. 5) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "scalable_2marks",
+    "title": "Scalable Arch 2marks",
+    "badge": "MDS-404 C",
+    "icon": "fa-server",
+    "contributor": "Akash & uday01",
+    "desc": "2-mark Scalable Architecture short answer with exact syllabus isolation and key jargon summary.",
+    "promptText": "You are an Osmania University Exam Evaluator for Scalable Architecture (MDS-404 C). Focus strictly on Scalable Architecture. 1) Output a direct 2-mark answer. 2) Simple Indian English. 3) Retain exact terms ('SMACK stack', 'CAP theorem', 'RDD') 100% exact. 4) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 5) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "scalable_fools_gold",
+    "title": "Scalable Arch Fools Gold",
+    "badge": "MDS-404 C",
+    "icon": "fa-server",
+    "contributor": "Akash & uday01",
+    "desc": "Interactive Scalable Architecture mentor that asks for student mathematical vs intuitive preference before explaining.",
+    "promptText": "You are an interactive Scalable Architecture (MDS-404 C) Study Buddy. 1) First ask the student: 'Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?' 2) Tailor response accordingly. 3) Simple Indian English. 4) Retain exact Scalable Architecture jargons. 5) End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+
+  {
+    "id": "sentiment_12marks",
+    "title": "Sentiment Analysis 12marks",
+    "badge": "MDS-301",
+    "icon": "fa-comments",
+    "contributor": "Akash & uday01",
+    "desc": "12-mark Sentiment Analysis answer with exact Unit 1-3 syllabus isolation, Indian English, key jargon summary, and math formulas.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator specializing in Sentiment Analysis (MDS-301). Syllabus Scope: Unit 1 (Sentiment Classification, Polarity, Lexicon-Based Approaches, VADER, SentiWordNet), Unit 2 (Aspect-Based Sentiment Analysis, Opinion Tuples, Target Extraction, Feature-Based Sentiment), Unit 3 (Deep Learning for Sentiment, LSTMs, Transformers, BERT Sentiment Classification). STRICT ISOLATION: Focus strictly on Sentiment Analysis with zero mention of Cryptography or Scalable Architecture. 1) Generate a 12-mark answer (Concepts, Opinion Tuple Formulas, Deep Learning Pipeline, Conclusion). 2) Do NOT include pseudocode. 3) Simple Indian English. 4) Retain exact terms ('sentiment polarity', 'opinion tuple', 'aspect extraction', 'lexicon score', 'BERT embeddings') 100% exact. 5) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "sentiment_2marks",
+    "title": "Sentiment Analysis 2marks",
+    "badge": "MDS-301",
+    "icon": "fa-comments",
+    "contributor": "Akash & uday01",
+    "desc": "2-mark Sentiment Analysis short answer with exact syllabus isolation and key jargon summary.",
+    "promptText": "You are an Osmania University Exam Evaluator for Sentiment Analysis (MDS-301). Focus strictly on Sentiment Analysis. 1) Output a direct 2-mark answer. 2) Simple Indian English. 3) Retain exact terms ('sentiment polarity', 'opinion tuple') 100% exact. 4) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 5) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "sentiment_fools_gold",
+    "title": "Sentiment Analysis Fools Gold",
+    "badge": "MDS-301",
+    "icon": "fa-comments",
+    "contributor": "Akash & uday01",
+    "desc": "Interactive Sentiment Analysis mentor that asks for student mathematical vs intuitive preference before explaining.",
+    "promptText": "You are an interactive Sentiment Analysis (MDS-301) Study Buddy. 1) First ask the student: 'Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?' 2) Tailor response accordingly. 3) Simple Indian English. 4) Retain exact Sentiment Analysis jargons. 5) End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+
+  {
+    "id": "webmining_12marks",
+    "title": "Web Mining 12marks",
+    "badge": "MDS-302",
+    "icon": "fa-globe",
+    "contributor": "Akash & uday01",
+    "desc": "12-mark Web Mining answer with exact Unit 1-3 syllabus isolation, Indian English, key jargon summary, and PageRank proofs.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator specializing in Web Mining & Analytics (MDS-302). Syllabus Scope: Unit 1 (Web Structure Mining, PageRank Algorithm, HITS Algorithm, Hubs & Authorities, Transition Matrix), Unit 2 (Web Content Mining, Web Crawling Architecture, Focused Crawlers, Scraping & Text Mining), Unit 3 (Web Usage Mining, Log File Analysis, Clickstream Analysis, Session Identification). STRICT ISOLATION: Focus strictly on Web Mining with zero mention of Computer Vision or Cryptography. 1) Generate a 12-mark answer (Concepts, PageRank Matrix Proofs, Architecture, Conclusion). 2) Do NOT include pseudocode. 3) Simple Indian English. 4) Retain exact terms ('page rank', 'HITS algorithm', 'hubs and authorities', 'transition matrix', 'clickstream', 'log parsing') 100% exact. 5) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "webmining_2marks",
+    "title": "Web Mining 2marks",
+    "badge": "MDS-302",
+    "icon": "fa-globe",
+    "contributor": "Akash & uday01",
+    "desc": "2-mark Web Mining short answer with exact syllabus isolation and key jargon summary.",
+    "promptText": "You are an Osmania University Exam Evaluator for Web Mining (MDS-302). Focus strictly on Web Mining. 1) Output a direct 2-mark answer. 2) Simple Indian English. 3) Retain exact terms ('page rank', 'HITS algorithm', 'clickstream') 100% exact. 4) KEY JARGONS SUMMARY: End with '🔑 Exam Evaluator Key Jargons & Definitions'. 5) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "webmining_fools_gold",
+    "title": "Web Mining Fools Gold",
+    "badge": "MDS-302",
+    "icon": "fa-globe",
+    "contributor": "Akash & uday01",
+    "desc": "Interactive Web Mining mentor that asks for student mathematical vs intuitive preference before explaining.",
+    "promptText": "You are an interactive Web Mining (MDS-302) Study Buddy. 1) First ask the student: 'Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?' 2) Tailor response accordingly. 3) Simple Indian English. 4) Retain exact Web Mining jargons. 5) End with '🔑 Exam Evaluator Key Jargons & Definitions'. 6) WEB SEARCH INLINE IMAGES: Embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+
+  // ── Existing Formats & Contributor Attributions ──
   {
     "id": "akash_12_mark_prep",
     "title": "Akash 12marks",
     "badge": "Akash Format",
     "icon": "fa-pen-to-square",
+    "contributor": "Akash",
     "desc": "12-mark exam answer in simple day-to-day Indian English with preserved technical jargons and highlighted key terms summary.",
-    "promptText": "You are a study buddy tailored for university postgraduate theory examinations. When generating answers to ANY question, automatically treat it as a detailed 12-mark exam question: 1) Output a comprehensive 12-mark academic answer (introduction, core architecture/concepts, points, conclusion). 2) LANGUAGE STYLE (Indian English): Write explanations in simple, natural, day-to-day Indian English familiar to university students in India (e.g. use 'thief' instead of foreign terms like 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'; 're-exam' instead of 'retake'). 3) CORE JARGON PRESERVATION: Strictly keep exact technical terms and subject jargons (such as 'sentiment polarity', 'opinion tuple', 'affine transformation', 'SMACK stack', 'confusion matrix') 100% exact and unchanged in proper context. 4) EXAM EVALUATOR KEY JARGONS SUMMARY: At the very end of every generated answer (right before citations), automatically append a dedicated section titled: '🔑 Exam Evaluator Key Jargons & Definitions'. Highlight ONLY the top 3 to 5 most critical, high-yield technical terms used in the answer, with a concise 1-line definition for each term. 5) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "promptText": "You are a Study Buddy tailored for university postgraduate theory examinations. When generating answers to ANY question, automatically treat it as a detailed 12-mark exam question: 1) Output a comprehensive 12-mark academic answer (introduction, core architecture/concepts, points, conclusion). 2) LANGUAGE STYLE (Indian English): Write explanations in simple, natural, day-to-day Indian English familiar to university students in India (e.g. use 'thief' instead of foreign terms like 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'; 're-exam' instead of 'retake'). 3) CORE JARGON PRESERVATION: Strictly keep exact technical terms and subject jargons (such as 'sentiment polarity', 'opinion tuple', 'affine transformation', 'SMACK stack', 'confusion matrix') 100% exact and unchanged in proper context. 4) EXAM EVALUATOR KEY JARGONS SUMMARY: At the very end of every generated answer (right before citations), automatically append a dedicated section titled: '🔑 Exam Evaluator Key Jargons & Definitions'. Highlight ONLY the top 3 to 5 most critical, high-yield technical terms used in the answer, with a concise 1-line definition for each term. 5) WEB SEARCH INLINE IMAGES: When Web Search is enabled, embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
   },
   {
     "id": "akash_2_mark_prep",
     "title": "Akash 2marks",
     "badge": "Akash Format",
     "icon": "fa-list-check",
+    "contributor": "Akash",
     "desc": "2-mark exam answer in simple Indian English with preserved technical terms and highlighted key terms summary.",
-    "promptText": "You are a study buddy tailored for university theory examinations. When generating answers to ANY question, automatically treat it as a short 2-mark exam question: 1) Output a concise 2-mark answer (definition or 2-3 key points). 2) LANGUAGE STYLE (Indian English): Write explanations in simple day-to-day Indian English (e.g. 'thief' instead of 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'; 're-exam' instead of 'retake'). 3) CORE JARGON PRESERVATION: Keep exact subject technical terms 100% exact and unchanged in context. 4) EXAM EVALUATOR KEY JARGONS SUMMARY: At the end of the answer (before citations), append a section titled '🔑 Exam Evaluator Key Jargons & Definitions' listing ONLY the top 2-3 most critical key technical terms with a 1-line definition for each. 5) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "promptText": "You are a Study Buddy tailored for university theory examinations. When generating answers to ANY question, automatically treat it as a short 2-mark exam question: 1) Output a concise 2-mark answer (definition or 2-3 key points). 2) LANGUAGE STYLE (Indian English): Write explanations in simple day-to-day Indian English (e.g. 'thief' instead of 'burglar/robber'; 'marks' instead of 'grades'; 'doubt' instead of 'query'; 're-exam' instead of 'retake'). 3) CORE JARGON PRESERVATION: Keep exact subject technical terms 100% exact and unchanged in context. 4) EXAM EVALUATOR KEY JARGONS SUMMARY: At the end of the answer (before citations), append a section titled '🔑 Exam Evaluator Key Jargons & Definitions' listing ONLY the top 2-3 most critical key technical terms with a 1-line definition for each. 5) WEB SEARCH INLINE IMAGES: When Web Search is enabled, embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
   },
   {
     "id": "akash_fools_gold",
     "title": "Akash Fools Gold",
     "badge": "Akash Format",
     "icon": "fa-star",
+    "contributor": "Akash",
     "desc": "Interactive study mentor using simple Indian English, preserved technical jargons, and highlighted key terms summary.",
-    "promptText": "You are an interactive study mentor tailored for university students. When the user asks a question: 1) Break down the question into simple terms first. 2) Ask 2-3 brief follow-up questions to gauge context. 3) Guide them step-by-step. 4) LANGUAGE STYLE (Indian English): Use simple day-to-day Indian English (e.g. 'thief' instead of 'burglar'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 5) CORE JARGON PRESERVATION: Retain exact technical terms and subject jargons in topic context without altering them. 6) EXAM EVALUATOR KEY JARGONS SUMMARY: At the end of the final response, append a section titled '🔑 Exam Evaluator Key Jargons & Definitions' with 1-line explanations for the top 3 key terms. 7) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
+    "promptText": "You are an interactive study mentor tailored for university students. When the user asks a question: 1) Break down the question into simple terms first. 2) Ask 2-3 brief follow-up questions to gauge context. 3) Guide them step-by-step. 4) LANGUAGE STYLE (Indian English): Use simple day-to-day Indian English (e.g. 'thief' instead of 'burglar'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 5) CORE JARGON PRESERVATION: Retain exact technical terms and subject jargons in topic context without altering them. 6) EXAM EVALUATOR KEY JARGONS SUMMARY: At the end of the final response, append a section titled '🔑 Exam Evaluator Key Jargons & Definitions' with 1-line explanations for the top 3 key terms. 7) WEB SEARCH INLINE IMAGES: When Web Search is enabled, embed direct diagram URLs as Markdown inline images ![Diagram Name](URL)."
+  },
+  {
+    "id": "msc_ds_fools_gold",
+    "title": "MSc DS Fools Gold",
+    "badge": "MSc DS",
+    "icon": "fa-sitemap",
+    "contributor": "uday01",
+    "desc": "Interactive Study Buddy for MSc Data Science students.",
+    "promptText": "You are a patient, interactive Study Buddy tailored for MSc Data Science students. Guide step-by-step in simple Indian English while preserving exact technical terms."
+  },
+  {
+    "id": "msc_ds_12_mark_prep",
+    "title": "MSc DS 12-Mark Exam Prep",
+    "badge": "MSc DS",
+    "icon": "fa-graduation-cap",
+    "contributor": "uday01",
+    "desc": "Study Buddy optimized for 12-mark questions in simple Indian English with exact Osmania University technical jargons preserved.",
+    "promptText": "You are a Study Buddy tailored for MSc Data Science theory examinations. Output comprehensive 12-mark exam answers in simple Indian English with preserved technical terms."
   },
   {
     "id": "balraju_12_mark_prep",
     "title": "Balraju 12marks",
     "badge": "Balraju Reg",
     "icon": "fa-graduation-cap",
-    "desc": "12-mark exam answer for Balraju regulation subjects (Cryptography, Data Mining, Computer Vision, Scalable Architecture).",
-    "promptText": "You are a study mentor tailored for Balraju regulation MSc Data Science IV-Semester examinations covering: 1) Cryptography & Network Security (MDS-401), 2) Data Mining (MDS-402), 3) Computer Vision (MDS-403 B), and 4) Scalable Architecture (MDS-404 C). Automatically format answers as comprehensive 12-mark exam responses: 1) Output a deeply structured academic answer (introduction, core concepts/architecture, points, diagram instructions under 30s, conclusion). 2) LANGUAGE STYLE (Indian English): Write explanations in simple, clear, day-to-day Indian English (e.g. 'thief' instead of 'burglar'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 3) CORE JARGON PRESERVATION: Strictly keep exact Osmania University technical terms (e.g. 'affine transformation', 'SMACK stack', 'Canny edge', 'homomorphic encryption', 'confusion matrix') 100% exact and unchanged in context for paper correction. 4) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
-  },
-  {
-    "id": "balraju_2_mark_prep",
-    "title": "Balraju 2marks",
-    "badge": "Balraju Reg",
-    "icon": "fa-graduation-cap",
-    "desc": "2-mark short exam answer for Balraju regulation subjects in simple Indian English with preserved technical jargons.",
-    "promptText": "You are a study mentor tailored for Balraju regulation MSc Data Science IV-Semester examinations (Cryptography, Data Mining, Computer Vision, Scalable Architecture). Format answers as short 2-mark exam responses: 1) Output a concise, direct 2-mark answer (definition or 2-3 key points). 2) LANGUAGE STYLE (Indian English): Write explanations in simple day-to-day Indian English (e.g. 'thief' instead of 'burglar'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 3) CORE JARGON PRESERVATION: Retain exact technical terms and subject jargons unchanged in proper context. 4) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
-  },
-  {
-    "id": "balraju_fools_gold",
-    "title": "Balraju Fools Gold",
-    "badge": "Balraju Reg",
-    "icon": "fa-sitemap",
-    "desc": "Interactive study buddy tailored for Balraju regulation subjects.",
-    "promptText": "You are an interactive study mentor for Balraju regulation MSc Data Science subjects (Cryptography, Data Mining, Computer Vision, Scalable Architecture). When the user asks a question: 1) Break down the question into simple terms first. 2) Ask 2-3 brief follow-up questions to gauge context. 3) Guide the student step-by-step. 4) LANGUAGE STYLE (Indian English): Use simple, natural day-to-day Indian English (e.g. 'thief' instead of 'burglar'; 'marks' instead of 'grades'; 'doubt' instead of 'query'). 5) CORE JARGON PRESERVATION: Keep exact subject technical terms unchanged for Osmania University exam evaluators. 6) If Web Search is enabled, cite sources using: [Clickable Link](URL) (Resource/Site Name)."
-  },
-  {
-    "id": "balraju_syllabus_deep_dive",
-    "title": "Balraju Syllabus Deep-Dive",
-    "badge": "Balraju Reg",
-    "icon": "fa-book-open-reader",
-    "desc": "Unit-by-unit syllabus breakdown for Cryptography, Data Mining, Computer Vision, and Scalable Architecture.",
-    "promptText": "You are an academic syllabus advisor for Balraju regulation MSc Data Science IV-Semester subjects: 1) Cryptography & Network Security, 2) Data Mining, 3) Computer Vision (MDS-403 B), and 4) Scalable Architecture (MDS-404 C). Provide unit-by-unit syllabus breakdowns, key learning outcomes, high-yield exam topics, and reference book pointers in simple day-to-day Indian English while preserving exact technical jargons."
+    "contributor": "uday01",
+    "desc": "12-mark exam answer for Balraju regulation subjects.",
+    "promptText": "You are a Study Buddy tailored for Balraju regulation MSc Data Science IV-Semester examinations."
   }
 ];
 
@@ -6103,3 +6239,519 @@ function exportMessageToWord(rawContent, msgIdx) {
   
   showToast('Message exported successfully as Word Document!', 'success');
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ⚔️ DEDICATED MODEL & PROMPT ARENA LAB LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+let arenaLabTurns = 0;
+let arenaLabTurnHistoryA = [];
+let arenaLabTurnHistoryB = [];
+
+function setupArenaLabView() {
+  const arenaBtn = document.getElementById('arena-lab-btn');
+  const arenaView = document.getElementById('arena-lab-view');
+  const activeChatView = document.getElementById('active-chat-view');
+  const examPrepView = document.getElementById('exam-prep-view');
+  const promptsLibraryView = document.getElementById('prompts-library-view');
+  const modelGuideView = document.getElementById('model-guide-view');
+  const secureSettingsView = document.getElementById('secure-settings-view');
+
+  if (arenaBtn) {
+    arenaBtn.addEventListener('click', () => {
+      // Hide all other views
+      if (activeChatView) activeChatView.style.display = 'none';
+      if (examPrepView) examPrepView.style.display = 'none';
+      if (promptsLibraryView) promptsLibraryView.style.display = 'none';
+      if (modelGuideView) modelGuideView.style.display = 'none';
+      if (secureSettingsView) secureSettingsView.style.display = 'none';
+
+      // Show Arena Lab view
+      if (arenaView) arenaView.style.display = 'flex';
+
+      // Initialize provider & model dropdowns for Col A and Col B
+      initArenaLabDropdowns();
+      // Populate prompt templates dropdown
+      populateArenaTemplateSelect();
+    });
+  }
+
+  // Clear Session Handler
+  const clearSessionBtn = document.getElementById('arena-clear-session-btn');
+  if (clearSessionBtn) {
+    clearSessionBtn.addEventListener('click', () => {
+      arenaLabTurns = 0;
+      arenaLabTurnHistoryA = [];
+      arenaLabTurnHistoryB = [];
+
+      const countDisplay = document.getElementById('arena-turn-count');
+      if (countDisplay) countDisplay.textContent = '0 / 5 Turns';
+
+      const colAOutput = document.getElementById('arena-col-a-output');
+      const colBOutput = document.getElementById('arena-col-b-output');
+
+      if (colAOutput) {
+        colAOutput.innerHTML = `
+          <div id="arena-col-a-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
+            <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
+            <div style="font-weight: 600; font-size: 0.9rem;">Model A Standby</div>
+            <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
+          </div>
+        `;
+      }
+
+      if (colBOutput) {
+        colBOutput.innerHTML = `
+          <div id="arena-col-b-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
+            <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
+            <div style="font-weight: 600; font-size: 0.9rem;">Model B Standby</div>
+            <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
+          </div>
+        `;
+      }
+
+      showToast('Arena test session cleared!', 'info');
+    });
+  }
+
+  // Form Submit Handler
+  const arenaForm = document.getElementById('arena-lab-form');
+  if (arenaForm) {
+    arenaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inputEl = document.getElementById('arena-lab-input');
+      const rawPrompt = inputEl ? inputEl.value.trim() : '';
+
+      if (!rawPrompt) return;
+      if (arenaLabTurns >= 5) {
+        showToast('5-Turn Memory Limit reached! Please click "Clear Session" to start a new comparison test.', 'warning');
+        return;
+      }
+
+      inputEl.value = '';
+      await runArenaLabComparison(rawPrompt);
+    });
+  }
+
+  // Column Action Handlers (Copy, PDF, Word, Image, Email)
+  setupArenaColumnActions('a');
+  setupArenaColumnActions('b');
+
+  // Voting Handlers (Thumbs Up / Thumbs Down)
+  setupArenaVotingHandlers();
+
+  // Combined Side-by-Side PDF Export Handler
+  const exportCombinedPdfBtn = document.getElementById('arena-export-combined-pdf');
+  if (exportCombinedPdfBtn) {
+    exportCombinedPdfBtn.addEventListener('click', exportCombinedArenaPDF);
+  }
+
+  // Benchmark Refresh Button
+  const refreshBenchmarksBtn = document.getElementById('refresh-benchmarks-btn');
+  if (refreshBenchmarksBtn) {
+    refreshBenchmarksBtn.addEventListener('click', fetchCommunityBenchmarks);
+  }
+}
+
+function initArenaLabDropdowns() {
+  const colAProv = document.getElementById('arena-col-a-provider');
+  const colBProv = document.getElementById('arena-col-b-provider');
+  const mainProv = document.getElementById('provider-select');
+
+  if (mainProv && colAProv && colBProv) {
+    colAProv.innerHTML = mainProv.innerHTML;
+    colBProv.innerHTML = mainProv.innerHTML;
+
+    colAProv.value = mainProv.value || 'openrouter';
+    colBProv.value = 'nvidia'; // default comparison provider
+
+    populateModels(colAProv.value, 'arena-col-a-model');
+    populateModels(colBProv.value, 'arena-col-b-model');
+
+    colAProv.addEventListener('change', () => populateModels(colAProv.value, 'arena-col-a-model'));
+    colBProv.addEventListener('change', () => populateModels(colBProv.value, 'arena-col-b-model'));
+  }
+}
+
+function populateArenaTemplateSelect() {
+  const tSelect = document.getElementById('arena-template-select');
+  if (!tSelect) return;
+
+  tSelect.innerHTML = '<option value="">-- Direct Raw Prompt --</option>';
+  DEFAULT_PROMPTS.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `[${p.badge}] ${p.title} (${p.contributor || 'uday01'})`;
+    tSelect.appendChild(opt);
+  });
+}
+
+async function runArenaLabComparison(userPrompt) {
+  const colAOutput = document.getElementById('arena-col-a-output');
+  const colBOutput = document.getElementById('arena-col-b-output');
+  const emptyA = document.getElementById('arena-col-a-empty');
+  const emptyB = document.getElementById('arena-col-b-empty');
+
+  if (emptyA) emptyA.remove();
+  if (emptyB) emptyB.remove();
+
+  // Selected Template Wrapper
+  const tSelect = document.getElementById('arena-template-select');
+  const templateId = tSelect ? tSelect.value : '';
+  let finalPrompt = userPrompt;
+
+  if (templateId) {
+    const foundT = DEFAULT_PROMPTS.find(p => p.id === templateId);
+    if (foundT) {
+      finalPrompt = `${foundT.promptText}\n\nSTUDENT QUESTION:\n${userPrompt}`;
+    }
+  }
+
+  // Col A Config
+  const provA = document.getElementById('arena-col-a-provider').value;
+  const modelA = document.getElementById('arena-col-a-model').value;
+
+  // Col B Config
+  const provB = document.getElementById('arena-col-b-provider').value;
+  const modelB = document.getElementById('arena-col-b-model').value;
+
+  // Render User Message Bubbles in Col A and Col B
+  const userMsgHtmlA = `
+    <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem;">
+      <strong style="color: var(--accent-primary);"><i class="fa-solid fa-user"></i> You:</strong>
+      <div style="margin-top: 4px; color: var(--text-primary);">${escapeHtml(userPrompt)}</div>
+    </div>
+  `;
+  colAOutput.insertAdjacentHTML('beforeend', userMsgHtmlA);
+  colBOutput.insertAdjacentHTML('beforeend', userMsgHtmlA);
+
+  // Place Loading Indicator Cards in Col A and Col B
+  const loadingCardAId = `arena-load-a-${Date.now()}`;
+  const loadingCardBId = `arena-load-b-${Date.now()}`;
+
+  colAOutput.insertAdjacentHTML('beforeend', `
+    <div id="${loadingCardAId}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-primary);"></i>
+      <span>Generating response with ${escapeHtml(modelA)}...</span>
+    </div>
+  `);
+
+  colBOutput.insertAdjacentHTML('beforeend', `
+    <div id="${loadingCardBId}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-secondary);"></i>
+      <span>Generating response with ${escapeHtml(modelB)}...</span>
+    </div>
+  `);
+
+  // Parallel API Requests
+  try {
+    const [resA, resB] = await Promise.allSettled([
+      fetchAIResponse(provA, modelA, finalPrompt, arenaLabTurnHistoryA),
+      fetchAIResponse(provB, modelB, finalPrompt, arenaLabTurnHistoryB)
+    ]);
+
+    const cardA = document.getElementById(loadingCardAId);
+    const cardB = document.getElementById(loadingCardBId);
+
+    const textA = resA.status === 'fulfilled' ? resA.value : `Error: ${resA.reason?.message || 'Failed to fetch response.'}`;
+    const textB = resB.status === 'fulfilled' ? resB.value : `Error: ${resB.reason?.message || 'Failed to fetch response.'}`;
+
+    // Update Col A output card
+    if (cardA) {
+      cardA.outerHTML = `
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+            <i class="fa-solid fa-robot"></i> ${escapeHtml(modelA)} (${escapeHtml(provA.toUpperCase())})
+          </div>
+          <div class="arena-content-body">${renderMarkdownWithMath(textA)}</div>
+        </div>
+      `;
+    }
+
+    // Update Col B output card
+    if (cardB) {
+      cardB.outerHTML = `
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-secondary); margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+            <i class="fa-solid fa-bolt"></i> ${escapeHtml(modelB)} (${escapeHtml(provB.toUpperCase())})
+          </div>
+          <div class="arena-content-body">${renderMarkdownWithMath(textB)}</div>
+        </div>
+      `;
+    }
+
+    // Record turn histories
+    arenaLabTurnHistoryA.push({ role: 'user', content: finalPrompt });
+    arenaLabTurnHistoryA.push({ role: 'assistant', content: textA });
+
+    arenaLabTurnHistoryB.push({ role: 'user', content: finalPrompt });
+    arenaLabTurnHistoryB.push({ role: 'assistant', content: textB });
+
+    arenaLabTurns++;
+    const countDisplay = document.getElementById('arena-turn-count');
+    if (countDisplay) countDisplay.textContent = `${arenaLabTurns} / 5 Turns`;
+
+  } catch (err) {
+    console.error('Arena Lab Comparison Error:', err);
+    showToast('Failed to run comparison test.', 'error');
+  }
+}
+
+async function fetchAIResponse(provider, model, prompt, turnHistory) {
+  const keys = getAPIKeysForProvider(provider);
+
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider,
+      model,
+      messages: [...turnHistory, { role: 'user', content: prompt }],
+      keys
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Failed to fetch model response.');
+  }
+
+  return data.content || data.reply || data.response || 'No text output returned.';
+}
+
+function setupArenaColumnActions(col) {
+  const uppercaseCol = col.toUpperCase();
+
+  // Copy Output
+  const copyBtn = document.getElementById(`arena-col-${col}-copy`);
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const outputContainer = document.getElementById(`arena-col-${col}-output`);
+      if (outputContainer) {
+        const text = outputContainer.innerText;
+        navigator.clipboard.writeText(text);
+        showToast(`Column ${uppercaseCol} text copied to clipboard!`, 'success');
+      }
+    });
+  }
+
+  // Export PDF
+  const pdfBtn = document.getElementById(`arena-col-${col}-pdf`);
+  if (pdfBtn) {
+    pdfBtn.addEventListener('click', () => {
+      const outputContainer = document.getElementById(`arena-col-${col}-output`);
+      if (outputContainer) {
+        exportMessageToPDF(outputContainer.innerText, 0);
+      }
+    });
+  }
+
+  // Export Word
+  const wordBtn = document.getElementById(`arena-col-${col}-word`);
+  if (wordBtn) {
+    wordBtn.addEventListener('click', () => {
+      const outputContainer = document.getElementById(`arena-col-${col}-output`);
+      if (outputContainer) {
+        exportMessageToWord(outputContainer.innerText, 0);
+      }
+    });
+  }
+
+  // Export Image (PNG)
+  const imgBtn = document.getElementById(`arena-col-${col}-image`);
+  if (imgBtn) {
+    imgBtn.addEventListener('click', () => {
+      showToast(`Exporting Column ${uppercaseCol} visual view...`, 'info');
+    });
+  }
+
+  // Email
+  const emailBtn = document.getElementById(`arena-col-${col}-email`);
+  if (emailBtn) {
+    emailBtn.addEventListener('click', () => {
+      const outputContainer = document.getElementById(`arena-col-${col}-output`);
+      const bodyText = outputContainer ? encodeURIComponent(outputContainer.innerText) : '';
+      window.open(`mailto:?subject=Model Arena Output - Column ${uppercaseCol}&body=${bodyText}`);
+    });
+  }
+}
+
+function setupArenaVotingHandlers() {
+  ['a', 'b'].forEach(col => {
+    const upBtn = document.getElementById(`arena-col-${col}-vote-up`);
+    const downBtn = document.getElementById(`arena-col-${col}-vote-down`);
+
+    if (upBtn) {
+      upBtn.addEventListener('click', () => recordArenaVote(col, 1));
+    }
+    if (downBtn) {
+      downBtn.addEventListener('click', () => recordArenaVote(col, 0));
+    }
+  });
+}
+
+async function recordArenaVote(col, voteVal) {
+  const provEl = document.getElementById(`arena-col-${col}-provider`);
+  const modelEl = document.getElementById(`arena-col-${col}-model`);
+  const upBtn = document.getElementById(`arena-col-${col}-vote-up`);
+  const downBtn = document.getElementById(`arena-col-${col}-vote-down`);
+
+  const provider = provEl ? provEl.value : 'general';
+  const modelId = modelEl ? modelEl.value : 'unknown';
+  const modelName = modelEl && modelEl.options[modelEl.selectedIndex] ? modelEl.options[modelEl.selectedIndex].text : modelId;
+
+  const user = localStorage.getItem('chatterbot_current_user') || 'guest_student';
+  const voterRole = localStorage.getItem('chatterbot_user_role') || 'student';
+
+  if (voteVal === 1) {
+    if (upBtn) upBtn.classList.add('voted-like');
+    if (downBtn) downBtn.classList.remove('voted-dislike');
+  } else {
+    if (downBtn) downBtn.classList.add('voted-dislike');
+    if (upBtn) upBtn.classList.remove('voted-like');
+  }
+
+  try {
+    const res = await fetch('/api/benchmarks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user,
+        voterRole,
+        targetType: 'model',
+        targetId: modelId,
+        targetName: modelName,
+        provider,
+        vote: voteVal
+      })
+    });
+
+    if (res.ok) {
+      showToast(`Recorded benchmark vote for ${modelName}!`, 'success');
+      fetchCommunityBenchmarks();
+    }
+  } catch (err) {
+    console.error('Failed to submit benchmark vote:', err);
+  }
+}
+
+async function fetchCommunityBenchmarks() {
+  const bodyEl = document.getElementById('benchmark-leaderboard-body');
+  if (!bodyEl) return;
+
+  try {
+    const res = await fetch('/api/benchmarks');
+    const data = await res.json();
+
+    if (res.ok && Array.isArray(data.stats) && data.stats.length > 0) {
+      bodyEl.innerHTML = '';
+      data.stats.forEach((item, idx) => {
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        const rolesObj = item.roles || {};
+        
+        let roleBreakdownHtml = Object.keys(rolesObj).map(r => {
+          const rData = rolesObj[r];
+          return `<span style="display:inline-block; margin:2px 4px; padding:2px 6px; border-radius:4px; background:var(--bg-primary); border:1px solid var(--border-color); font-size:0.7rem;">
+            <strong>${escapeHtml(r.toUpperCase())}:</strong> ${rData.likePct}% Likes (${rData.upvotes}) | ${rData.dislikePct}% Dislikes (${rData.downvotes})
+          </span>`;
+        }).join('');
+
+        if (!roleBreakdownHtml) {
+          roleBreakdownHtml = '<span style="color:var(--text-muted); font-size:0.72rem;">No role votes recorded yet</span>';
+        }
+
+        bodyEl.insertAdjacentHTML('beforeend', `
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; font-weight: 700; color: var(--accent-primary);">${medal} ${escapeHtml(item.targetName || item.targetId)}</td>
+            <td style="padding: 8px; text-transform: uppercase; font-weight: 600; color: var(--accent-secondary);">${escapeHtml(item.provider)}</td>
+            <td style="padding: 8px; font-weight: 800; color: #10b981;">${item.winRate}%</td>
+            <td style="padding: 8px; font-weight: 600;">${item.totalVotes}</td>
+            <td style="padding: 8px;">${roleBreakdownHtml}</td>
+          </tr>
+        `);
+      });
+    } else {
+      bodyEl.innerHTML = `
+        <tr>
+          <td colspan="5" style="padding: 16px; text-align: center; color: var(--text-muted);">
+            No community benchmark votes recorded yet. Be the first to vote in the Model Arena Lab!
+          </td>
+        </tr>
+      `;
+    }
+  } catch (err) {
+    console.error('Failed to fetch benchmark leaderboard:', err);
+  }
+}
+
+function exportCombinedArenaPDF() {
+  const colAOutput = document.getElementById('arena-col-a-output');
+  const colBOutput = document.getElementById('arena-col-b-output');
+  const modelAEl = document.getElementById('arena-col-a-model');
+  const modelBEl = document.getElementById('arena-col-b-model');
+
+  const modelAName = modelAEl ? modelAEl.value : 'Model A';
+  const modelBName = modelBEl ? modelBEl.value : 'Model B';
+
+  const htmlA = colAOutput ? colAOutput.innerHTML : 'No content';
+  const htmlB = colBOutput ? colBOutput.innerHTML : 'No content';
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Pop-up blocked. Please allow popups to export PDFs.', 'error');
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Side-by-Side Model Arena PDF Comparison</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 24px; color: #1e293b; line-height: 1.5; background: #ffffff; }
+        .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px; text-align: center; }
+        .title { font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0; }
+        .meta { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+        .arena-grid { display: flex; gap: 16px; width: 100%; }
+        .col { flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; background: #f8fafc; min-width: 0; word-break: break-word; }
+        .col-header { font-weight: 700; font-size: 0.9rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 10px; color: #8b5cf6; }
+        img { max-width: 100%; height: auto; object-fit: contain; border-radius: 6px; }
+        @media print {
+          body { padding: 0; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1 class="title">⚔️ Side-by-Side Model Arena PDF Report</h1>
+        <div class="meta">Exported on ${new Date().toLocaleString()}</div>
+      </div>
+      <div class="arena-grid">
+        <div class="col">
+          <div class="col-header">MODEL A: ${escapeHtml(modelAName)}</div>
+          <div>${htmlA}</div>
+        </div>
+        <div class="col">
+          <div class="col-header">MODEL B: ${escapeHtml(modelBName)}</div>
+          <div>${htmlB}</div>
+        </div>
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() { window.print(); }, 500);
+        };
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  showToast('Opening Side-by-Side Arena PDF compilation window...', 'success');
+}
+
+// Automatically initialize Arena Lab & Community Benchmarks when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  setupArenaLabView();
+  fetchCommunityBenchmarks();
+});
+

@@ -2042,4 +2042,58 @@ details.guide-details .guide-content {
   overflow-x: auto;
 }
 
+/* ⚔️ Dedicated Model Arena Lab Action Buttons & Voting Styles */
+.arena-action-btn {
+  padding: 4px 8px !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.arena-action-btn:hover {
+  background: var(--accent-glow-subtle) !important;
+  color: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+}
+
+.arena-vote-btn {
+  padding: 4px 10px !important;
+  font-size: 0.78rem !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.arena-vote-btn:hover {
+  background: var(--accent-glow-subtle) !important;
+  color: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+}
+.arena-vote-btn.voted-like {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+.arena-vote-btn.voted-dislike {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+/* Responsive Scaling for Arena Lab Columns */
+@media (max-width: 900px) {
+  #arena-lab-view > div:nth-child(3) {
+    flex-direction: column !important;
+  }
+  .arena-lab-column {
+    min-height: 400px;
+  }
+}
+
+
 

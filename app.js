@@ -4632,6 +4632,9 @@ async function reSubmitFromUserMessage(index) {
         }).then(r => r.json()).catch(e => ({ error: e.message }))
       ]);
 
+      const contentA = resA.content || `❌ Error: ${resA.error || 'Model A request failed'}`;
+      const contentB = resB.content || `❌ Error: ${resB.error || 'Model B request failed'}`;
+
       const modelAObj = (PROVIDER_MODELS[activeSession.provider] || []).find(m => m.value === activeSession.model);
       const modelBObj = (PROVIDER_MODELS[arenaProv] || []).find(m => m.value === arenaMod);
       const modelAName = modelAObj ? modelAObj.name : activeSession.model;
@@ -5582,13 +5585,37 @@ function exportChatToPDF() {
   `;
 
   messages.forEach(msg => {
-    const formattedBody = renderMarkdownWithMath(msg.content);
-    htmlContent += `
-      <div class="message">
-        <div class="role ${msg.role}">${msg.role === 'user' ? '👤 User' : '🤖 Assistant'}</div>
-        <div class="content">${formattedBody}</div>
-      </div>
-    `;
+    if (msg.isArena) {
+      const formattedA = renderMarkdownWithMath(msg.modelAContent || '');
+      const formattedB = renderMarkdownWithMath(msg.modelBContent || '');
+      htmlContent += `
+        <div class="message" style="border: 2px solid #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <div class="role assistant" style="color: #7c3aed; font-size: 1rem; margin-bottom: 12px;">⚔️ Model Arena Comparison View</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px;">
+              <div style="font-weight: 700; color: #2563eb; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">
+                🤖 MODEL A: ${(msg.modelAProvider || '').toUpperCase()} (${msg.modelAName || ''})
+              </div>
+              <div class="content">${formattedA}</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px;">
+              <div style="font-weight: 700; color: #7c3aed; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">
+                ⚡ MODEL B: ${(msg.modelBProvider || '').toUpperCase()} (${msg.modelBName || ''})
+              </div>
+              <div class="content">${formattedB}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      const formattedBody = renderMarkdownWithMath(msg.content || '');
+      htmlContent += `
+        <div class="message">
+          <div class="role ${msg.role}">${msg.role === 'user' ? '👤 User' : '🤖 Assistant'}</div>
+          <div class="content">${formattedBody}</div>
+        </div>
+      `;
+    }
   });
 
   htmlContent += `

@@ -36,6 +36,7 @@
 
 # Credentials & environment files
 *credentials*
+vercel-credentials-map.md
 credentials.json
 token.json
 .env

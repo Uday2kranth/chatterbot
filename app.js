@@ -3372,6 +3372,9 @@ async function submitPrompt() {
       saveChatSessionsToStorage();
       renderMessages(activeSession.messages);
       statusLabel.textContent = 'Ready';
+
+      // Play audio notification chime
+      playCompletionAudioNotification();
     } else {
       // Fetch error feedback
       const errMsg = data ? data.error : 'Server error occurred during request.';
@@ -3399,6 +3402,47 @@ async function submitPrompt() {
     typingIndicator.style.display = 'none';
     activeAbortController = null;
     sendBtn.disabled = chatInput.value.trim().length === 0;
+  }
+}
+
+// Audio Notification Chime Handler
+function playCompletionAudioNotification() {
+  const toggle = document.getElementById('setting-toggle-audio-ping');
+  if (toggle && !toggle.checked) return;
+
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+      osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); // E5
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(ctx.currentTime);
+      osc1.stop(ctx.currentTime + 0.12);
+      osc2.start(ctx.currentTime + 0.12);
+      osc2.stop(ctx.currentTime + 0.35);
+    }
+  } catch (err) {}
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance("your answer is ready bitch");
+    utter.rate = 1.0;
+    utter.pitch = 1.0;
+    window.speechSynthesis.speak(utter);
   }
 }
 

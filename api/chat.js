@@ -236,8 +236,10 @@ STRICT CITATION & FORMATTING DIRECTIVES:
 ${imageContext}
 
 STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
-1. DO NOT draw ASCII text art, box diagrams, or text-arrow schemas inside raw code blocks.
-2. You MUST embed at least one of the verified direct diagram image URLs above using Markdown syntax: ![Diagram Description](verified_image_url).
+1. DO NOT draw ASCII text art or text-arrow schemas inside raw code blocks.
+2. You MUST embed verified image URLs using Markdown syntax AND provide a direct clickable source link right under the image:
+   ![Diagram Description](verified_image_url)
+   🔗 [Click to Open Full-Resolution Diagram Image](verified_image_url)
 3. For architectural flowcharts, trees, or process models, output a native Mermaid.js diagram block:
 \`\`\`mermaid
 graph TD

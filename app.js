@@ -4624,37 +4624,10 @@ function validateWebSearchState() {
   }
 }
 
-// ── Image Search Model Auto-Validation & Selector Coordinator ──
+// ── Image Search Model Coordinator (Allows all models to work seamlessly) ──
 function validateImageSearchState() {
-  const providerSelect = document.getElementById('provider-select');
-  const modelSelect = document.getElementById('model-select');
-  const imageSearchCheckbox = document.getElementById('image-search-checkbox');
-  
-  if (!imageSearchCheckbox || !imageSearchCheckbox.checked) return;
-
-  const provider = providerSelect.value;
-  const models = PROVIDER_MODELS[provider] || [];
-  const currentModelVal = modelSelect.value;
-  const currentModel = models.find(m => m.value === currentModelVal);
-
-  if (!currentModel || !currentModel.multimodal) {
-    const openrouterKey = (localStorage.getItem('chatterbot_key_openrouter_1') || '').trim();
-    if (openrouterKey) {
-      providerSelect.value = 'openrouter';
-      populateModels('openrouter');
-      modelSelect.value = 'google/gemma-4-31b-it:free';
-      updateHeaderLabels();
-      saveActiveChatDetails();
-      showToast('Switched to "OpenRouter (Gemma 4 31B OCR/Vision)" for Image & Diagram RAG capability.', 'info');
-    } else {
-      providerSelect.value = 'gemini';
-      populateModels('gemini');
-      modelSelect.value = 'gemini-3.5-flash';
-      updateHeaderLabels();
-      saveActiveChatDetails();
-      showToast('Switched to "Google Gemini (Gemini 2.0 Flash)" for Image & Diagram RAG capability.', 'info');
-    }
-  }
+  // Image Search works with any model (no forced provider switching)
+  return;
 }
 
 // ── Dynamic Provider Dropdown Filter ──
@@ -5980,6 +5953,7 @@ function exportChatToPDF() {
       <title>${activeSession.title || 'Chat Export'}</title>
       <!-- KaTeX styling for formulas -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
@@ -5997,6 +5971,7 @@ function exportChatToPDF() {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
         th { background: #f8fafc; }
+        .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; }
         @media print {
           body { padding: 0; }
           .no-print { display: none; }
@@ -6049,9 +6024,15 @@ function exportChatToPDF() {
       </div>
       <script>
         window.onload = function() {
+          if (window.mermaid) {
+            try {
+              window.mermaid.initialize({ startOnLoad: true, theme: 'default' });
+              window.mermaid.run();
+            } catch(e){}
+          }
           setTimeout(function() {
             window.print();
-          }, 500);
+          }, 700);
         }
       </script>
     </body>
@@ -6142,6 +6123,7 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
       <title>${docTitle}</title>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       <style>
         :root {
           --bg-main: #0f172a;
@@ -6329,6 +6311,13 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
             
             card.style.opacity = 1;
             card.style.transform = 'scale(1)';
+
+            if (window.mermaid) {
+              try {
+                window.mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+                window.mermaid.run();
+              } catch(e){}
+            }
           }, 150);
         }
 
@@ -6454,6 +6443,7 @@ function exportMessageToPDF(rawContent, msgIdx) {
     <head>
       <title>Message PDF Export</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
@@ -6467,6 +6457,7 @@ function exportMessageToPDF(rawContent, msgIdx) {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.9rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
         th { background: #f8fafc; color: #0f172a; }
+        .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; }
         @media print {
           body { padding: 0; }
           .no-print { display: none; }
@@ -6481,9 +6472,15 @@ function exportMessageToPDF(rawContent, msgIdx) {
       <div class="content">${formattedContent}</div>
       <script>
         window.onload = function() {
+          if (window.mermaid) {
+            try {
+              window.mermaid.initialize({ startOnLoad: true, theme: 'default' });
+              window.mermaid.run();
+            } catch(e){}
+          }
           setTimeout(function() {
             window.print();
-          }, 500);
+          }, 700);
         };
       </script>
     </body>

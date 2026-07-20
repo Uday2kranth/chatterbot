@@ -1,11 +1,16 @@
 const fs = require('fs');
 const path = require('path');
+let MongoClient = null;
+try {
+    MongoClient = require('mongodb').MongoClient;
+} catch (e) {
+    console.warn('MongoDB package not found locally, using file fallback.');
+}
 
-// Resolve path to the database file in the project workspace
+// Local file database fallback setup
 const DB_DIR = path.join(process.cwd(), 'db');
 const DB_FILE = path.join(DB_DIR, 'database.json');
 
-// Ensure database directory and file exist
 function initializeDB() {
     if (!fs.existsSync(DB_DIR)) {
         fs.mkdirSync(DB_DIR, { recursive: true });
@@ -15,21 +20,44 @@ function initializeDB() {
     }
 }
 
+// Serverless MongoDB connection caching
+let cachedClient = null;
+let cachedDb = null;
+
+async function connectToMongo() {
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL;
+    if (!mongoUri || !MongoClient) return null;
+
+    if (cachedClient && cachedDb) {
+        return { client: cachedClient, db: cachedDb };
+    }
+
+    try {
+        const client = await MongoClient.connect(mongoUri);
+        const db = client.db('chatterbot_db');
+        cachedClient = client;
+        cachedDb = db;
+        return { client, db };
+    } catch (err) {
+        console.error('Failed to connect to MongoDB Atlas:', err);
+        return null;
+    }
+}
+
 module.exports = async (req, res) => {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle OPTIONS preflight request
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
     try {
-        initializeDB();
+        const mongo = await connectToMongo();
 
-        // 1. GET - Load user sessions (filter out soft-deleted sessions and system logs)
+        // 1. GET - Load user sessions
         if (req.method === 'GET') {
             let query = {};
             if (req.query && Object.keys(req.query).length > 0) {
@@ -38,39 +66,43 @@ module.exports = async (req, res) => {
                 query = require('url').parse(req.url, true).query || {};
             }
             const { user } = query;
-            
+
             if (!user) {
                 return res.status(400).json({ error: 'Query parameter "user" is required.' });
             }
 
-            const dbData = fs.readFileSync(DB_FILE, 'utf-8');
-            const database = JSON.parse(dbData);
-            const userSessions = database[user] || {};
+            if (mongo) {
+                const collection = mongo.db.collection('user_sessions');
+                const docs = await collection.find({ user, deleted: { $ne: true } }).toArray();
+                const visibleSessions = {};
+                docs.forEach(doc => {
+                    if (doc.id && doc.session && doc.isSystemLog !== true) {
+                        visibleSessions[doc.id] = doc.session;
+                    }
+                });
+                return res.status(200).json(visibleSessions);
+            } else {
+                initializeDB();
+                const dbData = fs.readFileSync(DB_FILE, 'utf-8');
+                const database = JSON.parse(dbData);
+                const userSessions = database[user] || {};
 
-            // Extract only visible, non-deleted chat sessions
-            const visibleSessions = {};
-            for (const [id, session] of Object.entries(userSessions)) {
-                if (session && session.deleted !== true && session.isSystemLog !== true) {
-                    visibleSessions[id] = session;
+                const visibleSessions = {};
+                for (const [id, session] of Object.entries(userSessions)) {
+                    if (session && session.deleted !== true && session.isSystemLog !== true) {
+                        visibleSessions[id] = session;
+                    }
                 }
+                return res.status(200).json(visibleSessions);
             }
-
-            return res.status(200).json(visibleSessions);
         }
 
         // 2. POST - Save/Update a session
         if (req.method === 'POST') {
-            const { user, id, session } = req.body;
+            const { user, id, session } = req.body || {};
 
             if (!user || !id || !session) {
                 return res.status(400).json({ error: 'Body fields "user", "id", and "session" are required.' });
-            }
-
-            const dbData = fs.readFileSync(DB_FILE, 'utf-8');
-            const database = JSON.parse(dbData);
-
-            if (!database[user]) {
-                database[user] = {};
             }
 
             // Prevent non-Master Admin accounts from assigning themselves the admin role
@@ -78,18 +110,33 @@ module.exports = async (req, res) => {
                 session.data.assignedRole = 'student';
             }
 
-            // Save or update session (preserving deleted flag if already set)
-            const existingSession = database[user][id] || {};
-            database[user][id] = {
-                ...session,
-                deleted: existingSession.deleted || false
-            };
+            if (mongo) {
+                const collection = mongo.db.collection('user_sessions');
+                await collection.updateOne(
+                    { user, id },
+                    { $set: { user, id, session, deleted: false, updatedAt: new Date() } },
+                    { upsert: true }
+                );
+                return res.status(200).json({ success: true, storage: 'mongodb' });
+            } else {
+                initializeDB();
+                const dbData = fs.readFileSync(DB_FILE, 'utf-8');
+                const database = JSON.parse(dbData);
 
-            fs.writeFileSync(DB_FILE, JSON.stringify(database, null, 2), 'utf-8');
-            return res.status(200).json({ success: true });
+                if (!database[user]) database[user] = {};
+
+                const existingSession = database[user][id] || {};
+                database[user][id] = {
+                    ...session,
+                    deleted: existingSession.deleted || false
+                };
+
+                fs.writeFileSync(DB_FILE, JSON.stringify(database, null, 2), 'utf-8');
+                return res.status(200).json({ success: true, storage: 'file' });
+            }
         }
 
-        // 3. DELETE - Soft-delete a session and append audit log row
+        // 3. DELETE - Soft-delete session
         if (req.method === 'DELETE') {
             let query = {};
             if (req.query && Object.keys(req.query).length > 0) {
@@ -103,68 +150,48 @@ module.exports = async (req, res) => {
                 return res.status(400).json({ error: 'Query parameters "user" and "id" are required.' });
             }
 
-            const dbData = fs.readFileSync(DB_FILE, 'utf-8');
-            const database = JSON.parse(dbData);
+            if (mongo) {
+                const collection = mongo.db.collection('user_sessions');
+                if (id === 'all') {
+                    await collection.updateMany(
+                        { user, id: { $nin: ['api_keys_storage', 'token_tracker_storage', 'chat_settings_storage'] } },
+                        { $set: { deleted: true, deletedAt: new Date() } }
+                    );
+                } else {
+                    await collection.updateOne(
+                        { user, id },
+                        { $set: { deleted: true, deletedAt: new Date() } }
+                    );
+                }
+                return res.status(200).json({ success: true, storage: 'mongodb' });
+            } else {
+                initializeDB();
+                const dbData = fs.readFileSync(DB_FILE, 'utf-8');
+                const database = JSON.parse(dbData);
 
-            if (!database[user]) {
-                database[user] = {};
-            }
+                if (!database[user]) database[user] = {};
 
-            const timestamp = Date.now();
-            const timeString = new Date().toLocaleString();
-
-            if (id === 'all') {
-                // Set all active sessions as deleted (except system settings)
-                for (const sessionId of Object.keys(database[user])) {
-                    if (database[user][sessionId] && 
-                        database[user][sessionId].isSystemLog !== true && 
-                        sessionId !== 'api_keys_storage' && 
-                        sessionId !== 'token_tracker_storage') {
-                        database[user][sessionId].deleted = true;
+                if (id === 'all') {
+                    for (const sessionId of Object.keys(database[user])) {
+                        if (database[user][sessionId] && 
+                            database[user][sessionId].isSystemLog !== true && 
+                            sessionId !== 'api_keys_storage' && 
+                            sessionId !== 'token_tracker_storage' && 
+                            sessionId !== 'chat_settings_storage') {
+                            database[user][sessionId].deleted = true;
+                        }
                     }
+                } else if (database[user][id]) {
+                    database[user][id].deleted = true;
                 }
 
-                // Add log entry row indicating clear logs attempt
-                const logId = 'log_clear_' + timestamp;
-                database[user][logId] = {
-                    isSystemLog: true,
-                    timestamp: timestamp,
-                    action: 'clear_all_logs',
-                    time: timeString,
-                    details: `User ${user} cleared all active chat logs on client interface.`
-                };
-
                 fs.writeFileSync(DB_FILE, JSON.stringify(database, null, 2), 'utf-8');
-                return res.status(200).json({ success: true, message: 'All logs cleared from client UI.' });
-            }
-
-            // Individual chat session deletion
-            if (database[user] && database[user][id]) {
-                database[user][id].deleted = true;
-
-                // Add log entry row indicating specific chat deletion
-                const logId = 'log_delete_' + timestamp;
-                database[user][logId] = {
-                    isSystemLog: true,
-                    timestamp: timestamp,
-                    action: 'delete_session',
-                    targetSessionId: id,
-                    targetSessionTitle: database[user][id]?.title || 'Unknown',
-                    time: timeString,
-                    details: `User ${user} deleted chat session titled "${database[user][id]?.title || id}".`
-                };
-
-                fs.writeFileSync(DB_FILE, JSON.stringify(database, null, 2), 'utf-8');
-                return res.status(200).json({ success: true, message: 'Session hidden from frontend.' });
-            } else {
-                return res.status(404).json({ error: 'Session not found.' });
+                return res.status(200).json({ success: true, storage: 'file' });
             }
         }
 
-        return res.status(405).json({ error: 'Method Not Allowed' });
-
     } catch (err) {
-        console.error('Error handling database sessions route:', err);
-        return res.status(500).json({ error: 'Failed to access persistent database: ' + err.message });
+        console.error('Session processing error:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 };

@@ -433,11 +433,10 @@ const PROVIDER_MODELS = {
     { value: "gemma-4-31B-it", name: "Gemma 4 31B it", multimodal: true, preferredVision: true }
   ],
   gemini: [
-    { value: "gemini-2.5-flash", name: "Gemini 2.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
-    { value: "gemini-2.5-pro", name: "Gemini 2.5 Pro [WS]", webSearch: true, multimodal: true, voice: true },
-    { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash [WS]", webSearch: true, multimodal: true, voice: true },
-    { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash [WS]", webSearch: true, multimodal: true, voice: true },
-    { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro [WS]", webSearch: true, multimodal: true, voice: true }
+    { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
+    { value: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash-Lite", multimodal: true, voice: true },
+    { value: "gemini-flash-latest", name: "Gemini Flash Latest [WS]", webSearch: true, multimodal: true },
+    { value: "gemini-pro-latest", name: "Gemini Pro Latest [WS]", webSearch: true, multimodal: true }
   ],
   nararouter: [
     { value: "mistral-large", name: "Mistral Large (Free) [WS]", webSearch: true },
@@ -4501,12 +4500,22 @@ function validateImageSearchState() {
   const currentModel = models.find(m => m.value === currentModelVal);
 
   if (!currentModel || !currentModel.multimodal) {
-    providerSelect.value = 'gemini';
-    populateModels('gemini');
-    modelSelect.value = 'gemini-2.5-flash';
-    updateHeaderLabels();
-    saveActiveChatDetails();
-    showToast('Switched to "Google Gemini (Gemini 2.5 Flash)" for Image & Diagram RAG capability.', 'info');
+    const openrouterKey = (localStorage.getItem('chatterbot_key_openrouter_1') || '').trim();
+    if (openrouterKey) {
+      providerSelect.value = 'openrouter';
+      populateModels('openrouter');
+      modelSelect.value = 'google/gemma-4-31b-it:free';
+      updateHeaderLabels();
+      saveActiveChatDetails();
+      showToast('Switched to "OpenRouter (Gemma 4 31B OCR/Vision)" for Image & Diagram RAG capability.', 'info');
+    } else {
+      providerSelect.value = 'gemini';
+      populateModels('gemini');
+      modelSelect.value = 'gemini-2.0-flash';
+      updateHeaderLabels();
+      saveActiveChatDetails();
+      showToast('Switched to "Google Gemini (Gemini 2.0 Flash)" for Image & Diagram RAG capability.', 'info');
+    }
   }
 }
 

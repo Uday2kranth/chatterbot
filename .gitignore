@@ -49,8 +49,10 @@ db/
 *.db
 *.sqlite
 
-# Dev Scratch scripts and temporary files
+# Dev Scratch scripts, temporary files, and workflow folders
 scratch/
+to_do/
+completed/
 public/custom_audio/
 *.mp3
 *.wav

@@ -315,6 +315,35 @@
               <i class="fa-solid fa-user-gear"></i>
               <span>Roles</span>
             </button>
+
+            <!-- Side-by-Side Model Arena Toggle -->
+            <button id="arena-mode-toggle-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-secondary); padding: 7px 12px; cursor:pointer;" title="Toggle Side-by-Side Model Arena Comparison Mode">
+              <i class="fa-solid fa-scale-balanced" style="color:var(--accent-primary);"></i>
+              <span id="arena-toggle-label">⚔️ Model Arena</span>
+            </button>
+          </div>
+
+          <!-- Arena Model B Selection Controls (Hidden by default) -->
+          <div id="arena-controls-row" style="display:none; gap:12px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-color);">
+            <div class="selector-group">
+              <label for="arena-provider-select" style="font-size:0.75rem; color:var(--accent-primary); font-weight:700;">ARENA MODEL B PROVIDER</label>
+              <select id="arena-provider-select" class="custom-select">
+                <option value="cerebras">Cerebras</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="nvidia">NVIDIA NIM</option>
+                <option value="omnirouter">OmniRouter</option>
+                <option value="mistral">Mistral AI</option>
+                <option value="groq">Groq</option>
+                <option value="sambanova">SambaNova</option>
+              </select>
+            </div>
+            <div class="selector-group">
+              <label for="arena-model-select" style="font-size:0.75rem; color:var(--accent-primary); font-weight:700;">ARENA MODEL B</label>
+              <select id="arena-model-select" class="custom-select">
+                <!-- Populated dynamically via app.js -->
+              </select>
+            </div>
           </div>
         </div>
       </header>

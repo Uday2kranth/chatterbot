@@ -2001,4 +2001,45 @@ details.guide-details .guide-content {
   line-height: 1.75 !important;
 }
 
+/* ⚔️ Model Arena Side-by-Side Comparison Grid */
+.arena-comparison-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  margin: 12px 0;
+}
+@media (max-width: 768px) {
+  .arena-comparison-container {
+    grid-template-columns: 1fr;
+  }
+}
+.arena-model-column {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 0;
+}
+.arena-model-header {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.arena-model-body {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  overflow-x: auto;
+}
+
 

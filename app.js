@@ -113,6 +113,7 @@ let originalModelBeforeImage = null;
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
+let isArenaMode = false;
 let activeAbortController = null;
 
 // 2b. Curated Prompt Library Default Scenarios
@@ -353,6 +354,7 @@ function initializeApp() {
   setupHeaderControlsDrawer();
   setupSidebarAndPrompts();
   setupModelSelectors();
+  setupArenaMode();
   updateProviderSelectDropdown();
   setupChatHandlers();
   loadChatSessions();
@@ -465,6 +467,54 @@ function setupUserInfo() {
 }
 
 // Model & Provider Selection
+
+function setupArenaMode() {
+  const arenaBtn = document.getElementById('arena-mode-toggle-btn');
+  const arenaRow = document.getElementById('arena-controls-row');
+  const arenaProviderSelect = document.getElementById('arena-provider-select');
+  const arenaModelSelect = document.getElementById('arena-model-select');
+  const toggleLabel = document.getElementById('arena-toggle-label');
+
+  if (!arenaBtn || !arenaRow) return;
+
+  const populateArenaModels = (provider) => {
+    if (!arenaModelSelect) return;
+    arenaModelSelect.innerHTML = '';
+    const models = PROVIDER_MODELS[provider] || [];
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.value;
+      opt.textContent = m.label;
+      arenaModelSelect.appendChild(opt);
+    });
+  };
+
+  populateArenaModels(arenaProviderSelect.value);
+
+  arenaProviderSelect.addEventListener('change', () => {
+    populateArenaModels(arenaProviderSelect.value);
+  });
+
+  arenaBtn.addEventListener('click', () => {
+    isArenaMode = !isArenaMode;
+    if (isArenaMode) {
+      arenaRow.style.display = 'flex';
+      arenaBtn.style.backgroundColor = 'var(--accent-glow-subtle)';
+      arenaBtn.style.borderColor = 'var(--accent-primary)';
+      arenaBtn.style.color = 'var(--accent-primary)';
+      if (toggleLabel) toggleLabel.textContent = '⚔️ Arena Active';
+      showToast('⚔️ Side-by-Side Model Arena Mode Enabled!', 'info');
+    } else {
+      arenaRow.style.display = 'none';
+      arenaBtn.style.backgroundColor = 'var(--bg-tertiary)';
+      arenaBtn.style.borderColor = 'var(--border-color)';
+      arenaBtn.style.color = 'var(--text-secondary)';
+      if (toggleLabel) toggleLabel.textContent = '⚔️ Model Arena';
+      showToast('Model Arena Mode Disabled.', 'info');
+    }
+  });
+}
+
 function setupModelSelectors() {
   const providerSelect = document.getElementById('provider-select');
   const modelSelect = document.getElementById('model-select');
@@ -4457,7 +4507,64 @@ async function reSubmitFromUserMessage(index) {
     const localEndpoint = localStorage.getItem('chatterbot_local_endpoint') || '';
     const omniEndpoint = localStorage.getItem('chatterbot_omnirouter_endpoint') || '';
     
-    if (activeSession.provider === 'local') {
+    if (isArenaMode) {
+      const arenaProv = document.getElementById('arena-provider-select')?.value || 'cerebras';
+      const arenaMod = document.getElementById('arena-model-select')?.value || 'llama3.3-70b';
+      
+      const reqHeaders = {
+        'Content-Type': 'application/json',
+        'x-user-openrouter-key': openrouterKey,
+        'x-user-nvidia-key': nvidiaKey,
+        'x-user-omnirouter-key': omnirouterKey,
+        'x-user-mistral-key': mistralKey,
+        'x-user-cerebras-key': cerebrasKey,
+        'x-user-groq-key': groqKey,
+        'x-user-sambanova-key': sambanovaKey,
+        'x-user-gemini-key': geminiKey
+      };
+
+      const [resA, resB] = await Promise.all([
+        fetch('/api/chat', {
+          method: 'POST',
+          headers: reqHeaders,
+          body: JSON.stringify({ user: currentUser, model: activeSession.model, provider: activeSession.provider, messages: messagesToSend, sessionId: activeChatId, sessionTitle: activeSession.title, webSearch: isWebSearch })
+        }).then(r => r.json()).catch(e => ({ error: e.message })),
+        fetch('/api/chat', {
+          method: 'POST',
+          headers: reqHeaders,
+          body: JSON.stringify({ user: currentUser, model: arenaMod, provider: arenaProv, messages: messagesToSend, sessionId: activeChatId, sessionTitle: activeSession.title, webSearch: isWebSearch })
+        }).then(r => r.json()).catch(e => ({ error: e.message }))
+      ]);
+
+      const contentA = resA.content || `❌ Error: ${resA.error || 'Model A request failed'}`;
+      const contentB = resB.content || `❌ Error: ${resB.error || 'Model B request failed'}`;
+
+      const arenaComparisonHtml = `<div class="arena-comparison-container">
+<div class="arena-model-column">
+  <div class="arena-model-header"><span>🤖 Model A: ${activeSession.provider.toUpperCase()}</span> <code>${activeSession.model}</code></div>
+  <div class="arena-model-body">${contentA}</div>
+</div>
+<div class="arena-model-column">
+  <div class="arena-model-header"><span>🤖 Model B: ${arenaProv.toUpperCase()}</span> <code>${arenaMod}</code></div>
+  <div class="arena-model-body">${contentB}</div>
+</div>
+</div>`;
+
+      activeSession.messages.push({
+        role: 'assistant',
+        content: arenaComparisonHtml,
+        isArena: true
+      });
+
+      if (resA.usage) trackTokens(activeSession.provider, activeSession.model, resA.usage);
+      if (resB.usage) trackTokens(arenaProv, arenaMod, resB.usage);
+
+      activeSession.timestamp = Date.now();
+      saveChatSessionsToStorage();
+      renderMessages(activeSession.messages);
+      renderHistoryList();
+      return;
+    } else if (activeSession.provider === 'local') {
       const cleanEndpoint = localEndpoint.trim().replace(/\/$/, '');
       const localKey = localStorage.getItem('chatterbot_local_key') || '';
       

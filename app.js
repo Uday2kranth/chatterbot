@@ -4465,8 +4465,9 @@ function showMainAreaView(viewName) {
   const secureSettingsView = document.getElementById('secure-settings-view');
   const bookmarksView = document.getElementById('bookmarks-view');
   const examPrepView = document.getElementById('exam-prep-view');
+  const arenaLabView = document.getElementById('arena-lab-view');
   
-  if (!activeChatView || !modelGuideView || !apiGuideView || !tokenTrackerView || !promptsLibraryView || !secureSettingsView) return;
+  if (!activeChatView) return;
 
   if (currentUser) {
     localStorage.setItem(`chatterbot_active_view_${currentUser}`, viewName);
@@ -4476,14 +4477,12 @@ function showMainAreaView(viewName) {
     lockApiSettings();
   }
   
-  const arenaLabView = document.getElementById('arena-lab-view');
-
-  activeChatView.style.display = 'none';
-  modelGuideView.style.display = 'none';
-  apiGuideView.style.display = 'none';
-  tokenTrackerView.style.display = 'none';
-  promptsLibraryView.style.display = 'none';
-  secureSettingsView.style.display = 'none';
+  if (activeChatView) activeChatView.style.display = 'none';
+  if (modelGuideView) modelGuideView.style.display = 'none';
+  if (apiGuideView) apiGuideView.style.display = 'none';
+  if (tokenTrackerView) tokenTrackerView.style.display = 'none';
+  if (promptsLibraryView) promptsLibraryView.style.display = 'none';
+  if (secureSettingsView) secureSettingsView.style.display = 'none';
   if (bookmarksView) bookmarksView.style.display = 'none';
   if (examPrepView) examPrepView.style.display = 'none';
   if (arenaLabView) arenaLabView.style.display = 'none';
@@ -4492,25 +4491,25 @@ function showMainAreaView(viewName) {
     activeChatView.style.display = 'flex';
     updateHeaderLabels();
   } else if (viewName === 'model-guide') {
-    modelGuideView.style.display = 'flex';
+    if (modelGuideView) modelGuideView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'CHATTER_BOT';
     document.getElementById('active-model-label').textContent = 'Model Capabilities Guide';
   } else if (viewName === 'api-guide') {
-    apiGuideView.style.display = 'flex';
+    if (apiGuideView) apiGuideView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'API GUIDE';
     document.getElementById('active-model-label').textContent = 'API Keys Generation Guide';
   } else if (viewName === 'token-tracker') {
-    tokenTrackerView.style.display = 'flex';
+    if (tokenTrackerView) tokenTrackerView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'STATISTICS';
     document.getElementById('active-model-label').textContent = 'Unified Token Tracker';
     renderTokenTracker();
   } else if (viewName === 'prompts-library') {
-    promptsLibraryView.style.display = 'flex';
+    if (promptsLibraryView) promptsLibraryView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'TEMPLATES';
     document.getElementById('active-model-label').textContent = 'Curated Prompts Library';
     renderPromptsLibrary();
   } else if (viewName === 'secure-settings') {
-    secureSettingsView.style.display = 'flex';
+    if (secureSettingsView) secureSettingsView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'SECURITY';
     document.getElementById('active-model-label').textContent = 'Secure Settings & API Keys';
   } else if (viewName === 'bookmarks') {
@@ -4523,6 +4522,12 @@ function showMainAreaView(viewName) {
     document.getElementById('active-provider-label').textContent = 'EXAM PREP';
     document.getElementById('active-model-label').textContent = 'Syllabus, Question Bank & Predicted Papers';
     renderExamPrepContent();
+  } else if (viewName === 'arena-lab') {
+    if (arenaLabView) arenaLabView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'ARENA LAB';
+    document.getElementById('active-model-label').textContent = 'Side-by-Side Dual AI Model & Prompt Engineering Canvas';
+    initArenaLabDropdowns();
+    populateArenaTemplateSelects();
   }
 
   // Auto-close mobile sidebar drawer when switching rooms/subviews
@@ -6264,20 +6269,7 @@ function setupArenaLabView() {
 
   if (arenaBtn) {
     arenaBtn.addEventListener('click', () => {
-      // Hide all other views
-      if (activeChatView) activeChatView.style.display = 'none';
-      if (examPrepView) examPrepView.style.display = 'none';
-      if (promptsLibraryView) promptsLibraryView.style.display = 'none';
-      if (modelGuideView) modelGuideView.style.display = 'none';
-      if (secureSettingsView) secureSettingsView.style.display = 'none';
-
-      // Show Arena Lab view
-      if (arenaView) arenaView.style.display = 'flex';
-
-      // Initialize provider & model dropdowns
-      initArenaLabDropdowns();
-      // Populate prompt templates dropdowns
-      populateArenaTemplateSelects();
+      showMainAreaView('arena-lab');
     });
   }
 

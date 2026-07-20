@@ -2152,3 +2152,51 @@ details.guide-details .guide-content {
 .toggle-switch-pill input:checked + .toggle-switch-slider:before {
   transform: translateX(14px);
 }
+
+/* Custom contrast overrides for Mermaid diagrams in Light/Dark themes */
+.mermaid-diagram-card {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  overflow-x: auto;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node path {
+  fill: var(--bg-tertiary) !important;
+  stroke: var(--accent-primary) !important;
+  stroke-width: 2px !important;
+}
+
+.mermaid .node .label text,
+.mermaid .node label,
+.mermaid span.nodeLabel,
+.mermaid .label {
+  fill: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+}
+
+.mermaid .edgePath .path,
+.mermaid .flowchart-link {
+  stroke: var(--accent-primary) !important;
+  stroke-width: 2px !important;
+}
+
+.mermaid .marker,
+.mermaid marker {
+  fill: var(--accent-primary) !important;
+  stroke: var(--accent-primary) !important;
+}
+
+.mermaid .edgeLabel {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 4px;
+}

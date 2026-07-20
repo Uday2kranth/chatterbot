@@ -3057,11 +3057,23 @@ function renderMessages(messages) {
     container.appendChild(msgElement);
   });
 
-  // Trigger Mermaid.js vector diagram rendering
+  // Trigger Mermaid.js vector diagram rendering with adaptive Light/Dark theme contrast
   setTimeout(() => {
     if (window.mermaid) {
       try {
-        window.mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+        const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: isDarkMode ? 'dark' : 'default',
+          securityLevel: 'loose',
+          themeVariables: {
+            fontFamily: 'Inter, sans-serif',
+            primaryTextColor: isDarkMode ? '#f8fafc' : '#0f172a',
+            nodeBorder: isDarkMode ? '#38bdf8' : '#0284c7',
+            clusterBkg: isDarkMode ? '#1e293b' : '#f8fafc',
+            clusterBorder: isDarkMode ? '#334155' : '#cbd5e1'
+          }
+        });
         window.mermaid.run({ querySelector: '.mermaid' });
       } catch (e) {
         console.warn('Mermaid rendering warning:', e);

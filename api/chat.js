@@ -252,7 +252,7 @@ When asked to explain, draw, or provide a flowchart, architecture, pipeline, tre
 graph TD
   A[Component / Layer 1] --> B[Component / Layer 2]
 \`\`\`
-DO NOT output raw LaTeX TikZ code (such as \\documentclass or \\usepackage{tikz}) or raw ASCII text art, as TikZ code cannot render visually inside web browsers.`
+DO NOT draw ASCII text art, ASCII box-drawing schemas (like +---+ or | BOX |), or raw LaTeX TikZ code (such as \\documentclass or \\usepackage{tikz}). ALWAYS use native Mermaid code blocks.`
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols

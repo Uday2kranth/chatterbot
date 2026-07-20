@@ -2529,55 +2529,12 @@ function convertTikzToMermaid(code) {
   });
 }
 
-// Helper to automatically convert raw ASCII schema text blocks into visual Mermaid.js diagrams
-function convertAsciiToMermaid(code) {
-  if (!code) return code;
-  return code.replace(/```(?:text|ascii)?\s*([\s\S]*?\[[\s\S]*?(?:->|v|\|)[\s\S]*?)```/gi, (fullMatch, blockContent) => {
-    const lines = blockContent.split('\n');
-    const nodes = [];
-    
-    lines.forEach((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return;
-      
-      const bracketMatch = trimmed.match(/\[\s*([^\]]+)\s*\]/);
-      const inputMatch = trimmed.match(/^(?:Input|Output)\s*:?\s*(.*)/i);
-      
-      if (bracketMatch) {
-        const label = bracketMatch[1].trim();
-        if (!nodes.some(n => n.label === label)) {
-          nodes.push({ id: `node_${nodes.length + 1}`, label });
-        }
-      } else if (inputMatch && inputMatch[1]) {
-        const label = trimmed.replace(/"/g, '');
-        if (!nodes.some(n => n.label === label)) {
-          nodes.push({ id: `node_${nodes.length + 1}`, label });
-        }
-      }
-    });
-
-    if (nodes.length < 2) return fullMatch;
-
-    let mermaid = '\n```mermaid\ngraph TD\n';
-    nodes.forEach(n => {
-      mermaid += `  ${n.id}["${n.label}"]\n`;
-    });
-    for (let i = 0; i < nodes.length - 1; i++) {
-      mermaid += `  ${nodes[i].id} --> ${nodes[i+1].id}\n`;
-    }
-    mermaid += '```\n';
-
-    return mermaid;
-  });
-}
-
 // Render Markdown with KaTeX mathematical compilation
 function renderMarkdownWithMath(text) {
   if (!text) return '';
 
-  // Intercept and auto-convert any raw TikZ LaTeX or ASCII text schema into visual Mermaid diagrams
+  // Intercept and auto-convert any raw TikZ LaTeX code into visual Mermaid diagrams
   text = convertTikzToMermaid(text);
-  text = convertAsciiToMermaid(text);
 
   const mathBlocks = [];
   

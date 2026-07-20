@@ -3187,9 +3187,12 @@ async function submitPrompt() {
   // Initialize abort controller
   activeAbortController = new AbortController();
 
-  // Check web search toggle state
+  // Check web search & image search toggle states
   const webSearchCheckbox = document.getElementById('web-search-checkbox');
   const isWebSearch = webSearchCheckbox ? webSearchCheckbox.checked : false;
+
+  const imageSearchCheckbox = document.getElementById('image-search-checkbox');
+  const isImageSearch = imageSearchCheckbox ? imageSearchCheckbox.checked : false;
 
   // Gather required keys from localStorage, packing rotation slots
   const openrouterKeys = [];
@@ -3424,7 +3427,8 @@ async function submitPrompt() {
           messages: messagesToSend,
           sessionId: activeChatId,
           sessionTitle: activeSession.title,
-          webSearch: isWebSearch
+          webSearch: isWebSearch,
+          imageSearch: isImageSearch
         }),
         signal: activeAbortController ? activeAbortController.signal : undefined
       });

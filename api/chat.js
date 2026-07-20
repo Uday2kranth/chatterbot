@@ -219,10 +219,13 @@ module.exports = async (req, res) => {
 
 ${searchContext || "No live search results could be retrieved for this query."}
 
-STRICT DIRECTIVES:
+STRICT CITATION & FORMATTING DIRECTIVES:
 1. Exclusively answer using the search snippets provided above.
-2. If the snippets do not contain the answer, reply: "I'm sorry, but that information is not available in the current live search results."
-3. Every statement or point you write must end with an inline citation link back to the source URL: [Clickable Link](URL) (Resource/Site Name).`
+2. Place numbered inline citations like [1], [2] next to key claims. If the same source is referenced multiple times, reuse the exact same number (e.g. [1]).
+3. At the VERY BOTTOM of your answer, include a neat "### 📚 References & Sources" section listing each numbered citation with its clickable source link:
+   [1] [Source Title](URL)
+   [2] [Source Title](URL)
+4. Do NOT scatter raw URL strings randomly throughout the text.`
         });
     }
 

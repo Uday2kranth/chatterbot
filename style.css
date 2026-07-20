@@ -2153,50 +2153,89 @@ details.guide-details .guide-content {
   transform: translateX(14px);
 }
 
-/* Custom contrast overrides for Mermaid diagrams in Light/Dark themes */
+/* Custom contrast overrides for Mermaid diagrams in Light (Emerald Green) & Dark (Royal Purple) themes */
 .mermaid-diagram-card {
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-color) !important;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 14px;
+  padding: 24px;
   margin: 16px 0;
   overflow-x: auto;
-  box-shadow: 0 4px 12px var(--shadow-color);
+  box-shadow: 0 6px 16px var(--shadow-color);
+  transition: all 0.3s ease;
 }
 
-.mermaid .node rect,
-.mermaid .node circle,
-.mermaid .node polygon,
-.mermaid .node path {
-  fill: var(--bg-tertiary) !important;
-  stroke: var(--accent-primary) !important;
-  stroke-width: 2px !important;
+/* Dark Theme: Elegant Purple Node Boxes */
+body[data-theme="dark"] .mermaid .node rect,
+body[data-theme="dark"] .mermaid .node circle,
+body[data-theme="dark"] .mermaid .node polygon,
+body[data-theme="dark"] .mermaid .node path {
+  fill: #3b0764 !important;
+  stroke: #c084fc !important;
+  stroke-width: 2.5px !important;
+  rx: 8px !important;
+  ry: 8px !important;
 }
 
-.mermaid .node .label text,
-.mermaid .node label,
-.mermaid span.nodeLabel,
-.mermaid .label {
-  fill: var(--text-primary) !important;
-  color: var(--text-primary) !important;
+body[data-theme="dark"] .mermaid .node .label text,
+body[data-theme="dark"] .mermaid .node label,
+body[data-theme="dark"] .mermaid span.nodeLabel,
+body[data-theme="dark"] .mermaid .label {
+  fill: #faf5ff !important;
+  color: #faf5ff !important;
   font-weight: 600 !important;
   font-family: inherit !important;
 }
 
-.mermaid .edgePath .path,
-.mermaid .flowchart-link {
-  stroke: var(--accent-primary) !important;
-  stroke-width: 2px !important;
+body[data-theme="dark"] .mermaid .edgePath .path,
+body[data-theme="dark"] .mermaid .flowchart-link {
+  stroke: #c084fc !important;
+  stroke-width: 2.5px !important;
 }
 
-.mermaid .marker,
-.mermaid marker {
-  fill: var(--accent-primary) !important;
-  stroke: var(--accent-primary) !important;
+body[data-theme="dark"] .mermaid .marker,
+body[data-theme="dark"] .mermaid marker {
+  fill: #c084fc !important;
+  stroke: #c084fc !important;
+}
+
+/* Light Theme: Vibrant Emerald Green Node Boxes */
+body[data-theme="light"] .mermaid .node rect,
+body[data-theme="light"] .mermaid .node circle,
+body[data-theme="light"] .mermaid .node polygon,
+body[data-theme="light"] .mermaid .node path {
+  fill: #d1fae5 !important;
+  stroke: #059669 !important;
+  stroke-width: 2.5px !important;
+  rx: 8px !important;
+  ry: 8px !important;
+}
+
+body[data-theme="light"] .mermaid .node .label text,
+body[data-theme="light"] .mermaid .node label,
+body[data-theme="light"] .mermaid span.nodeLabel,
+body[data-theme="light"] .mermaid .label {
+  fill: #064e3b !important;
+  color: #064e3b !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+}
+
+body[data-theme="light"] .mermaid .edgePath .path,
+body[data-theme="light"] .mermaid .flowchart-link {
+  stroke: #059669 !important;
+  stroke-width: 2.5px !important;
+}
+
+body[data-theme="light"] .mermaid .marker,
+body[data-theme="light"] .mermaid marker {
+  fill: #059669 !important;
+  stroke: #059669 !important;
 }
 
 .mermaid .edgeLabel {
   background-color: var(--bg-secondary) !important;
   color: var(--text-secondary) !important;
   border-radius: 4px;
+  padding: 2px 6px;
 }

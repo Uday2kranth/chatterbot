@@ -2547,13 +2547,21 @@ function renderMarkdownWithMath(text) {
   // 4. Force all anchor links to open in a new tab/page
   html = html.replace(/<a\s+(href="[^"]*")/gi, '<a $1 target="_blank" rel="noopener noreferrer"');
 
-  // 5. Enhance image tags: bypass hotlink/referrer blocks with no-referrer & automatic fallback
+  // 5. Enhance image tags: route external HTTP/HTTPS images through Vercel Image Proxy to bypass CORS & hotlink blocks
   const defaultFallbackImg = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22260%22 viewBox=%220 0 600 260%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%231e293b%22 rx=%2212%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 fill=%22%2338bdf8%22 font-family=%22sans-serif%22 font-size=%2218%22 font-weight=%22bold%22 text-anchor=%22middle%22%3E📊 Subject Diagram Representation%3C/text%3E%3Ctext x=%2250%25%22 y=%2262%25%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2213%22 text-anchor=%22middle%22%3E(Diagram RAG Engine)%3C/text%3E%3C/svg%3E";
   html = html.replace(/<img\s+([^>]*)\/?>/gi, (match, attrs) => {
     let newAttrs = attrs;
     // Strip out any legacy/corrupted inline onerror attributes from saved message strings
     newAttrs = newAttrs.replace(/onerror\s*=\s*(["'])[\s\S]*?\1/gi, '');
     newAttrs = newAttrs.replace(/onerror\s*=\s*this\.onerror=null[\s\S]*?(?=\s|>)/gi, '');
+
+    // Proxy external HTTP/HTTPS images through our Vercel Image Proxy backend (/api/proxy-image)
+    newAttrs = newAttrs.replace(/src=["'](https?:\/\/[^"']+)["']/gi, (srcMatch, rawUrl) => {
+      if (rawUrl.startsWith('data:') || rawUrl.includes('/api/proxy-image')) {
+        return `src="${rawUrl}"`;
+      }
+      return `src="/api/proxy-image?url=${encodeURIComponent(rawUrl)}"`;
+    });
 
     if (!newAttrs.includes('referrerpolicy')) {
       newAttrs += ' referrerpolicy="no-referrer"';
@@ -2563,6 +2571,12 @@ function renderMarkdownWithMath(text) {
       newAttrs += ' style="max-width:100%; border-radius:10px; border:1px solid var(--border-color); margin:8px 0; box-shadow:0 4px 12px rgba(0,0,0,0.3);"';
     }
     return `<img ${newAttrs} />`;
+  });
+
+  // 6. Convert Mermaid code blocks into renderable Mermaid containers
+  html = html.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/gi, (match, code) => {
+    const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    return `<div class="mermaid-diagram-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${cleanCode}</div></div>`;
   });
 
   return html;
@@ -3042,6 +3056,18 @@ function renderMessages(messages) {
 
     container.appendChild(msgElement);
   });
+
+  // Trigger Mermaid.js vector diagram rendering
+  setTimeout(() => {
+    if (window.mermaid) {
+      try {
+        window.mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+        window.mermaid.run({ querySelector: '.mermaid' });
+      } catch (e) {
+        console.warn('Mermaid rendering warning:', e);
+      }
+    }
+  }, 100);
 
   // Scroll to bottom
   container.scrollTop = container.scrollHeight;

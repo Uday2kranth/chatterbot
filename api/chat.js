@@ -233,9 +233,13 @@ STRICT DIRECTIVES:
 ${imageContext}
 
 STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
-1. DO NOT draw ASCII text art, box diagrams, or text-arrow schemas.
-2. You MUST embed at least one of the verified direct diagram image URLs above directly in your answer using Markdown image syntax: ![Diagram Description](verified_image_url).
-3. Format as ![alt](url) (with an exclamation mark !) so the diagram renders visually as an image in the UI response bubble.`
+1. DO NOT draw ASCII text art, box diagrams, or text-arrow schemas inside raw code blocks.
+2. You MUST embed at least one of the verified direct diagram image URLs above using Markdown syntax: ![Diagram Description](verified_image_url).
+3. For architectural flowcharts, trees, or process models, output a native Mermaid.js diagram block:
+\`\`\`mermaid
+graph TD
+  A[Layer / Stage 1] --> B[Layer / Stage 2]
+\`\`\``
         });
     }
 

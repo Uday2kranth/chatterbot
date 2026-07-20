@@ -11,6 +11,7 @@ const transcribeHandler = require('./api/transcribe');
 const sendEmailHandler = require('./api/send-email');
 const loginHandler = require('./api/login');
 const benchmarksHandler = require('./api/benchmarks');
+const proxyImageHandler = require('./api/proxy-image');
 
 const PORT = process.env.PORT || 3000;
 
@@ -65,6 +66,9 @@ const server = http.createServer((req, res) => {
           this.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify(data));
         },
+        send(data) {
+          res.end(data);
+        },
         end(data) {
           res.end(data);
         }
@@ -85,6 +89,8 @@ const server = http.createServer((req, res) => {
           await transcribeHandler(mockReq, mockRes);
         } else if (pathname === '/api/send-email') {
           await sendEmailHandler(mockReq, mockRes);
+        } else if (pathname === '/api/proxy-image') {
+          await proxyImageHandler(mockReq, mockRes);
         } else {
           res.statusCode = 404;
           res.setHeader('Content-Type', 'application/json');

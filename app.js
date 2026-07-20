@@ -813,30 +813,42 @@ function setupSidebarAndPrompts() {
 
   if (saveCustomPromptBtn) {
     saveCustomPromptBtn.addEventListener('click', () => {
-      const title = document.getElementById('custom-prompt-title').value.trim();
-      const desc = document.getElementById('custom-prompt-desc').value.trim();
-      const promptText = document.getElementById('custom-prompt-text').value.trim();
+      const title = document.getElementById('custom-prompt-title')?.value.trim();
+      const desc = document.getElementById('custom-prompt-desc')?.value.trim();
+      const botRole = document.getElementById('custom-prompt-bot-role')?.value.trim();
+      const userRole = document.getElementById('custom-prompt-user-role')?.value.trim();
+      const text = document.getElementById('custom-prompt-text')?.value.trim();
 
-      if (!title || !desc || !promptText) {
-        showToast('Please fill out all custom prompt fields.', 'error');
+      if (!title || !text) {
+        showToast('Title and System Prompt Text are required.', 'warning');
         return;
       }
 
-      const custom = JSON.parse(localStorage.getItem(`chatterbot_custom_prompts_${currentUser}`) || '[]');
+      let formattedPrompt = text;
+      if (botRole || userRole) {
+        formattedPrompt = `BOT ROLE: ${botRole || 'AI Assistant'}\nUSER ROLE: ${userRole || 'Student'}\n\nINSTRUCTIONS:\n${text}`;
+      }
+
+      const customPrompts = JSON.parse(localStorage.getItem(`chatterbot_custom_prompts_${currentUser}`) || '[]');
       const newPrompt = {
-        id: 'prompt_' + Date.now(),
+        id: 'custom_' + Date.now(),
         title: title,
-        desc: desc,
-        promptText: promptText,
+        badge: 'Custom',
+        desc: desc || 'Custom user prompt template.',
+        contributor: currentUser || 'uday01',
+        botRole: botRole || '',
+        userRole: userRole || '',
+        promptText: formattedPrompt,
         icon: 'fa-wand-magic-sparkles'
       };
 
-      custom.push(newPrompt);
-      localStorage.setItem(`chatterbot_custom_prompts_${currentUser}`, JSON.stringify(custom));
+      customPrompts.unshift(newPrompt);
+      localStorage.setItem(`chatterbot_custom_prompts_${currentUser}`, JSON.stringify(customPrompts));
 
-      formContainer.style.display = 'none';
+      if (formContainer) formContainer.style.display = 'none';
       clearPromptForm();
       renderPromptsLibrary();
+      populateArenaTemplateSelects();
       showToast(`Custom prompt "${title}" created successfully!`, 'success');
     });
   }
@@ -4573,6 +4585,9 @@ function renderPromptsLibrary() {
            ${badgeMarkup}
            ${deleteBtnMarkup}
          </div>
+      </div>
+      <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600; display:flex; align-items:center; gap:4px;">
+        <i class="fa-solid fa-user-pen" style="color:var(--accent-primary);"></i> Contributor: <strong style="color:var(--text-secondary);">${p.contributor || 'uday01'}</strong>
       </div>
       <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.45; margin:0;">${p.desc}</p>
       

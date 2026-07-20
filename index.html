@@ -1478,6 +1478,16 @@
                 <input type="text" id="custom-prompt-desc" placeholder="e.g. Explains indexing schemas with visual diagrams." style="padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; outline:none;">
               </div>
             </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label for="custom-prompt-bot-role" style="font-size:0.75rem; font-weight:600; color:var(--accent-primary);">🤖 Agent / Bot Role Persona</label>
+                <input type="text" id="custom-prompt-bot-role" placeholder="e.g. Senior Data Scientist & University Professor" style="padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; outline:none;">
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <label for="custom-prompt-user-role" style="font-size:0.75rem; font-weight:600; color:var(--accent-primary);">👤 Target User Role</label>
+                <input type="text" id="custom-prompt-user-role" placeholder="e.g. M.Sc. Data Science Exam Student" style="padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; outline:none;">
+              </div>
+            </div>
             <div style="display:flex; flex-direction:column; gap:4px;">
               <label for="custom-prompt-text" style="font-size:0.75rem; font-weight:600; color:var(--text-primary);">System Instructions Prompt</label>
               <textarea id="custom-prompt-text" placeholder="e.g. Act as a database administrator. Teach database indexing step-by-step..." style="height:80px; resize:none; padding:8px 10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-size:0.8rem; font-family:inherit; outline:none;"></textarea>

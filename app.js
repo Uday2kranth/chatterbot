@@ -879,28 +879,33 @@ function setupSidebarAndPrompts() {
   const botRoleInput = document.getElementById('bot-role-input');
   const userRoleInput = document.getElementById('user-role-input');
 
-  customRolesBtn.addEventListener('click', () => {
-    if (activeChatId && chatSessions[activeChatId]) {
-      const session = chatSessions[activeChatId];
-      botRoleInput.value = session.botRole || '';
-      userRoleInput.value = session.userRoleContext || '';
-    } else {
-      botRoleInput.value = '';
-      userRoleInput.value = '';
-    }
-    rolesOverlay.classList.add('open');
-  });
+  if (customRolesBtn) {
+    customRolesBtn.addEventListener('click', () => {
+      if (activeChatId && chatSessions[activeChatId]) {
+        const session = chatSessions[activeChatId];
+        if (botRoleInput) botRoleInput.value = session.botRole || '';
+        if (userRoleInput) userRoleInput.value = session.userRoleContext || '';
+      } else {
+        if (botRoleInput) botRoleInput.value = '';
+        if (userRoleInput) userRoleInput.value = '';
+      }
+      if (rolesOverlay) rolesOverlay.classList.add('open');
+    });
+  }
 
   const closeRoles = () => {
-    rolesOverlay.classList.remove('open');
+    if (rolesOverlay) rolesOverlay.classList.remove('open');
   };
-  closeRolesBtn.addEventListener('click', closeRoles);
-  cancelRolesBtn.addEventListener('click', closeRoles);
-  rolesOverlay.addEventListener('click', (e) => {
-    if (e.target === rolesOverlay) closeRoles();
-  });
+  if (closeRolesBtn) closeRolesBtn.addEventListener('click', closeRoles);
+  if (cancelRolesBtn) cancelRolesBtn.addEventListener('click', closeRoles);
+  if (rolesOverlay) {
+    rolesOverlay.addEventListener('click', (e) => {
+      if (e.target === rolesOverlay) closeRoles();
+    });
+  }
 
-  saveRolesBtn.addEventListener('click', () => {
+  if (saveRolesBtn) {
+    saveRolesBtn.addEventListener('click', () => {
     const botRole = botRoleInput.value.trim();
     const userRoleContext = userRoleInput.value.trim();
     
@@ -924,6 +929,7 @@ function setupSidebarAndPrompts() {
       closeRoles();
     }
   });
+}
 
   // 7. System Prompt Modal Event Handlers
   const sessionPromptBtn = document.getElementById('session-prompt-btn');

@@ -428,16 +428,22 @@
                   </button>
                 </div>
   
-                <label class="search-toggle" style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-secondary); user-select:none; margin:0;" title="Enable Real-Time Web RAG Search">
-                  <input type="checkbox" id="web-search-checkbox" style="cursor:pointer; accent-color:var(--accent-primary);">
+                <label class="toggle-switch-container" title="Enable Real-Time Web RAG Search">
                   <i class="fa-solid fa-earth-americas" style="color:var(--accent-primary); font-size: 0.85rem;"></i>
                   <span>Web Search</span>
+                  <div class="toggle-switch-pill">
+                    <input type="checkbox" id="web-search-checkbox">
+                    <span class="toggle-switch-slider"></span>
+                  </div>
                 </label>
 
-                <label class="search-toggle" style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-secondary); user-select:none; margin:0;" title="Enable Real-Time Diagram Image RAG Search Engine">
-                  <input type="checkbox" id="image-search-checkbox" style="cursor:pointer; accent-color:var(--accent-secondary);">
+                <label class="toggle-switch-container" title="Enable Real-Time Diagram Image RAG Search Engine">
                   <i class="fa-solid fa-image" style="color:var(--accent-secondary); font-size: 0.85rem;"></i>
                   <span>Image Search</span>
+                  <div class="toggle-switch-pill">
+                    <input type="checkbox" id="image-search-checkbox">
+                    <span class="toggle-switch-slider"></span>
+                  </div>
                 </label>
                 <div class="status-badge">
                   <span class="status-indicator"></span>
@@ -1778,6 +1784,19 @@
                     <input type="checkbox" id="setting-export-slides" checked style="accent-color:var(--accent-primary);" /> Slide Deck (.html)
                   </label>
                 </div>
+              </div>
+
+              <!-- Audio Notifications Settings -->
+              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Audio & Sound Notifications</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Play chime sound and announce "Your answer is ready!" when responses finish generating.</div>
+                </div>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--text-primary); cursor:pointer; margin-top:4px;">
+                  <input type="checkbox" id="setting-toggle-audio-ping" checked style="accent-color:var(--accent-primary);" />
+                  <i class="fa-solid fa-bell" style="color:var(--accent-primary);"></i>
+                  <span>Enable Audio Ping & Voice Chime ("Your answer is ready!")</span>
+                </label>
               </div>
 
               <!-- Recipient Email Configuration -->

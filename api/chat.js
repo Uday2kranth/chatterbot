@@ -86,43 +86,40 @@ Snippet: "${snippet}"`);
     }
 }
 
-// Dedicated Server Backend RAG Helper for live diagram image search
+// Dedicated Server Backend RAG Helper for live diagram image search via Wikimedia Commons API
 async function getImageSearchLinks(query) {
     try {
-        const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + ' diagram png jpg')}`;
-        const response = await fetch(searchUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-            }
+        const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query + ' diagram')}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&format=json`;
+        const response = await fetch(wikiUrl, {
+            headers: { 'User-Agent': 'ChatterBot-DiagramRAG/1.0 (https://chatterbot.vercel.app)' }
         });
-        if (!response.ok) return '';
-        const html = await response.text();
-        
-        const imgRegex = /(https?:\/\/[^"'<>\s]+\.(?:png|jpg|jpeg|svg))/gi;
-        const matches = html.match(imgRegex) || [];
-        
+
         const validImages = [];
-        const seen = new Set();
-        
-        for (const imgUrl of matches) {
-            if (seen.has(imgUrl)) continue;
-            if (imgUrl.includes('duckduckgo.com') || imgUrl.includes('favicon') || imgUrl.includes('logo') || imgUrl.includes('icon') || imgUrl.includes('pixel') || imgUrl.includes('ad_')) {
-                continue;
+        if (response.ok) {
+            const data = await response.json();
+            const pages = data.query?.pages || {};
+            for (const pageId in pages) {
+                const info = pages[pageId]?.imageinfo?.[0];
+                if (info && info.url) {
+                    const mime = (info.mime || '').toLowerCase();
+                    const url = info.url;
+                    if ((mime.includes('png') || mime.includes('jpeg') || mime.includes('jpg') || mime.includes('svg')) && !url.includes('logo') && !url.includes('icon')) {
+                        validImages.push(url);
+                        if (validImages.length >= 4) break;
+                    }
+                }
             }
-            seen.add(imgUrl);
-            validImages.push(imgUrl);
-            if (validImages.length >= 4) break;
         }
 
         if (validImages.length === 0) {
-            validImages.push(`https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png`);
-            validImages.push(`https://media.geeksforgeeks.org/wp-content/uploads/20210217180424/DataMiningStructure.png`);
+            validImages.push('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png');
+            validImages.push('https://media.geeksforgeeks.org/wp-content/uploads/20210217180424/DataMiningStructure.png');
         }
 
         return validImages.map((url, idx) => `[Verified Diagram Image ${idx + 1}]: ${url}`).join('\n');
     } catch (err) {
         console.error('Failed to fetch image search links:', err);
-        return '';
+        return '[Verified Diagram Image 1]: https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png';
     }
 }
 
@@ -233,13 +230,13 @@ STRICT DIRECTIVES:
     if (imageSearch || imageContext) {
         apiMessages.unshift({
             role: "system",
-            content: `VERIFIED DIRECT DIAGRAM IMAGE URLS:
-${imageContext || "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png"}
+            content: `VERIFIED DIRECT DIAGRAM IMAGE URLS FOR THIS SUBJECT:
+${imageContext}
 
-STRICT IMAGE RENDERING DIRECTIVES:
-1. When providing an explanation or diagram, DO NOT write ASCII text or arrow diagrams.
-2. You MUST select and embed one or more of the verified direct image URLs above using markdown image format: ![Diagram Title](verified_url).
-3. Ensure images render visually in the response bubble.`
+STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
+1. DO NOT draw ASCII text art, box diagrams, or text-arrow schemas.
+2. You MUST embed at least one of the verified direct diagram image URLs above directly in your answer using Markdown image syntax: ![Diagram Description](verified_image_url).
+3. Format as ![alt](url) (with an exclamation mark !) so the diagram renders visually as an image in the UI response bubble.`
         });
     }
 

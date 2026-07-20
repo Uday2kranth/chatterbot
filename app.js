@@ -715,6 +715,15 @@ function setupModelSelectors() {
     });
   }
 
+  const imageSearchCheckbox = document.getElementById('image-search-checkbox');
+  if (imageSearchCheckbox) {
+    imageSearchCheckbox.addEventListener('change', () => {
+      if (imageSearchCheckbox.checked) {
+        validateImageSearchState();
+      }
+    });
+  }
+
   // Load from current selection
   populateModels(providerSelect.value);
   updateHeaderLabels();
@@ -4421,6 +4430,29 @@ function validateWebSearchState() {
   }
 }
 
+// ── Image Search Model Auto-Validation & Selector Coordinator ──
+function validateImageSearchState() {
+  const providerSelect = document.getElementById('provider-select');
+  const modelSelect = document.getElementById('model-select');
+  const imageSearchCheckbox = document.getElementById('image-search-checkbox');
+  
+  if (!imageSearchCheckbox || !imageSearchCheckbox.checked) return;
+
+  const provider = providerSelect.value;
+  const models = PROVIDER_MODELS[provider] || [];
+  const currentModelVal = modelSelect.value;
+  const currentModel = models.find(m => m.value === currentModelVal);
+
+  if (!currentModel || !currentModel.multimodal) {
+    providerSelect.value = 'gemini';
+    populateModels('gemini');
+    modelSelect.value = 'gemini-2.5-flash';
+    updateHeaderLabels();
+    saveActiveChatDetails();
+    showToast('Switched to "Google Gemini (Gemini 2.5 Flash)" for Image & Diagram RAG capability.', 'info');
+  }
+}
+
 // ── Dynamic Provider Dropdown Filter ──
 function updateProviderSelectDropdown() {
   const providerSelect = document.getElementById('provider-select');
@@ -6756,24 +6788,71 @@ function playCompletionAudioNotification() {
   }
 }
 
+function getGeminiKeysString() {
+  const keys = [];
+  for (let i = 1; i <= 5; i++) {
+    const k = localStorage.getItem(`chatterbot_key_gemini_${i}`) || '';
+    if (k.trim()) keys.push(k.trim());
+  }
+  const legacy = localStorage.getItem('chatterbot_key_gemini') || '';
+  if (legacy.trim() && !keys.includes(legacy.trim())) keys.push(legacy.trim());
+  return keys.join(',');
+}
+
+function getAPIKeysHeaders() {
+  const openrouterKeys = [];
+  for (let i = 1; i <= 5; i++) {
+    const val = localStorage.getItem(`chatterbot_key_openrouter_${i}`) || '';
+    if (val.trim()) openrouterKeys.push(val.trim());
+  }
+  const nvidiaKeys = [];
+  for (let i = 1; i <= 5; i++) {
+    const val = localStorage.getItem(`chatterbot_key_nvidia_${i}`) || '';
+    if (val.trim()) nvidiaKeys.push(val.trim());
+  }
+  const mistralKeys = [];
+  for (let i = 1; i <= 2; i++) {
+    const val = localStorage.getItem(`chatterbot_key_mistral_${i}`) || '';
+    if (val.trim()) mistralKeys.push(val.trim());
+  }
+  const groqKeys = [];
+  for (let i = 1; i <= 2; i++) {
+    const val = localStorage.getItem(`chatterbot_key_groq_${i}`) || '';
+    if (val.trim()) groqKeys.push(val.trim());
+  }
+
+  return {
+    'Content-Type': 'application/json',
+    'x-user-openrouter-key': openrouterKeys.join(','),
+    'x-user-nvidia-key': nvidiaKeys.join(','),
+    'x-user-omnirouter-key': localStorage.getItem('chatterbot_key_omnirouter') || '',
+    'x-user-mistral-key': mistralKeys.join(','),
+    'x-user-cerebras-key': localStorage.getItem('chatterbot_key_cerebras') || '',
+    'x-user-groq-key': groqKeys.join(','),
+    'x-user-sambanova-key': localStorage.getItem('chatterbot_key_sambanova') || '',
+    'x-user-gemini-key': getGeminiKeysString()
+  };
+}
+
 async function fetchAIResponse(provider, model, prompt, turnHistory) {
-  const keys = getAPIKeysForProvider(provider);
   const webSearchCb = document.getElementById('web-search-checkbox');
   const imageSearchCb = document.getElementById('image-search-checkbox');
 
   const webSearch = webSearchCb ? webSearchCb.checked : false;
   const imageSearch = imageSearchCb ? imageSearchCb.checked : false;
 
+  const reqHeaders = getAPIKeysHeaders();
+
   const response = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: reqHeaders,
     body: JSON.stringify({
+      user: currentUser || 'Admin@uday',
       provider,
       model,
       messages: [...turnHistory, { role: 'user', content: prompt }],
       webSearch,
-      imageSearch,
-      keys
+      imageSearch
     })
   });
 

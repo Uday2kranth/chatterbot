@@ -21,22 +21,28 @@ const AUTHORIZED_USERS = {
 function updateDynamicAppBranding() {
   const isGuestStudent = userRole === 'guest_student';
   
-  // Dynamic favicon links & PWA manifest switcher
+  // Dynamic favicon links, PWA manifest, and header branding image switcher
   let faviconLink = document.querySelector('link[rel="icon"]');
   let altFaviconLink = document.querySelector('link[rel="alternate icon"]');
   let appleTouchLink = document.querySelector('link[rel="apple-touch-icon"]');
   let manifestLink = document.querySelector('link[rel="manifest"]');
+  let appLogoImg = document.getElementById('app-branding-logo-img');
+  let appTitleSpan = document.querySelector('.app-title');
 
   if (isGuestStudent) {
     if (faviconLink) faviconLink.href = '/av-college-icon.svg';
     if (altFaviconLink) altFaviconLink.href = '/av-college-favicon.png';
     if (appleTouchLink) appleTouchLink.href = '/av-college-apple-touch-icon.png';
     if (manifestLink) manifestLink.href = '/av-college-manifest.json';
+    if (appLogoImg) appLogoImg.src = '/av-college-icon.svg';
+    if (appTitleSpan) appTitleSpan.textContent = 'A.V. ChatterBot';
   } else {
     if (faviconLink) faviconLink.href = '/icon.svg';
     if (altFaviconLink) altFaviconLink.href = '/favicon.png';
     if (appleTouchLink) appleTouchLink.href = '/apple-touch-icon.png';
     if (manifestLink) manifestLink.href = '/manifest.json';
+    if (appLogoImg) appLogoImg.src = '/icon.svg';
+    if (appTitleSpan) appTitleSpan.textContent = 'ChatterBot';
   }
 }
 
@@ -3552,14 +3558,14 @@ function renderBookmarksView() {
 
 // ── Exam Prep, Syllabus & Question Banks Controller ──
 function checkExamPrepAccess() {
-  const isAllowedUser = currentUser === 'admin' || currentUser === 'uday01' || userRole === 'student' || userRole === 'guest_student' || userRole === 'admin';
+  const isAllowedUser = userRole === 'admin' || userRole === 'student' || userRole === 'guest_student';
   const prepBtn = document.getElementById('exam-prep-btn');
   if (prepBtn) {
     prepBtn.style.display = isAllowedUser ? 'flex' : 'none';
   }
 
-  // Restrict Ask AI, PDF, Word, and Copy action buttons ONLY to Admin and uday01 accounts
-  const isAdminOrUday = currentUser === 'admin' || currentUser === 'uday01' || userRole === 'admin';
+  // Restrict Ask AI, PDF, Word, and Copy action buttons ONLY to Master Admin
+  const isAdminOrUday = userRole === 'admin' || currentUser === 'Admin@uday';
   const actionToolbar = document.getElementById('prep-action-toolbar');
   if (actionToolbar) {
     actionToolbar.style.display = isAdminOrUday ? 'flex' : 'none';

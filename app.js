@@ -3124,6 +3124,60 @@ function renderMessages(messages) {
       }
     }
 
+// Helper to format Mermaid code into a clean, human-readable ASCII text flowchart schema
+function formatMermaidToAsciiSchema(mermaidCode) {
+  if (!mermaidCode) return '';
+  const lines = mermaidCode.split('\n');
+  const nodeMap = {};
+  const connections = [];
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
+
+    const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
+    for (const m of nodeDefs) {
+      nodeMap[m[1]] = m[2].trim();
+    }
+
+    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
+    if (connMatch) {
+      connections.push({
+        from: connMatch[1],
+        label: connMatch[2] ? connMatch[2].trim() : '',
+        to: connMatch[3]
+      });
+    }
+  });
+
+  if (connections.length === 0) {
+    return mermaidCode;
+  }
+
+  let ascii = '┌────────────────────────────────────────────────────────┐\n';
+  ascii +=   '│             ASCII TEXT SCHEMA FLOWCHART                │\n';
+  ascii +=   '└────────────────────────────────────────────────────────┘\n\n';
+
+  connections.forEach((c, idx) => {
+    const fromLabel = nodeMap[c.from] || c.from;
+    const toLabel = nodeMap[c.to] || c.to;
+    
+    ascii += `[ ${fromLabel} ]\n`;
+    if (c.label) {
+      ascii += `       │  (${c.label})\n`;
+    } else {
+      ascii += `       │\n`;
+    }
+    ascii += `       ▼\n`;
+    
+    if (idx === connections.length - 1) {
+      ascii += `[ ${toLabel} ]\n`;
+    }
+  });
+
+  return ascii;
+}
+
     // Attach Interactive Diagram View Toggle Toolbar (Vector Diagram vs Text Schema)
     document.querySelectorAll('.mermaid-diagram-card').forEach((card) => {
       if (card.querySelector('.diagram-card-toolbar')) return; // Already initialized
@@ -3143,12 +3197,12 @@ function renderMessages(messages) {
       textSchemaContainer.style.background = 'var(--bg-tertiary)';
       textSchemaContainer.style.border = '1px solid var(--border-color)';
       textSchemaContainer.style.borderRadius = '8px';
-      textSchemaContainer.style.padding = '12px';
+      textSchemaContainer.style.padding = '16px';
       textSchemaContainer.style.margin = '10px 0 0 0';
       textSchemaContainer.style.fontFamily = 'monospace';
       textSchemaContainer.style.fontSize = '0.85rem';
       textSchemaContainer.style.overflowX = 'auto';
-      textSchemaContainer.textContent = rawCode;
+      textSchemaContainer.textContent = formatMermaidToAsciiSchema(rawCode);
 
       card.appendChild(textSchemaContainer);
 

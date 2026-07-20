@@ -248,19 +248,17 @@ graph TD
         });
     }
 
-    // Global Diagram System Directive: Enforce clean, valid Mermaid.js for visual diagrams across all chat queries
+    // Global Diagram System Directive: Enforce clean, perfectly-scaled vertical Mermaid.js diagrams
     apiMessages.unshift({
         role: "system",
-        content: `DIAGRAM & FLOWCHART DIRECTIVES:
-When asked to explain, draw, or provide a flowchart, architecture, pipeline, tree structure, or process diagram:
-1. ALWAYS output a clean, native Mermaid.js code block:
-\`\`\`mermaid
-graph TD
-  A["Component / Layer 1"] --> B["Component / Layer 2"]
-\`\`\`
-2. Ensure all node text labels are enclosed in double quotes inside brackets (e.g., A["Label Text"]).
-3. Avoid unescaped quotes, special unescaped characters, or raw HTML tags inside node brackets.
-4. DO NOT draw ASCII text art, ASCII box-drawing schemas (like +---+ or | BOX |), or raw LaTeX TikZ code.`
+        content: `MANDATORY DIAGRAM & FLOWCHART LAYOUT DIRECTIVES:
+When explaining, drawing, or providing a flowchart, system architecture, pipeline, decision tree, or process diagram:
+1. MANDATORY DIRECTION: ALWAYS use top-to-bottom vertical direction \`graph TD\`. NEVER use horizontal direction \`graph LR\` or \`graph RL\` (horizontal graphs shrink & squish on screens).
+2. QUOTED LABELS: ALL node text MUST be wrapped in double quotes inside brackets (e.g., A["Clean Label Text"]).
+3. SHORT CONCISE LABELS: Keep node labels concise (under 6 words per box). Avoid ultra-long paragraphs inside diagram nodes.
+4. NO SQUISHED SUBGRAPHS: If using subgraphs, arrange them vertically top-to-bottom rather than side-by-side horizontally.
+5. NO SPECIAL SYMBOL BREAKS: Do not place unescaped quotes, raw HTML tags, or illegal symbols inside node brackets.
+6. NO ASCII ART OR TIKZ: Never output ASCII box art (+---+) or raw LaTeX TikZ code (\`\\documentclass\`, \`\\begin{tikzpicture}\`). ALWAYS use standard Mermaid blocks (\`\`\`mermaid graph TD ... \`\`\`).`
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols
@@ -269,10 +267,10 @@ graph TD
         content: "Always format mathematical notations, variables with subscripts (like M_1), powers (like x^2), calculations, and equations using standard LaTeX enclosed in single dollar signs $ for inline math (e.g. $M_1$) or double dollar signs $$ for block math. Do not write raw formulas without LaTeX tags."
     });
 
-    // Final Mandatory System Directive: Override any prompt templates that request TikZ code
+    // Final Mandatory System Directive: Override any prompt templates that request TikZ code or horizontal LR graphs
     apiMessages.push({
         role: "system",
-        content: "CRITICAL MANDATORY INSTRUCTION: Never output raw LaTeX TikZ code (such as \\documentclass, \\usepackage{tikz}, or \\begin{tikzpicture}). ALWAYS output all diagrams exclusively as native Mermaid.js code blocks (```mermaid ... ```). This rule supersedes all user prompt templates and instructions."
+        content: "CRITICAL MANDATORY OVERRIDE: ALWAYS output all diagrams exclusively as top-to-bottom vertical Mermaid.js code blocks (```mermaid\\ngraph TD\\n...\\n```). NEVER use graph LR or raw TikZ. This rule supersedes all prompt templates."
     });
 
     try {

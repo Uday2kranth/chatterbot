@@ -3320,15 +3320,9 @@ function renderMessages(messages) {
       // Set default mode attribute
       card.setAttribute('data-active-mode', 'full');
 
-      // Create toolbar header with 3-Way Mode Segmented Buttons
+      // Create toolbar header with 3-Way Mode iOS Glassmorphic Segmented Control
       const toolbar = document.createElement('div');
       toolbar.className = 'diagram-card-toolbar';
-      toolbar.style.display = 'flex';
-      toolbar.style.justifyContent = 'space-between';
-      toolbar.style.alignItems = 'center';
-      toolbar.style.marginBottom = '12px';
-      toolbar.style.paddingBottom = '8px';
-      toolbar.style.borderBottom = '1px solid var(--border-color)';
 
       const titleLabel = document.createElement('span');
       titleLabel.style.fontSize = '0.8rem';
@@ -3340,27 +3334,20 @@ function renderMessages(messages) {
       titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Multi-Branch Diagram</span>`;
 
       const btnGroup = document.createElement('div');
-      btnGroup.style.display = 'flex';
-      btnGroup.style.gap = '4px';
+      btnGroup.className = 'ios-glass-btn-group';
 
       const btnFull = document.createElement('button');
-      btnFull.className = 'msg-action-btn active';
-      btnFull.style.padding = '3px 8px';
-      btnFull.style.fontSize = '0.75rem';
+      btnFull.className = 'ios-glass-btn active';
       btnFull.title = 'Show full multi-branch diagram with all decision splits';
       btnFull.innerHTML = `<i class="fa-solid fa-sitemap"></i> <span>Full Vector</span>`;
 
       const btnSimple = document.createElement('button');
-      btnSimple.className = 'msg-action-btn';
-      btnSimple.style.padding = '3px 8px';
-      btnSimple.style.fontSize = '0.75rem';
+      btnSimple.className = 'ios-glass-btn';
       btnSimple.title = 'Show clean 1-line simplified flowchart';
       btnSimple.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Clean Linear</span>`;
 
       const btnText = document.createElement('button');
-      btnText.className = 'msg-action-btn';
-      btnText.style.padding = '3px 8px';
-      btnText.style.fontSize = '0.75rem';
+      btnText.className = 'ios-glass-btn';
       btnText.title = 'Show ASCII text flowchart schema';
       btnText.innerHTML = `<i class="fa-solid fa-code"></i> <span>ASCII Schema</span>`;
 

@@ -89,7 +89,7 @@ Snippet: "${snippet}"`);
 // Dedicated Server Backend RAG Helper for live diagram image search via Wikimedia Commons API
 async function getImageSearchLinks(query) {
     try {
-        const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query + ' diagram')}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&format=json`;
+        const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query + ' diagram')}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&iiurlwidth=800&format=json`;
         const response = await fetch(wikiUrl, {
             headers: { 'User-Agent': 'ChatterBot-DiagramRAG/1.0 (https://chatterbot.vercel.app)' }
         });
@@ -100,11 +100,11 @@ async function getImageSearchLinks(query) {
             const pages = data.query?.pages || {};
             for (const pageId in pages) {
                 const info = pages[pageId]?.imageinfo?.[0];
-                if (info && info.url) {
-                    const mime = (info.mime || '').toLowerCase();
-                    const url = info.url;
-                    if ((mime.includes('png') || mime.includes('jpeg') || mime.includes('jpg') || mime.includes('svg')) && !url.includes('logo') && !url.includes('icon')) {
-                        validImages.push(url);
+                const imgUrl = info?.thumburl || info?.url;
+                if (imgUrl) {
+                    const urlLower = imgUrl.toLowerCase();
+                    if (!urlLower.endsWith('.pdf') && !urlLower.includes('logo') && !urlLower.includes('icon') && !urlLower.includes('avatar')) {
+                        validImages.push(imgUrl);
                         if (validImages.length >= 4) break;
                     }
                 }
@@ -112,14 +112,13 @@ async function getImageSearchLinks(query) {
         }
 
         if (validImages.length === 0) {
-            validImages.push('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png');
-            validImages.push('https://media.geeksforgeeks.org/wp-content/uploads/20210217180424/DataMiningStructure.png');
+            return '';
         }
 
         return validImages.map((url, idx) => `[Verified Diagram Image ${idx + 1}]: ${url}`).join('\n');
     } catch (err) {
         console.error('Failed to fetch image search links:', err);
-        return '[Verified Diagram Image 1]: https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png';
+        return '';
     }
 }
 

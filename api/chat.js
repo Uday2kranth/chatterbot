@@ -289,7 +289,10 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
 
                 console.warn(`Key rotation: Key index ${i} failed for provider "${provider}" with status ${response.status}: ${lastErrorText}`);
 
-                // If this is a client error (e.g. bad request 400, model not found), rotating keys won't help, so break early!
+                // If quota exhausted (429) or bad request (400), capture explicit message
+                if (response.status === 429) {
+                    lastErrorText = "Google Free Tier Rate Limit Exceeded (15 RPM / 1500 RPD quota). Please try again in 15s or switch provider.";
+                }
                 if (response.status === 400) {
                     break;
                 }

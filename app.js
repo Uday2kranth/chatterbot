@@ -435,8 +435,13 @@ const PROVIDER_MODELS = {
   gemini: [
     { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
     { value: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash-Lite", multimodal: true, voice: true },
+    { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash [WS]", webSearch: true, multimodal: true },
+    { value: "gemini-1.5-flash-8b", name: "Gemini 1.5 Flash-8B", multimodal: true },
+    { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro [WS]", webSearch: true, multimodal: true },
     { value: "gemini-flash-latest", name: "Gemini Flash Latest [WS]", webSearch: true, multimodal: true },
-    { value: "gemini-pro-latest", name: "Gemini Pro Latest [WS]", webSearch: true, multimodal: true }
+    { value: "gemini-pro-latest", name: "Gemini Pro Latest [WS]", webSearch: true, multimodal: true },
+    { value: "gemma-4-31b-it", name: "Gemma 4 31B (Vision/Layout)", multimodal: true, preferredVision: true },
+    { value: "gemma-2-27b-it", name: "Gemma 2 27B (Dense Reasoning)" }
   ],
   nararouter: [
     { value: "mistral-large", name: "Mistral Large (Free) [WS]", webSearch: true },

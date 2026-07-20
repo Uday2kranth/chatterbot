@@ -2617,10 +2617,40 @@ function renderMarkdownWithMath(text) {
     return `<img ${newAttrs} />`;
   });
 
-  // 6. Convert Mermaid code blocks into renderable Mermaid containers
-  html = html.replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/gi, (match, code) => {
+  // 6. Convert Mermaid & ASCII text diagram code blocks into renderable Mermaid diagram cards
+  html = html.replace(/<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/gi, (match, lang, code) => {
     const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-    return `<div class="mermaid-diagram-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${cleanCode}</div></div>`;
+    if (lang === 'mermaid' || cleanCode.trim().startsWith('graph') || cleanCode.trim().startsWith('flowchart')) {
+      return `<div class="mermaid-diagram-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${cleanCode}</div></div>`;
+    }
+    
+    // Auto-detect ASCII flowchart blocks in older messages and wrap into 3-mode diagram cards
+    if ((cleanCode.includes('[') && cleanCode.includes(']')) && (cleanCode.includes('│') || cleanCode.includes('▼') || cleanCode.includes('->') || cleanCode.includes('-->') || cleanCode.includes('|'))) {
+      const asciiLines = cleanCode.split('\n');
+      const nodes = [];
+      asciiLines.forEach(l => {
+        const bracket = l.match(/\[\s*([^\]]+)\s*\]/);
+        const inputMatch = l.match(/^(?:Input|Output)\s*:?\s*(.*)/i);
+        if (bracket) {
+          const lbl = bracket[1].trim().replace(/"/g, "'");
+          if (!nodes.some(n => n === lbl)) nodes.push(lbl);
+        } else if (inputMatch && inputMatch[1]) {
+          const lbl = l.trim().replace(/"/g, "'");
+          if (!nodes.some(n => n === lbl)) nodes.push(lbl);
+        }
+      });
+      if (nodes.length >= 2) {
+        let convertedMermaid = 'graph TD\n';
+        nodes.forEach((nLbl, idx) => {
+          convertedMermaid += `  n_ascii_${idx}["${nLbl}"]\n`;
+        });
+        for (let i = 0; i < nodes.length - 1; i++) {
+          convertedMermaid += `  n_ascii_${i} --> n_ascii_${i+1}\n`;
+        }
+        return `<div class="mermaid-diagram-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${convertedMermaid}</div></div>`;
+      }
+    }
+    return match;
   });
 
   return html;
@@ -3137,7 +3167,8 @@ function formatMermaidToSimplifiedLinear(mermaidCode) {
 
     const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
     for (const m of nodeDefs) {
-      nodeMap[m[1]] = m[2].trim();
+      const cleanLabel = m[2].trim().replace(/"/g, "'").replace(/\n/g, ' ');
+      nodeMap[m[1]] = cleanLabel;
     }
 
     const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
@@ -6214,13 +6245,22 @@ function exportChatToPDF() {
         const fullEl = card.querySelector('.mermaid-full');
         const simpleEl = card.querySelector('.mermaid-simple');
         const textEl = card.querySelector('.diagram-text-schema');
+        const rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
 
         if (activeMode === 'full') {
-          if (fullEl) fullEl.style.display = 'block';
+          if (fullEl) {
+            fullEl.className = 'mermaid';
+            fullEl.style.display = 'block';
+            if (rawCode) fullEl.textContent = rawCode;
+          }
           if (simpleEl) simpleEl.remove();
           if (textEl) textEl.remove();
         } else if (activeMode === 'simple') {
-          if (simpleEl) simpleEl.style.display = 'block';
+          if (simpleEl) {
+            simpleEl.className = 'mermaid';
+            simpleEl.style.display = 'block';
+            if (rawCode) simpleEl.textContent = formatMermaidToSimplifiedLinear(rawCode);
+          }
           if (fullEl) fullEl.remove();
           if (textEl) textEl.remove();
         } else if (activeMode === 'text') {
@@ -6660,7 +6700,52 @@ function exportMessageToPDF(rawContent, msgIdx) {
     return;
   }
 
-  const formattedContent = renderMarkdownWithMath(rawContent);
+  const messagesContainer = document.getElementById('messages-container');
+  let targetContentHTML = '';
+  if (messagesContainer && msgIdx !== undefined) {
+    const msgEl = messagesContainer.querySelector(`[data-index="${msgIdx}"]`);
+    if (msgEl) {
+      const cloned = msgEl.cloneNode(true);
+      cloned.querySelectorAll('.message-actions, .diagram-card-toolbar, .code-copy-btn').forEach(el => el.remove());
+
+      cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
+        const activeMode = card.getAttribute('data-active-mode') || 'full';
+        const fullEl = card.querySelector('.mermaid-full');
+        const simpleEl = card.querySelector('.mermaid-simple');
+        const textEl = card.querySelector('.diagram-text-schema');
+        const rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
+
+        if (activeMode === 'full') {
+          if (fullEl) {
+            fullEl.className = 'mermaid';
+            fullEl.style.display = 'block';
+            if (rawCode) fullEl.textContent = rawCode;
+          }
+          if (simpleEl) simpleEl.remove();
+          if (textEl) textEl.remove();
+        } else if (activeMode === 'simple') {
+          if (simpleEl) {
+            simpleEl.className = 'mermaid';
+            simpleEl.style.display = 'block';
+            if (rawCode) simpleEl.textContent = formatMermaidToSimplifiedLinear(rawCode);
+          }
+          if (fullEl) fullEl.remove();
+          if (textEl) textEl.remove();
+        } else if (activeMode === 'text') {
+          if (textEl) textEl.style.display = 'block';
+          if (fullEl) fullEl.remove();
+          if (simpleEl) simpleEl.remove();
+        }
+      });
+
+      targetContentHTML = cloned.innerHTML;
+    }
+  }
+
+  if (!targetContentHTML) {
+    targetContentHTML = renderMarkdownWithMath(rawContent);
+  }
+
   let htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -6693,7 +6778,7 @@ function exportMessageToPDF(rawContent, msgIdx) {
         <h1 class="title">Message Export</h1>
         <div class="meta">Exported on ${new Date().toLocaleString()}</div>
       </div>
-      <div class="content">${formattedContent}</div>
+      <div class="content">${targetContentHTML}</div>
       <script>
         window.onload = function() {
           if (window.mermaid) {

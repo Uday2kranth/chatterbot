@@ -3340,7 +3340,6 @@ function formatMermaidToAsciiSchema(mermaidCode) {
       card.insertBefore(toolbar, card.firstChild);
     });
   }, 100);
-  }, 100);
 
   // Scroll to bottom
   container.scrollTop = container.scrollHeight;

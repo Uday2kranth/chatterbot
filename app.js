@@ -1662,12 +1662,12 @@ async function loadChatSessions() {
   
   const sessionIds = Object.keys(chatSessions).filter(id => id !== 'api_keys_storage' && id !== 'token_tracker_storage' && id !== 'chat_settings_storage');
   if (paramSessionId && chatSessions[paramSessionId]) {
-    loadChatSession(paramSessionId);
+    loadChatSession(paramSessionId, false);
   } else if (savedActiveId && chatSessions[savedActiveId]) {
-    loadChatSession(savedActiveId);
+    loadChatSession(savedActiveId, false);
   } else if (sessionIds.length > 0) {
     sessionIds.sort((a, b) => chatSessions[b].timestamp - chatSessions[a].timestamp);
-    loadChatSession(sessionIds[0]);
+    loadChatSession(sessionIds[0], false);
   } else {
     createNewChatSession("Study Session 1", true);
   }
@@ -1822,7 +1822,7 @@ function createNewChatSession(defaultTitle = null, bypassPrompt = false) {
   return id;
 }
 
-function loadChatSession(id) {
+function loadChatSession(id, switchView = true) {
   if (!chatSessions[id]) return;
   
   activeChatId = id;
@@ -1904,8 +1904,10 @@ function loadChatSession(id) {
   // Render Messages
   renderMessages(data.messages);
 
-  // Switch to chat view in case we were in model guide or token tracker
-  showMainAreaView('chat');
+  // Switch to chat view if requested (e.g. user clicked session in sidebar)
+  if (switchView) {
+    showMainAreaView('chat');
+  }
 }
 
 async function deleteChatSession(id) {

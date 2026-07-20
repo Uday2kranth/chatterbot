@@ -3123,6 +3123,81 @@ function renderMessages(messages) {
         console.warn('Mermaid rendering warning:', e);
       }
     }
+
+    // Attach Interactive Diagram View Toggle Toolbar (Vector Diagram vs Text Schema)
+    document.querySelectorAll('.mermaid-diagram-card').forEach((card) => {
+      if (card.querySelector('.diagram-card-toolbar')) return; // Already initialized
+
+      const mermaidElement = card.querySelector('.mermaid');
+      if (!mermaidElement) return;
+
+      const rawCode = mermaidElement.getAttribute('data-raw-code') || mermaidElement.textContent;
+      if (!mermaidElement.getAttribute('data-raw-code')) {
+        mermaidElement.setAttribute('data-raw-code', rawCode);
+      }
+
+      // Create text schema container (hidden by default)
+      const textSchemaContainer = document.createElement('pre');
+      textSchemaContainer.className = 'diagram-text-schema';
+      textSchemaContainer.style.display = 'none';
+      textSchemaContainer.style.background = 'var(--bg-tertiary)';
+      textSchemaContainer.style.border = '1px solid var(--border-color)';
+      textSchemaContainer.style.borderRadius = '8px';
+      textSchemaContainer.style.padding = '12px';
+      textSchemaContainer.style.margin = '10px 0 0 0';
+      textSchemaContainer.style.fontFamily = 'monospace';
+      textSchemaContainer.style.fontSize = '0.85rem';
+      textSchemaContainer.style.overflowX = 'auto';
+      textSchemaContainer.textContent = rawCode;
+
+      card.appendChild(textSchemaContainer);
+
+      // Create toolbar header
+      const toolbar = document.createElement('div');
+      toolbar.className = 'diagram-card-toolbar';
+      toolbar.style.display = 'flex';
+      toolbar.style.justifyContent = 'space-between';
+      toolbar.style.alignItems = 'center';
+      toolbar.style.marginBottom = '12px';
+      toolbar.style.paddingBottom = '8px';
+      toolbar.style.borderBottom = '1px solid var(--border-color)';
+
+      const titleLabel = document.createElement('span');
+      titleLabel.style.fontSize = '0.8rem';
+      titleLabel.style.fontWeight = '700';
+      titleLabel.style.color = 'var(--accent-primary)';
+      titleLabel.style.display = 'flex';
+      titleLabel.style.alignItems = 'center';
+      titleLabel.style.gap = '6px';
+      titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Vector Flowchart Diagram</span>`;
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'msg-action-btn';
+      toggleBtn.style.padding = '3px 10px';
+      toggleBtn.style.fontSize = '0.75rem';
+      toggleBtn.style.borderRadius = '6px';
+      toggleBtn.title = 'Switch between visual diagram and raw text code';
+      toggleBtn.innerHTML = `<i class="fa-solid fa-code"></i> <span>View Text Schema</span>`;
+
+      toggleBtn.addEventListener('click', () => {
+        const isShowingVector = mermaidElement.style.display !== 'none';
+        if (isShowingVector) {
+          mermaidElement.style.display = 'none';
+          textSchemaContainer.style.display = 'block';
+          toggleBtn.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>View Vector Diagram</span>`;
+          titleLabel.innerHTML = `<i class="fa-solid fa-code"></i> <span>Text Schema View</span>`;
+        } else {
+          mermaidElement.style.display = 'block';
+          textSchemaContainer.style.display = 'none';
+          toggleBtn.innerHTML = `<i class="fa-solid fa-code"></i> <span>View Text Schema</span>`;
+          titleLabel.innerHTML = `<i class="fa-solid fa-diagram-project"></i> <span>Vector Flowchart Diagram</span>`;
+        }
+      });
+
+      toolbar.appendChild(titleLabel);
+      toolbar.appendChild(toggleBtn);
+      card.insertBefore(toolbar, card.firstChild);
+    });
   }, 100);
 
   // Scroll to bottom
@@ -5959,11 +6034,11 @@ function exportChatToPDF() {
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
         .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
         .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
-        .message { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; page-break-inside: avoid; }
+        .message { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; page-break-inside: auto; break-inside: auto; }
         .role { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
         .role.user { color: #2563eb; }
         .role.assistant { color: #059669; }
-        .content { font-size: 1rem; word-break: break-word; }
+        .content { font-size: 1rem; word-break: break-word; page-break-inside: auto; break-inside: auto; }
         pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.9rem; }
         code { font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
         pre code { background: transparent; padding: 0; }
@@ -5971,7 +6046,7 @@ function exportChatToPDF() {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
         th { background: #f8fafc; }
-        .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; }
+        .mermaid-diagram-card, .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
         @media print {
           body { padding: 0; }
           .no-print { display: none; }
@@ -6449,7 +6524,7 @@ function exportMessageToPDF(rawContent, msgIdx) {
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
         .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
         .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
-        .content { font-size: 1rem; word-break: break-word; }
+        .content { font-size: 1rem; word-break: break-word; page-break-inside: auto; break-inside: auto; }
         pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.9rem; }
         code { font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
         pre code { background: transparent; padding: 0; }
@@ -6457,7 +6532,7 @@ function exportMessageToPDF(rawContent, msgIdx) {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.9rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
         th { background: #f8fafc; color: #0f172a; }
-        .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; }
+        .mermaid-diagram-card, .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
         @media print {
           body { padding: 0; }
           .no-print { display: none; }

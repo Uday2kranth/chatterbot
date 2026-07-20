@@ -268,39 +268,53 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
                 headers["X-Title"] = "ChatterBot Dashboard";
             }
 
-            try {
-                const response = await fetch(fetchEndpoint, {
-                    method: "POST",
-                    headers: headers,
-                    body: JSON.stringify({
-                        model: model,
-                        messages: apiMessages
-                    })
-                });
-
-                if (response.ok) {
-                    responsePayload = await response.json();
-                    break; // Success! Exit key rotation loop.
+            // Build model candidates for Gemini to handle custom preview strings gracefully
+            let modelCandidates = [model];
+            if (provider === "gemini") {
+                if (model === "gemini-3.5-flash" || model === "gemini-3.1-flash-lite" || model === "gemini-flash-latest") {
+                    modelCandidates.push("gemini-2.0-flash", "gemini-1.5-flash");
+                } else if (model === "gemini-3.1-pro-preview" || model === "gemini-pro-latest") {
+                    modelCandidates.push("gemini-1.5-pro", "gemini-2.0-flash");
+                } else if (model.includes("gemma")) {
+                    modelCandidates.push("gemini-2.0-flash", "gemini-1.5-flash");
+                } else if (!["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"].includes(model)) {
+                    modelCandidates.push("gemini-2.0-flash");
                 }
-
-                const errData = await response.json().catch(() => ({}));
-                lastErrorText = errData.error?.message || errData.message || errData.error || response.statusText || 'Unknown Provider Error';
-                lastStatus = response.status;
-
-                console.warn(`Key rotation: Key index ${i} failed for provider "${provider}" with status ${response.status}: ${lastErrorText}`);
-
-                // If quota exhausted (429) or bad request (400), capture explicit message
-                if (response.status === 429) {
-                    lastErrorText = "Google Free Tier Rate Limit Exceeded (15 RPM / 1500 RPD quota). Please try again in 15s or switch provider.";
-                }
-                if (response.status === 400) {
-                    break;
-                }
-            } catch (err) {
-                lastErrorText = err.message;
-                lastStatus = 500;
-                console.error(`Key rotation: Network error on key index ${i}:`, err);
             }
+
+            for (const targetModel of modelCandidates) {
+                try {
+                    const response = await fetch(fetchEndpoint, {
+                        method: "POST",
+                        headers: headers,
+                        body: JSON.stringify({
+                            model: targetModel,
+                            messages: apiMessages
+                        })
+                    });
+
+                    if (response.ok) {
+                        responsePayload = await response.json();
+                        break; // Success! Exit key & candidate loop.
+                    }
+
+                    const errData = await response.json().catch(() => ({}));
+                    lastErrorText = errData.error?.message || errData.message || errData.error || response.statusText || 'Unknown Provider Error';
+                    lastStatus = response.status;
+
+                    console.warn(`Key rotation: Key index ${i} failed for model "${targetModel}" with status ${response.status}: ${lastErrorText}`);
+
+                    if (response.status === 429) {
+                        lastErrorText = "Google Free Tier Rate Limit Exceeded (15 RPM / 1500 RPD quota). Please try again in 15s or switch provider.";
+                    }
+                } catch (err) {
+                    lastErrorText = err.message;
+                    lastStatus = 500;
+                    console.error(`Key rotation: Network error on key index ${i}:`, err);
+                }
+            }
+
+            if (responsePayload) break;
         }
 
         if (!responsePayload) {

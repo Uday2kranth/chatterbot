@@ -433,6 +433,9 @@ const PROVIDER_MODELS = {
     { value: "gemma-4-31B-it", name: "Gemma 4 31B it", multimodal: true, preferredVision: true }
   ],
   gemini: [
+    { value: "gemini-3.5-flash", name: "Gemini 3.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
+    { value: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash-Lite", multimodal: true, voice: true },
+    { value: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Preview)", multimodal: true, voice: true },
     { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
     { value: "gemini-2.0-flash-lite", name: "Gemini 2.0 Flash-Lite", multimodal: true, voice: true },
     { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash [WS]", webSearch: true, multimodal: true },
@@ -440,8 +443,9 @@ const PROVIDER_MODELS = {
     { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro [WS]", webSearch: true, multimodal: true },
     { value: "gemini-flash-latest", name: "Gemini Flash Latest [WS]", webSearch: true, multimodal: true },
     { value: "gemini-pro-latest", name: "Gemini Pro Latest [WS]", webSearch: true, multimodal: true },
-    { value: "gemma-4-31b-it", name: "Gemma 4 31B (Vision/Layout)", multimodal: true, preferredVision: true },
-    { value: "gemma-2-27b-it", name: "Gemma 2 27B (Dense Reasoning)" }
+    { value: "gemma-4-31b-it", name: "Gemma 4 31B (AI Studio) [WS]", webSearch: true, multimodal: true, preferredVision: true },
+    { value: "gemma-4-26b-a4b-it", name: "Gemma 4 26B MoE (AI Studio)", multimodal: true },
+    { value: "gemma-2-27b-it", name: "Gemma 2 27B (AI Studio) [WS]", webSearch: true, multimodal: true }
   ],
   nararouter: [
     { value: "mistral-large", name: "Mistral Large (Free) [WS]", webSearch: true },

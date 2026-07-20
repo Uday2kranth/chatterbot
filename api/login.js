@@ -67,14 +67,26 @@ module.exports = async (req, res) => {
         let activeRole = userRecord.role;
         try {
             const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL || process.env.STORAGE_URL || process.env.MONGODB_STORAGE_URL;
-            const DB_FILE = path.join(process.cwd(), 'db', 'database.json');
-            if (fs.existsSync(DB_FILE)) {
-                const database = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
-                if (database[trimmedUser] && database[trimmedUser].chat_settings_storage && database[trimmedUser].chat_settings_storage.data && database[trimmedUser].chat_settings_storage.data.assignedRole) {
-                    activeRole = database[trimmedUser].chat_settings_storage.data.assignedRole;
+            if (mongoUri) {
+                const { MongoClient } = require('mongodb');
+                const client = await MongoClient.connect(mongoUri);
+                const db = client.db('chatterbot_db');
+                const doc = await db.collection('user_sessions').findOne({ user: trimmedUser, id: 'chat_settings_storage' });
+                if (doc && doc.session && doc.session.data && doc.session.data.assignedRole) {
+                    activeRole = doc.session.data.assignedRole;
+                }
+            } else {
+                const DB_FILE = path.join(process.cwd(), 'db', 'database.json');
+                if (fs.existsSync(DB_FILE)) {
+                    const database = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+                    if (database[trimmedUser] && database[trimmedUser].chat_settings_storage && database[trimmedUser].chat_settings_storage.data && database[trimmedUser].chat_settings_storage.data.assignedRole) {
+                        activeRole = database[trimmedUser].chat_settings_storage.data.assignedRole;
+                    }
                 }
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Error fetching assigned role override from database:', e);
+        }
 
         return res.status(200).json({
             success: true,

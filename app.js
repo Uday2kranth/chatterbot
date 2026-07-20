@@ -2488,6 +2488,100 @@ function setupChatHandlers() {
   sendBtn.addEventListener('click', submitPrompt);
 }
 
+// Helper to format Mermaid code into a clean linear sequence
+function formatMermaidToSimplifiedLinear(mermaidCode) {
+  if (!mermaidCode) return '';
+  const lines = mermaidCode.split('\n');
+  const nodeMap = {};
+  const mainSequence = [];
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
+
+    const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
+    for (const m of nodeDefs) {
+      const cleanLabel = m[2].trim().replace(/"/g, "'").replace(/\n/g, ' ');
+      nodeMap[m[1]] = cleanLabel;
+    }
+
+    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
+    if (connMatch) {
+      const from = connMatch[1];
+      const to = connMatch[3];
+      if (!mainSequence.includes(from)) mainSequence.push(from);
+      if (!mainSequence.includes(to)) mainSequence.push(to);
+    }
+  });
+
+  if (mainSequence.length < 2) return mermaidCode;
+
+  let mermaid = 'graph TD\n';
+  mainSequence.forEach((nId, idx) => {
+    const label = nodeMap[nId] || nId;
+    mermaid += `  node_simple_${idx}["${label}"]\n`;
+  });
+  for (let i = 0; i < mainSequence.length - 1; i++) {
+    mermaid += `  node_simple_${i} --> node_simple_${i+1}\n`;
+  }
+
+  return mermaid;
+}
+
+// Helper to format Mermaid code into a clean, human-readable ASCII text flowchart schema
+function formatMermaidToAsciiSchema(mermaidCode) {
+  if (!mermaidCode) return '';
+  const lines = mermaidCode.split('\n');
+  const nodeMap = {};
+  const connections = [];
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
+
+    const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
+    for (const m of nodeDefs) {
+      nodeMap[m[1]] = m[2].trim();
+    }
+
+    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
+    if (connMatch) {
+      connections.push({
+        from: connMatch[1],
+        label: connMatch[2] ? connMatch[2].trim() : '',
+        to: connMatch[3]
+      });
+    }
+  });
+
+  if (connections.length === 0) {
+    return mermaidCode;
+  }
+
+  let ascii = '┌────────────────────────────────────────────────────────┐\n';
+  ascii +=   '│             ASCII TEXT SCHEMA FLOWCHART                │\n';
+  ascii +=   '└────────────────────────────────────────────────────────┘\n\n';
+
+  connections.forEach((c, idx) => {
+    const fromLabel = nodeMap[c.from] || c.from;
+    const toLabel = nodeMap[c.to] || c.to;
+    
+    ascii += `[ ${fromLabel} ]\n`;
+    if (c.label) {
+      ascii += `       │  (${c.label})\n`;
+    } else {
+      ascii += `       │\n`;
+    }
+    ascii += `       ▼\n`;
+    
+    if (idx === connections.length - 1) {
+      ascii += `[ ${toLabel} ]\n`;
+    }
+  });
+
+  return ascii;
+}
+
 // Helper to automatically convert raw LaTeX TikZ code blocks into visual Mermaid.js diagrams
 function convertTikzToMermaid(code) {
   if (!code || (!code.includes('\\begin{tikzpicture}') && !code.includes('\\documentclass'))) return code;
@@ -3153,100 +3247,6 @@ function renderMessages(messages) {
         console.warn('Mermaid rendering warning:', e);
       }
     }
-
-// Helper to format Mermaid code into a clean linear sequence
-function formatMermaidToSimplifiedLinear(mermaidCode) {
-  if (!mermaidCode) return '';
-  const lines = mermaidCode.split('\n');
-  const nodeMap = {};
-  const mainSequence = [];
-
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
-
-    const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
-    for (const m of nodeDefs) {
-      const cleanLabel = m[2].trim().replace(/"/g, "'").replace(/\n/g, ' ');
-      nodeMap[m[1]] = cleanLabel;
-    }
-
-    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
-    if (connMatch) {
-      const from = connMatch[1];
-      const to = connMatch[3];
-      if (!mainSequence.includes(from)) mainSequence.push(from);
-      if (!mainSequence.includes(to)) mainSequence.push(to);
-    }
-  });
-
-  if (mainSequence.length < 2) return mermaidCode;
-
-  let mermaid = 'graph TD\n';
-  mainSequence.forEach((nId, idx) => {
-    const label = nodeMap[nId] || nId;
-    mermaid += `  node_simple_${idx}["${label}"]\n`;
-  });
-  for (let i = 0; i < mainSequence.length - 1; i++) {
-    mermaid += `  node_simple_${i} --> node_simple_${i+1}\n`;
-  }
-
-  return mermaid;
-}
-
-// Helper to format Mermaid code into a clean, human-readable ASCII text flowchart schema
-function formatMermaidToAsciiSchema(mermaidCode) {
-  if (!mermaidCode) return '';
-  const lines = mermaidCode.split('\n');
-  const nodeMap = {};
-  const connections = [];
-
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
-
-    const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
-    for (const m of nodeDefs) {
-      nodeMap[m[1]] = m[2].trim();
-    }
-
-    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
-    if (connMatch) {
-      connections.push({
-        from: connMatch[1],
-        label: connMatch[2] ? connMatch[2].trim() : '',
-        to: connMatch[3]
-      });
-    }
-  });
-
-  if (connections.length === 0) {
-    return mermaidCode;
-  }
-
-  let ascii = '┌────────────────────────────────────────────────────────┐\n';
-  ascii +=   '│             ASCII TEXT SCHEMA FLOWCHART                │\n';
-  ascii +=   '└────────────────────────────────────────────────────────┘\n\n';
-
-  connections.forEach((c, idx) => {
-    const fromLabel = nodeMap[c.from] || c.from;
-    const toLabel = nodeMap[c.to] || c.to;
-    
-    ascii += `[ ${fromLabel} ]\n`;
-    if (c.label) {
-      ascii += `       │  (${c.label})\n`;
-    } else {
-      ascii += `       │\n`;
-    }
-    ascii += `       ▼\n`;
-    
-    if (idx === connections.length - 1) {
-      ascii += `[ ${toLabel} ]\n`;
-    }
-  });
-
-  return ascii;
-}
 
     // Attach Interactive 3-Mode Diagram View Toggle Toolbar
     document.querySelectorAll('.mermaid-diagram-card').forEach((card) => {
@@ -6242,31 +6242,15 @@ function exportChatToPDF() {
 
       cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
         const activeMode = card.getAttribute('data-active-mode') || 'full';
-        const fullEl = card.querySelector('.mermaid-full');
-        const simpleEl = card.querySelector('.mermaid-simple');
-        const textEl = card.querySelector('.diagram-text-schema');
+        const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
         const rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
 
         if (activeMode === 'full') {
-          if (fullEl) {
-            fullEl.className = 'mermaid';
-            fullEl.style.display = 'block';
-            if (rawCode) fullEl.textContent = rawCode;
-          }
-          if (simpleEl) simpleEl.remove();
-          if (textEl) textEl.remove();
+          card.innerHTML = `<div class="mermaid">${rawCode}</div>`;
         } else if (activeMode === 'simple') {
-          if (simpleEl) {
-            simpleEl.className = 'mermaid';
-            simpleEl.style.display = 'block';
-            if (rawCode) simpleEl.textContent = formatMermaidToSimplifiedLinear(rawCode);
-          }
-          if (fullEl) fullEl.remove();
-          if (textEl) textEl.remove();
+          card.innerHTML = `<div class="mermaid">${formatMermaidToSimplifiedLinear(rawCode)}</div>`;
         } else if (activeMode === 'text') {
-          if (textEl) textEl.style.display = 'block';
-          if (fullEl) fullEl.remove();
-          if (simpleEl) simpleEl.remove();
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${formatMermaidToAsciiSchema(rawCode)}</pre>`;
         }
       });
 
@@ -6710,31 +6694,15 @@ function exportMessageToPDF(rawContent, msgIdx) {
 
       cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
         const activeMode = card.getAttribute('data-active-mode') || 'full';
-        const fullEl = card.querySelector('.mermaid-full');
-        const simpleEl = card.querySelector('.mermaid-simple');
-        const textEl = card.querySelector('.diagram-text-schema');
+        const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
         const rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
 
         if (activeMode === 'full') {
-          if (fullEl) {
-            fullEl.className = 'mermaid';
-            fullEl.style.display = 'block';
-            if (rawCode) fullEl.textContent = rawCode;
-          }
-          if (simpleEl) simpleEl.remove();
-          if (textEl) textEl.remove();
+          card.innerHTML = `<div class="mermaid">${rawCode}</div>`;
         } else if (activeMode === 'simple') {
-          if (simpleEl) {
-            simpleEl.className = 'mermaid';
-            simpleEl.style.display = 'block';
-            if (rawCode) simpleEl.textContent = formatMermaidToSimplifiedLinear(rawCode);
-          }
-          if (fullEl) fullEl.remove();
-          if (textEl) textEl.remove();
+          card.innerHTML = `<div class="mermaid">${formatMermaidToSimplifiedLinear(rawCode)}</div>`;
         } else if (activeMode === 'text') {
-          if (textEl) textEl.style.display = 'block';
-          if (fullEl) fullEl.remove();
-          if (simpleEl) simpleEl.remove();
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${formatMermaidToAsciiSchema(rawCode)}</pre>`;
         }
       });
 

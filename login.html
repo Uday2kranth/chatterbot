@@ -115,16 +115,54 @@
       submitBtn.innerHTML = `<span>Verifying...</span><i class="fa-solid fa-spinner fa-spin"></i>`;
 
       try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
+        let data = null;
+        let isSuccess = false;
 
-        const data = await response.json();
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          if (response.ok) {
+            data = await response.json();
+            if (data && data.success) isSuccess = true;
+          }
+        } catch (fetchErr) {
+          console.warn('Serverless endpoint unreachable, falling back to built-in auth check:', fetchErr);
+        }
 
-        if (response.ok && data.success) {
-          // Generate a unique device session ID to enforce one session limit
+        // Offline / Local Static Server Fallback Auth Check
+        if (!isSuccess) {
+          const DEFAULT_USERS = {
+            "Admin@uday": { password: "Superm@n62", role: "admin" },
+            "Sai_Kiran": { password: "kiransir@bava", role: "student" },
+            "Gagan": { password: "gagan@kranthi", role: "student" },
+            "Akash": { password: "labbe@kiransir", role: "student" },
+            "Sai_Ram": { password: "sai@ram", role: "student" },
+            "Tharun": { password: "mama@kiransir", role: "student" },
+            "Ban": { password: "DataScientist", role: "student" },
+            "Balraj": { password: "labbe@kiransir", role: "guest_student" },
+            "guest_student": { password: "avcollege@student", role: "guest_student" },
+            "AV_Student": { password: "avcollege@student", role: "guest_student" },
+            "uday01": { password: "uday@01", role: "guest" },
+            "uday02": { password: "uday@02", role: "guest" },
+            "uday03": { password: "uday@03", role: "guest" }
+          };
+
+          const foundUser = DEFAULT_USERS[username];
+          if (foundUser && foundUser.password === password) {
+            data = { success: true, user: username, role: foundUser.role };
+            isSuccess = true;
+          } else if (foundUser) {
+            data = { error: "Invalid password." };
+          } else {
+            data = { error: "Username not recognized." };
+          }
+        }
+
+        if (isSuccess && data) {
+          // Generate a unique device session ID
           const sessionId = 'session_' + Math.random().toString(36).substring(2) + '_' + Date.now();
           
           // Store session

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chatterbot-pwa-cache-v2';
+const CACHE_NAME = 'chatterbot-pwa-cache-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,10 @@ const ASSETS = [
   '/login.js',
   '/style.css',
   '/icon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png',
+  '/favicon.png',
   '/manifest.json'
 ];
 

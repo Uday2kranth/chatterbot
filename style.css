@@ -2165,16 +2165,55 @@ details.guide-details .guide-content {
   transition: all 0.3s ease;
 }
 
-/* Dark Theme: Elegant Purple Node Boxes */
-body[data-theme="dark"] .mermaid .node rect,
-body[data-theme="dark"] .mermaid .node circle,
-body[data-theme="dark"] .mermaid .node polygon,
-body[data-theme="dark"] .mermaid .node path {
+/* Subgraph Cluster Title Text: Add heavy background halo so arrow lines NEVER obstruct full spelling */
+.mermaid .cluster text,
+.mermaid .cluster-label text,
+.mermaid g.cluster text,
+.mermaid .subgraph-title {
+  fill: var(--accent-primary) !important;
+  color: var(--accent-primary) !important;
+  font-weight: 800 !important;
+  font-size: 0.95rem !important;
+  paint-order: stroke fill !important;
+  stroke: var(--bg-secondary) !important;
+  stroke-width: 8px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* Subgraph Cluster Outer Container Box */
+.mermaid .cluster rect {
+  fill: var(--bg-tertiary) !important;
+  stroke: var(--border-color) !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 6 6 !important;
+  rx: 12px !important;
+  ry: 12px !important;
+}
+
+/* ── Dark Theme Diagram Colors ── */
+/* 1. Standard Process Boxes (Rectangles) - Royal Purple */
+body[data-theme="dark"] .mermaid .node rect {
   fill: #3b0764 !important;
   stroke: #c084fc !important;
   stroke-width: 2.5px !important;
   rx: 8px !important;
   ry: 8px !important;
+}
+
+/* 2. Decision Boxes (Diamonds / Polygons) - Vibrant Gold / Amber */
+body[data-theme="dark"] .mermaid .node polygon {
+  fill: #78350f !important;
+  stroke: #fbbf24 !important;
+  stroke-width: 2.5px !important;
+}
+
+/* 3. Start/End Terminals (Circles / Ellipses) - Sapphire Blue */
+body[data-theme="dark"] .mermaid .node circle,
+body[data-theme="dark"] .mermaid .node ellipse {
+  fill: #0369a1 !important;
+  stroke: #38bdf8 !important;
+  stroke-width: 2.5px !important;
 }
 
 body[data-theme="dark"] .mermaid .node .label text,
@@ -2199,16 +2238,29 @@ body[data-theme="dark"] .mermaid marker {
   stroke: #c084fc !important;
 }
 
-/* Light Theme: Vibrant Emerald Green Node Boxes */
-body[data-theme="light"] .mermaid .node rect,
-body[data-theme="light"] .mermaid .node circle,
-body[data-theme="light"] .mermaid .node polygon,
-body[data-theme="light"] .mermaid .node path {
+/* ── Light Theme Diagram Colors ── */
+/* 1. Standard Process Boxes (Rectangles) - Vibrant Emerald Green */
+body[data-theme="light"] .mermaid .node rect {
   fill: #d1fae5 !important;
   stroke: #059669 !important;
   stroke-width: 2.5px !important;
   rx: 8px !important;
   ry: 8px !important;
+}
+
+/* 2. Decision Boxes (Diamonds / Polygons) - Warm Gold / Amber */
+body[data-theme="light"] .mermaid .node polygon {
+  fill: #fef3c7 !important;
+  stroke: #d97706 !important;
+  stroke-width: 2.5px !important;
+}
+
+/* 3. Start/End Terminals (Circles / Ellipses) - Soft Sky Blue */
+body[data-theme="light"] .mermaid .node circle,
+body[data-theme="light"] .mermaid .node ellipse {
+  fill: #e0f2fe !important;
+  stroke: #0284c7 !important;
+  stroke-width: 2.5px !important;
 }
 
 body[data-theme="light"] .mermaid .node .label text,

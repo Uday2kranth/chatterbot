@@ -477,6 +477,19 @@ function setupArenaMode() {
 
   if (!arenaBtn || !arenaRow) return;
 
+  const syncArenaProviders = () => {
+    const providerSelect = document.getElementById('provider-select');
+    if (providerSelect && arenaProviderSelect) {
+      const currentSelected = arenaProviderSelect.value;
+      arenaProviderSelect.innerHTML = providerSelect.innerHTML;
+      if (currentSelected && Array.from(arenaProviderSelect.options).some(o => o.value === currentSelected)) {
+        arenaProviderSelect.value = currentSelected;
+      } else if (arenaProviderSelect.options.length > 1) {
+        arenaProviderSelect.selectedIndex = 1;
+      }
+    }
+  };
+
   const populateArenaModels = (provider) => {
     if (!arenaModelSelect) return;
     arenaModelSelect.innerHTML = '';
@@ -489,7 +502,16 @@ function setupArenaMode() {
     });
   };
 
+  syncArenaProviders();
   populateArenaModels(arenaProviderSelect.value);
+
+  const providerSelect = document.getElementById('provider-select');
+  if (providerSelect) {
+    providerSelect.addEventListener('change', () => {
+      syncArenaProviders();
+      populateArenaModels(arenaProviderSelect.value);
+    });
+  }
 
   arenaProviderSelect.addEventListener('change', () => {
     populateArenaModels(arenaProviderSelect.value);

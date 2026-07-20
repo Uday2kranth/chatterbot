@@ -324,23 +324,16 @@
           </div>
 
           <!-- Arena Model B Selection Controls (Hidden by default) -->
-          <div id="arena-controls-row" style="display:none; gap:12px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-color);">
-            <div class="selector-group">
+          <div id="arena-controls-row" style="display:none; flex-wrap:wrap; align-items:center; gap:12px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-color);">
+            <div class="selector-group" style="flex:1; min-width:180px;">
               <label for="arena-provider-select" style="font-size:0.75rem; color:var(--accent-primary); font-weight:700;">ARENA MODEL B PROVIDER</label>
-              <select id="arena-provider-select" class="custom-select">
-                <option value="cerebras">Cerebras</option>
-                <option value="gemini">Google Gemini</option>
-                <option value="openrouter">OpenRouter</option>
-                <option value="nvidia">NVIDIA NIM</option>
-                <option value="omnirouter">OmniRouter</option>
-                <option value="mistral">Mistral AI</option>
-                <option value="groq">Groq</option>
-                <option value="sambanova">SambaNova</option>
+              <select id="arena-provider-select" class="custom-select" style="width:100%; min-width:180px;">
+                <!-- Dynamically synchronized from provider-select -->
               </select>
             </div>
-            <div class="selector-group">
+            <div class="selector-group" style="flex:2; min-width:220px;">
               <label for="arena-model-select" style="font-size:0.75rem; color:var(--accent-primary); font-weight:700;">ARENA MODEL B</label>
-              <select id="arena-model-select" class="custom-select">
+              <select id="arena-model-select" class="custom-select" style="width:100%; min-width:220px;">
                 <!-- Populated dynamically via app.js -->
               </select>
             </div>

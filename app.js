@@ -2548,7 +2548,7 @@ function renderMarkdownWithMath(text) {
   html = html.replace(/<a\s+(href="[^"]*")/gi, '<a $1 target="_blank" rel="noopener noreferrer"');
 
   // 5. Enhance image tags: bypass hotlink/referrer blocks with no-referrer & automatic fallback
-  const defaultFallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='260' viewBox='0 0 600 260'%3E%3Crect width='100%25' height='100%25' fill='%231e293b' rx='12'/%3E%3Ctext x='50%25' y='45%25' fill='%2338bdf8' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle'%3E📊 Subject Diagram Representation%3C/text%3E%3Ctext x='50%25' y='62%25' fill='%2394a3b8' font-family='sans-serif' font-size='13' text-anchor='middle'%3E(Diagram RAG Engine)%3C/text%3E%3C/svg%3E";
+  const defaultFallbackImg = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22260%22 viewBox=%220 0 600 260%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%231e293b%22 rx=%2212%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 fill=%22%2338bdf8%22 font-family=%22sans-serif%22 font-size=%2218%22 font-weight=%22bold%22 text-anchor=%22middle%22%3E📊 Subject Diagram Representation%3C/text%3E%3Ctext x=%2250%25%22 y=%2262%25%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2213%22 text-anchor=%22middle%22%3E(Diagram RAG Engine)%3C/text%3E%3C/svg%3E";
   html = html.replace(/<img\s+([^>]*)\/?>/gi, (match, attrs) => {
     let newAttrs = attrs;
     if (!newAttrs.includes('referrerpolicy')) {

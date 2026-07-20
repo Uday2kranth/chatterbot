@@ -10,6 +10,7 @@ const AUTHORIZED_USERS = {
   "Sai_Ram": { password: "sai@ram", role: "student" },
   "Tharun": { password: "mama@kiransir", role: "student" },
   "Ban": { password: "DataScientist", role: "student" },
+  "Balraj": { password: "labbe@kiransir", role: "guest_student" },
   "guest_student": { password: "avcollege@student", role: "guest_student" },
   "AV_Student": { password: "avcollege@student", role: "guest_student" },
   "uday01": { password: "uday@01", role: "guest" },

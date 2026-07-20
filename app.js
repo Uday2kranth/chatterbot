@@ -491,15 +491,7 @@ function setupArenaMode() {
   };
 
   const populateArenaModels = (provider) => {
-    if (!arenaModelSelect) return;
-    arenaModelSelect.innerHTML = '';
-    const models = PROVIDER_MODELS[provider] || [];
-    models.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.value;
-      opt.textContent = m.label;
-      arenaModelSelect.appendChild(opt);
-    });
+    populateModels(provider, 'arena-model-select');
   };
 
   syncArenaProviders();
@@ -962,8 +954,9 @@ function checkMistralWarning() {
   }
 }
 
-function populateModels(provider) {
-  const modelSelect = document.getElementById('model-select');
+function populateModels(provider, targetSelectId = 'model-select') {
+  const modelSelect = document.getElementById(targetSelectId);
+  if (!modelSelect) return;
   modelSelect.innerHTML = '';
   
   if (provider === 'local') {
@@ -991,7 +984,7 @@ function populateModels(provider) {
     
     const suffix = tags.length > 0 ? ` [${tags.join(', ')}]` : '';
     // Strip existing suffix bracket tags or [WS] from the predefined name to avoid duplication
-    const cleanName = model.name.replace(/\s*\[WS\]\s*$/, '').replace(/\s*\[.*\]\s*$/, '');
+    const cleanName = (model.name || model.value || '').replace(/\s*\[WS\]\s*$/, '').replace(/\s*\[.*\]\s*$/, '');
     
     option.textContent = cleanName + suffix;
     modelSelect.appendChild(option);

@@ -59,7 +59,7 @@ function getPersistedUserRoles() {
 
 function getGeminiKeysString() {
   const geminiKeys = [];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 7; i++) {
     const val = localStorage.getItem(`chatterbot_key_gemini_${i}`) || '';
     if (val.trim()) geminiKeys.push(val.trim());
   }
@@ -82,12 +82,12 @@ function getAPIKeysHeaders() {
     if (val.trim()) nvidiaKeys.push(val.trim());
   }
   const mistralKeys = [];
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 3; i++) {
     const val = localStorage.getItem(`chatterbot_key_mistral_${i}`) || '';
     if (val.trim()) mistralKeys.push(val.trim());
   }
   const groqKeys = [];
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 3; i++) {
     const val = localStorage.getItem(`chatterbot_key_groq_${i}`) || '';
     if (val.trim()) groqKeys.push(val.trim());
   }
@@ -1842,7 +1842,7 @@ function setupSettingsDrawer() {
         }
       }
       // Load Mistral
-      for (let i = 1; i <= 2; i++) {
+      for (let i = 1; i <= 3; i++) {
         const input = document.getElementById(`mistral-key-${i}`);
         if (input) {
           input.disabled = false;
@@ -1856,7 +1856,7 @@ function setupSettingsDrawer() {
         cerebrasInput.value = localStorage.getItem('chatterbot_key_cerebras') || '';
       }
       // Load Groq
-      for (let i = 1; i <= 2; i++) {
+      for (let i = 1; i <= 3; i++) {
         const input = document.getElementById(`groq-key-${i}`);
         if (input) {
           input.disabled = false;
@@ -1875,8 +1875,8 @@ function setupSettingsDrawer() {
         nararouterInput.disabled = false;
         nararouterInput.value = localStorage.getItem('chatterbot_key_nararouter') || '';
       }
-      // Load Gemini (5 keys)
-      for (let i = 1; i <= 5; i++) {
+      // Load Gemini (7 keys)
+      for (let i = 1; i <= 7; i++) {
         const input = document.getElementById(`gemini-key-${i}`);
         if (input) {
           input.disabled = false;
@@ -4427,11 +4427,15 @@ async function syncAPIKeysToServer() {
   for (let i = 1; i <= 5; i++) {
     keysObj.nvidia.push(localStorage.getItem(`chatterbot_key_nvidia_${i}`) || '');
   }
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 3; i++) {
     keysObj.mistral.push(localStorage.getItem(`chatterbot_key_mistral_${i}`) || '');
   }
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 3; i++) {
     keysObj.groq.push(localStorage.getItem(`chatterbot_key_groq_${i}`) || '');
+  }
+  keysObj.gemini = [];
+  for (let i = 1; i <= 7; i++) {
+    keysObj.gemini.push(localStorage.getItem(`chatterbot_key_gemini_${i}`) || '');
   }
 
   try {

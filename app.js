@@ -2551,12 +2551,14 @@ function renderMarkdownWithMath(text) {
   const defaultFallbackImg = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22260%22 viewBox=%220 0 600 260%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%231e293b%22 rx=%2212%22/%3E%3Ctext x=%2250%25%22 y=%2245%25%22 fill=%22%2338bdf8%22 font-family=%22sans-serif%22 font-size=%2218%22 font-weight=%22bold%22 text-anchor=%22middle%22%3E📊 Subject Diagram Representation%3C/text%3E%3Ctext x=%2250%25%22 y=%2262%25%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2213%22 text-anchor=%22middle%22%3E(Diagram RAG Engine)%3C/text%3E%3C/svg%3E";
   html = html.replace(/<img\s+([^>]*)\/?>/gi, (match, attrs) => {
     let newAttrs = attrs;
+    // Strip out any legacy/corrupted inline onerror attributes from saved message strings
+    newAttrs = newAttrs.replace(/onerror\s*=\s*(["'])[\s\S]*?\1/gi, '');
+    newAttrs = newAttrs.replace(/onerror\s*=\s*this\.onerror=null[\s\S]*?(?=\s|>)/gi, '');
+
     if (!newAttrs.includes('referrerpolicy')) {
       newAttrs += ' referrerpolicy="no-referrer"';
     }
-    if (!newAttrs.includes('onerror')) {
-      newAttrs += ` onerror="this.onerror=null; this.src='${defaultFallbackImg}';"`;
-    }
+    newAttrs += ` onerror="this.onerror=null; this.src='${defaultFallbackImg}';"`;
     if (!newAttrs.includes('style=')) {
       newAttrs += ' style="max-width:100%; border-radius:10px; border:1px solid var(--border-color); margin:8px 0; box-shadow:0 4px 12px rgba(0,0,0,0.3);"';
     }

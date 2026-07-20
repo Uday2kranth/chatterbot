@@ -2192,6 +2192,10 @@ details.guide-details .guide-content {
 }
 
 /* ── Dark Theme Diagram Colors ── */
+body[data-theme="dark"] .mermaid svg {
+  background: transparent !important;
+}
+
 /* 1. Standard Process Boxes (Rectangles) - Royal Purple */
 body[data-theme="dark"] .mermaid .node rect {
   fill: #3b0764 !important;
@@ -2219,23 +2223,42 @@ body[data-theme="dark"] .mermaid .node ellipse {
 body[data-theme="dark"] .mermaid .node .label text,
 body[data-theme="dark"] .mermaid .node label,
 body[data-theme="dark"] .mermaid span.nodeLabel,
-body[data-theme="dark"] .mermaid .label {
-  fill: #faf5ff !important;
-  color: #faf5ff !important;
-  font-weight: 600 !important;
+body[data-theme="dark"] .mermaid .label,
+body[data-theme="dark"] .mermaid text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
   font-family: inherit !important;
 }
 
+/* Arrow Paths & Lines - High Visibility Bright Purple/Cyan */
 body[data-theme="dark"] .mermaid .edgePath .path,
-body[data-theme="dark"] .mermaid .flowchart-link {
+body[data-theme="dark"] .mermaid .flowchart-link,
+body[data-theme="dark"] .mermaid path.path,
+body[data-theme="dark"] .mermaid path.link,
+body[data-theme="dark"] .mermaid .edgePaths path {
   stroke: #c084fc !important;
   stroke-width: 2.5px !important;
 }
 
+/* Arrowhead Markers */
 body[data-theme="dark"] .mermaid .marker,
-body[data-theme="dark"] .mermaid marker {
+body[data-theme="dark"] .mermaid marker,
+body[data-theme="dark"] .mermaid .arrowheadPath,
+body[data-theme="dark"] .mermaid marker path,
+body[data-theme="dark"] .mermaid .marker path,
+body[data-theme="dark"] .mermaid path[id*="arrow"] {
   fill: #c084fc !important;
   stroke: #c084fc !important;
+}
+
+body[data-theme="dark"] .mermaid .cluster text,
+body[data-theme="dark"] .mermaid .cluster-label text,
+body[data-theme="dark"] .mermaid g.cluster text {
+  fill: #e9d5ff !important;
+  color: #e9d5ff !important;
+  stroke: #0f172a !important;
+  stroke-width: 6px !important;
 }
 
 /* ── Light Theme Diagram Colors ── */
@@ -2292,7 +2315,9 @@ body[data-theme="light"] .mermaid marker {
   padding: 2px 6px;
 }
 
-/* ── iOS Glassmorphic Segmented Control Toolbar & Buttons ── */
+/* ── iOS Glassmorphic Controls & Theme Button Overrides ── */
+
+/* 1. Diagram Card Toolbar Container */
 .diagram-card-toolbar {
   display: flex !important;
   justify-content: space-between !important;
@@ -2316,7 +2341,7 @@ body[data-theme="light"] .diagram-card-toolbar {
 .ios-glass-btn-group {
   display: flex;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.2);
   padding: 3px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2351,17 +2376,68 @@ body[data-theme="light"] .ios-glass-btn-group {
   transform: translateY(-1px);
 }
 
-.ios-glass-btn.active {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(14, 165, 233, 0.45));
-  border-color: rgba(56, 189, 248, 0.6);
+/* Dark Mode: Glassy Reflective Purple Active State */
+.ios-glass-btn.active,
+body[data-theme="dark"] .ios-glass-btn.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.55), rgba(147, 51, 234, 0.75)) !important;
+  border-color: rgba(192, 132, 252, 0.8) !important;
   color: #ffffff !important;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
   transform: translateY(-1px);
 }
 
+/* Light Mode: Glassy Reflective Emerald Green Active State */
 body[data-theme="light"] .ios-glass-btn.active {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
-  border-color: #0284c7;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.95)) !important;
+  border-color: #059669 !important;
   color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 2. Web Search & Image Search Glassmorphic Toggles */
+.toggle-switch-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+body[data-theme="light"] .toggle-switch-container {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Active State for Web Search & Image Search Switches */
+.toggle-switch-pill input:checked + .toggle-switch-slider {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.75), rgba(147, 51, 234, 0.9)) !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+body[data-theme="light"] .toggle-switch-pill input:checked + .toggle-switch-slider {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.95)) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+/* 3. Send Message Glassmorphic Button */
+.send-btn:not(:disabled) {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.85), rgba(147, 51, 234, 0.95)) !important;
+  border: 1px solid rgba(192, 132, 252, 0.6) !important;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+body[data-theme="light"] .send-btn:not(:disabled) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.95)) !important;
+  border: 1px solid #059669 !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }

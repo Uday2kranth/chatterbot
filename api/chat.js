@@ -248,16 +248,19 @@ graph TD
         });
     }
 
-    // Global Diagram System Directive: Enforce Mermaid.js for visual diagrams across all chat queries
+    // Global Diagram System Directive: Enforce clean, valid Mermaid.js for visual diagrams across all chat queries
     apiMessages.unshift({
         role: "system",
         content: `DIAGRAM & FLOWCHART DIRECTIVES:
-When asked to explain, draw, or provide a flowchart, architecture, pipeline, tree structure, or process diagram, ALWAYS output a native Mermaid.js code block:
+When asked to explain, draw, or provide a flowchart, architecture, pipeline, tree structure, or process diagram:
+1. ALWAYS output a clean, native Mermaid.js code block:
 \`\`\`mermaid
 graph TD
-  A[Component / Layer 1] --> B[Component / Layer 2]
+  A["Component / Layer 1"] --> B["Component / Layer 2"]
 \`\`\`
-DO NOT draw ASCII text art, ASCII box-drawing schemas (like +---+ or | BOX |), or raw LaTeX TikZ code (such as \\documentclass or \\usepackage{tikz}). ALWAYS use native Mermaid code blocks.`
+2. Ensure all node text labels are enclosed in double quotes inside brackets (e.g., A["Label Text"]).
+3. Avoid unescaped quotes, special unescaped characters, or raw HTML tags inside node brackets.
+4. DO NOT draw ASCII text art, ASCII box-drawing schemas (like +---+ or | BOX |), or raw LaTeX TikZ code.`
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols

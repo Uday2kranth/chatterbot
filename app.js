@@ -2496,12 +2496,28 @@ function formatMermaidToSimplifiedLinear(mermaidCode) {
   const mainSequence = [];
 
   lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
+    let trimmed = line.trim();
+    if (!trimmed || 
+        trimmed.startsWith('graph') || 
+        trimmed.startsWith('flowchart') || 
+        trimmed.startsWith('subgraph') || 
+        trimmed.startsWith('%%') || 
+        trimmed.startsWith('style') || 
+        trimmed.startsWith('classDef') || 
+        trimmed.startsWith('class ') || 
+        trimmed.startsWith('linkStyle') || 
+        trimmed === 'end') return;
+
+    if (trimmed.includes('%%')) {
+      trimmed = trimmed.split('%%')[0].trim();
+    }
 
     const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
     for (const m of nodeDefs) {
-      const cleanLabel = m[2].trim().replace(/"/g, "'").replace(/\n/g, ' ');
+      let cleanLabel = m[2].trim()
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/"/g, "'")
+        .replace(/\n/g, ' ');
       nodeMap[m[1]] = cleanLabel;
     }
 
@@ -2536,19 +2552,33 @@ function formatMermaidToAsciiSchema(mermaidCode) {
   const connections = [];
 
   lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('graph') || trimmed.startsWith('subgraph') || trimmed === 'end') return;
+    let trimmed = line.trim();
+    if (!trimmed || 
+        trimmed.startsWith('graph') || 
+        trimmed.startsWith('flowchart') || 
+        trimmed.startsWith('subgraph') || 
+        trimmed.startsWith('%%') || 
+        trimmed.startsWith('style') || 
+        trimmed.startsWith('classDef') || 
+        trimmed.startsWith('class ') || 
+        trimmed.startsWith('linkStyle') || 
+        trimmed === 'end') return;
+
+    if (trimmed.includes('%%')) {
+      trimmed = trimmed.split('%%')[0].trim();
+    }
 
     const nodeDefs = trimmed.matchAll(/([a-zA-Z0-9_]+)\s*[\(\[\{]{1,2}\s*"?([^"\}\]\)]+)"?\s*[\)\]\}]{1,2}/g);
     for (const m of nodeDefs) {
-      nodeMap[m[1]] = m[2].trim();
+      let cleanLabel = m[2].trim().replace(/<br\s*\/?>/gi, ' ').replace(/\n/g, ' ');
+      nodeMap[m[1]] = cleanLabel;
     }
 
     const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
     if (connMatch) {
       connections.push({
         from: connMatch[1],
-        label: connMatch[2] ? connMatch[2].trim() : '',
+        label: connMatch[2] ? connMatch[2].trim().replace(/<br\s*\/?>/gi, ' ') : '',
         to: connMatch[3]
       });
     }

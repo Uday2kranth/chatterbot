@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chatterbot-pwa-cache-v3';
+const CACHE_NAME = 'chatterbot-pwa-cache-v5';
 const ASSETS = [
   '/',
   '/index.html',
@@ -11,7 +11,13 @@ const ASSETS = [
   '/icon-512.png',
   '/apple-touch-icon.png',
   '/favicon.png',
-  '/manifest.json'
+  '/manifest.json',
+  '/av-college-icon.svg',
+  '/av-college-icon-192.png',
+  '/av-college-icon-512.png',
+  '/av-college-apple-touch-icon.png',
+  '/av-college-favicon.png',
+  '/av-college-manifest.json'
 ];
 
 self.addEventListener('install', (e) => {
@@ -41,25 +47,19 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Avoid caching POST requests or API routes
-  if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
-    return;
-  }
+  // Stale-while-revalidate caching strategy
   e.respondWith(
-    fetch(e.request)
-      .then((response) => {
-        // Clone and cache the fresh response if it's a valid successful GET request
-        if (response && response.status === 200) {
-          const responseClone = response.clone();
+    caches.match(e.request).then((cachedResponse) => {
+      const fetchPromise = fetch(e.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, responseClone);
+            cache.put(e.request, responseToCache);
           });
         }
-        return response;
-      })
-      .catch(() => {
-        // Fallback to cache if offline or network fetch fails
-        return caches.match(e.request);
-      })
+        return networkResponse;
+      }).catch(() => cachedResponse);
+      return cachedResponse || fetchPromise;
+    })
   );
 });

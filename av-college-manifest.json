@@ -21,9 +21,9 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/av-college-icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any"
+      "src": "/av-college-favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
     }
   ]
 }

@@ -30,11 +30,11 @@ function updateDynamicAppBranding() {
   let appTitleSpan = document.querySelector('.app-title');
 
   if (isGuestStudent) {
-    if (faviconLink) faviconLink.href = '/av-college-icon.svg';
+    if (faviconLink) faviconLink.href = '/av-college-favicon.png';
     if (altFaviconLink) altFaviconLink.href = '/av-college-favicon.png';
     if (appleTouchLink) appleTouchLink.href = '/av-college-apple-touch-icon.png';
     if (manifestLink) manifestLink.href = '/av-college-manifest.json';
-    if (appLogoImg) appLogoImg.src = '/av-college-icon.svg';
+    if (appLogoImg) appLogoImg.src = '/av-college-icon-192.png';
     if (appTitleSpan) appTitleSpan.textContent = 'A.V. ChatterBot';
   } else {
     if (faviconLink) faviconLink.href = '/icon.svg';

@@ -2290,11 +2290,17 @@ function loadChatSession(id, switchView = true) {
   populateModels(data.provider);
   
   let modelExists = Array.from(modelSelect.options).some(opt => opt.value === data.model);
-  if (!modelExists && data.model) {
-    const opt = document.createElement('option');
-    opt.value = data.model;
-    opt.textContent = `${data.model} (Unavailable)`;
-    modelSelect.appendChild(opt);
+  if (!modelExists) {
+    const availableModels = PROVIDER_MODELS[data.provider] || [];
+    if (availableModels.length > 0) {
+      data.model = availableModels[0].value;
+      saveChatSessionsToStorage();
+    } else {
+      const opt = document.createElement('option');
+      opt.value = data.model;
+      opt.textContent = `${data.model} (Unavailable)`;
+      modelSelect.appendChild(opt);
+    }
   }
   modelSelect.value = data.model;
   updateHeaderLabels();

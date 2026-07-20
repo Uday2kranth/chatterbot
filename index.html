@@ -293,7 +293,7 @@
           <div class="chat-controls-top">
             <!-- Provider Dropdown -->
             <div class="selector-group">
-              <label for="provider-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">PROVIDER A</label>
+              <label for="provider-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">PROVIDER</label>
               <select id="provider-select" class="custom-select">
                 <option value="openrouter">OpenRouter</option>
                 <option value="nvidia">NVIDIA NIM</option>
@@ -308,40 +308,13 @@
 
             <!-- Model Dropdown -->
             <div class="selector-group">
-              <label for="model-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">MODEL A</label>
+              <label for="model-select" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">MODEL</label>
               <select id="model-select" class="custom-select">
                 <!-- Populated dynamically via app.js -->
               </select>
             </div>
-
-            <!-- Roles Trigger button -->
-            <button id="custom-roles-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:transparent; border-style:dashed; border-color:var(--accent-primary); color:var(--accent-primary); padding: 7px 12px;" title="Configure Bot & User Roles">
-              <i class="fa-solid fa-user-gear"></i>
-              <span>Roles</span>
-            </button>
-
-            <!-- Side-by-Side Model Arena Toggle -->
-            <button id="arena-mode-toggle-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.8rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-secondary); padding: 7px 12px; cursor:pointer;" title="Toggle Side-by-Side Model Arena Comparison Mode">
-              <i class="fa-solid fa-scale-balanced" style="color:var(--accent-primary);"></i>
-              <span id="arena-toggle-label">⚔️ Model Arena</span>
-            </button>
           </div>
-
-          <!-- Arena Model B Selection Controls (Hidden by default) -->
-          <div id="arena-controls-row" class="chat-controls-top" style="display:none; padding: 8px 24px 12px 24px; margin-top: 0; border-top: 1px dashed var(--border-color); gap: 12px;">
-            <div class="selector-group">
-              <label for="arena-provider-select" style="font-size:0.75rem; color:var(--accent-primary); font-weight:700;">PROVIDER B</label>
-              <select id="arena-provider-select" class="custom-select">
-                <!-- Dynamically synchronized from provider-select -->
-              </select>
-            </div>
-            <div class="selector-group">
-              <label for="arena-model-select" style="font-size:0.75rem; color:var(--accent-primary); font-weight:700;">MODEL B</label>
-              <select id="arena-model-select" class="custom-select">
-                <!-- Populated dynamically via app.js -->
-              </select>
-            </div>
-          </div>
+        </div>
         </div>
       </header>
 
@@ -456,10 +429,16 @@
                   </button>
                 </div>
   
-                <label class="search-toggle" style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-secondary); user-select:none; margin:0;">
+                <label class="search-toggle" style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-secondary); user-select:none; margin:0;" title="Enable Real-Time Web RAG Search">
                   <input type="checkbox" id="web-search-checkbox" style="cursor:pointer; accent-color:var(--accent-primary);">
                   <i class="fa-solid fa-earth-americas" style="color:var(--accent-primary); font-size: 0.85rem;"></i>
                   <span>Web Search</span>
+                </label>
+
+                <label class="search-toggle" style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; color:var(--text-secondary); user-select:none; margin:0;" title="Enable Real-Time Diagram Image RAG Search Engine">
+                  <input type="checkbox" id="image-search-checkbox" style="cursor:pointer; accent-color:var(--accent-secondary);">
+                  <i class="fa-solid fa-image" style="color:var(--accent-secondary); font-size: 0.85rem;"></i>
+                  <span>Image Search</span>
                 </label>
                 <div class="status-badge">
                   <span class="status-indicator"></span>
@@ -1517,21 +1496,31 @@
         </div>
       </div>
 
-      <!-- View 6: Dedicated Model & Prompt Arena Lab -->
+      <!-- View 6: Dedicated Arena Lab -->
       <div id="arena-lab-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-primary);">
         <!-- Top Control Header -->
         <div style="padding: 12px 24px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fa-solid fa-scale-balanced" style="font-size: 1.3rem; color: var(--accent-primary);"></i>
-            <div>
-              <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">⚔️ Model & Prompt Arena Lab</h2>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">Side-by-Side Dual AI Model & Prompt Engineering Comparison Canvas</span>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-scale-balanced" style="font-size: 1.3rem; color: var(--accent-primary);"></i>
+              <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">⚔️ Arena Lab</h2>
+            </div>
+            
+            <!-- Arena Lab Sub-Navigation Mode Bar -->
+            <div style="display: flex; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 3px; gap: 4px;">
+              <button id="arena-tab-model" class="custom-select" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 6px; border: none; background: var(--accent-primary); color: white; cursor: pointer;">
+                🤖 Model Arena Lab
+              </button>
+              <button id="arena-tab-prompt" class="custom-select" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer;">
+                ✨ Prompt Arena Lab
+              </button>
             </div>
           </div>
 
+          <!-- Mode Controls Container -->
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
-            <!-- Prompt Template Picker Dropdown -->
-            <div style="display: flex; align-items: center; gap: 6px;">
+            <!-- Prompt Template Picker Dropdown (Used in Model Arena Mode) -->
+            <div id="arena-model-mode-template-group" style="display: flex; align-items: center; gap: 6px;">
               <label style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary);">✨ TEMPLATE:</label>
               <select id="arena-template-select" class="custom-select" style="padding: 5px 10px; font-size: 0.8rem; min-width: 180px;">
                 <option value="">-- Direct Raw Prompt --</option>
@@ -1539,8 +1528,19 @@
               </select>
             </div>
 
+            <!-- Shared Provider & Model Selector (Used in Prompt Arena Mode) -->
+            <div id="arena-prompt-mode-model-group" style="display: none; align-items: center; gap: 8px;">
+              <label style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary);">SHARED MODEL:</label>
+              <select id="arena-shared-provider-select" class="custom-select" style="padding: 5px 8px; font-size: 0.8rem;">
+                <!-- Dynamically synchronized -->
+              </select>
+              <select id="arena-shared-model-select" class="custom-select" style="padding: 5px 8px; font-size: 0.8rem; min-width: 160px;">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
             <!-- Export Combined PDF Button -->
-            <button id="arena-export-combined-pdf" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.78rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--accent-secondary); padding:6px 12px; cursor:pointer;" title="Export Both Models Side-by-Side to PDF">
+            <button id="arena-export-combined-pdf" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.78rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--accent-secondary); padding:6px 12px; cursor:pointer;" title="Export Both Columns Side-by-Side to PDF">
               <i class="fa-solid fa-file-pdf" style="color:var(--accent-secondary);"></i>
               <span>Export Combined PDF</span>
             </button>
@@ -1561,20 +1561,30 @@
 
         <!-- Split 2-Column Main Workspace -->
         <div style="display: flex; flex: 1; min-height: 0; gap: 16px; padding: 16px 24px; overflow-y: auto;">
-          <!-- Left Panel: Model A / Column A -->
+          <!-- Left Panel: Column A -->
           <div class="arena-lab-column" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; min-width: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
             <!-- Column Header Controls -->
             <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
               <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-robot"></i> MODEL A / COLUMN A</span>
+                <span id="arena-col-a-title" style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-robot"></i> MODEL A / COLUMN A</span>
                 <span id="arena-col-a-badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 600;">Active</span>
               </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              
+              <!-- Model Arena Controls (Col A) -->
+              <div id="arena-col-a-model-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <select id="arena-col-a-provider" class="custom-select" style="flex: 1; min-width: 130px; font-size: 0.8rem; padding: 5px 8px;">
                   <!-- Dynamically synchronized -->
                 </select>
                 <select id="arena-col-a-model" class="custom-select" style="flex: 2; min-width: 170px; font-size: 0.8rem; padding: 5px 8px;">
                   <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <!-- Prompt Arena Controls (Col A) -->
+              <div id="arena-col-a-template-select-group" style="display: none; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary);">PROMPT TEMPLATE A:</label>
+                <select id="arena-col-a-template" class="custom-select" style="font-size: 0.8rem; padding: 5px 8px;">
+                  <!-- Populated dynamically via app.js -->
                 </select>
               </div>
             </div>
@@ -1584,7 +1594,7 @@
               <!-- Empty state placeholder -->
               <div id="arena-col-a-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
                 <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
-                <div style="font-weight: 600; font-size: 0.9rem;">Model A Standby</div>
+                <div style="font-weight: 600; font-size: 0.9rem;">Column A Standby</div>
                 <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
               </div>
             </div>
@@ -1599,26 +1609,36 @@
                 <button class="msg-action-btn arena-action-btn" id="arena-col-a-email" title="Email Column A"><i class="fa-regular fa-envelope"></i></button>
               </div>
               <div style="display: flex; align-items: center; gap: 4px;">
-                <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-up" title="Thumbs Up (Like Model A)"><i class="fa-regular fa-thumbs-up"></i></button>
-                <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-down" title="Thumbs Down (Dislike Model A)"><i class="fa-regular fa-thumbs-down"></i></button>
+                <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-up" title="Thumbs Up (Like Column A)"><i class="fa-regular fa-thumbs-up"></i></button>
+                <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-down" title="Thumbs Down (Dislike Column A)"><i class="fa-regular fa-thumbs-down"></i></button>
               </div>
             </div>
           </div>
 
-          <!-- Right Panel: Model B / Column B -->
+          <!-- Right Panel: Column B -->
           <div class="arena-lab-column" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; min-width: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
             <!-- Column Header Controls -->
             <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
               <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B</span>
+                <span id="arena-col-b-title" style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B</span>
                 <span id="arena-col-b-badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 600;">Active</span>
               </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+
+              <!-- Model Arena Controls (Col B) -->
+              <div id="arena-col-b-model-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <select id="arena-col-b-provider" class="custom-select" style="flex: 1; min-width: 130px; font-size: 0.8rem; padding: 5px 8px;">
                   <!-- Dynamically synchronized -->
                 </select>
                 <select id="arena-col-b-model" class="custom-select" style="flex: 2; min-width: 170px; font-size: 0.8rem; padding: 5px 8px;">
                   <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <!-- Prompt Arena Controls (Col B) -->
+              <div id="arena-col-b-template-select-group" style="display: none; flex-direction: column; gap: 4px;">
+                <label style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary);">PROMPT TEMPLATE B:</label>
+                <select id="arena-col-b-template" class="custom-select" style="font-size: 0.8rem; padding: 5px 8px;">
+                  <!-- Populated dynamically via app.js -->
                 </select>
               </div>
             </div>
@@ -1713,6 +1733,18 @@
                 </div>
                 <label class="switch-container" style="position:relative; display:inline-flex; align-items:center; width:44px; height:24px; cursor:pointer; flex-shrink:0; margin:0; line-height:0; align-self:center; margin-left:12px;">
                   <input type="checkbox" id="setting-toggle-summarize" style="display:none;" checked />
+                  <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
+                </label>
+              </div>
+
+              <!-- Toggle Audio Ping & Voice Notification -->
+              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:16px; width:100%;">
+                <div style="flex:1;">
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--accent-primary);">🔔 Audio Ping & Voice Chime</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.3;">Play a notification ping and voice chime ("Your answer is ready!") when AI response finishes.</div>
+                </div>
+                <label class="switch-container" style="position:relative; display:inline-flex; align-items:center; width:44px; height:24px; cursor:pointer; flex-shrink:0; margin:0; line-height:0; align-self:center; margin-left:12px;">
+                  <input type="checkbox" id="setting-toggle-audio-ping" style="display:none;" checked />
                   <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
                 </label>
               </div>

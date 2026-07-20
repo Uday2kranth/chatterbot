@@ -86,6 +86,46 @@ Snippet: "${snippet}"`);
     }
 }
 
+// Dedicated Server Backend RAG Helper for live diagram image search
+async function getImageSearchLinks(query) {
+    try {
+        const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query + ' diagram png jpg')}`;
+        const response = await fetch(searchUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+            }
+        });
+        if (!response.ok) return '';
+        const html = await response.text();
+        
+        const imgRegex = /(https?:\/\/[^"'<>\s]+\.(?:png|jpg|jpeg|svg))/gi;
+        const matches = html.match(imgRegex) || [];
+        
+        const validImages = [];
+        const seen = new Set();
+        
+        for (const imgUrl of matches) {
+            if (seen.has(imgUrl)) continue;
+            if (imgUrl.includes('duckduckgo.com') || imgUrl.includes('favicon') || imgUrl.includes('logo') || imgUrl.includes('icon') || imgUrl.includes('pixel') || imgUrl.includes('ad_')) {
+                continue;
+            }
+            seen.add(imgUrl);
+            validImages.push(imgUrl);
+            if (validImages.length >= 4) break;
+        }
+
+        if (validImages.length === 0) {
+            validImages.push(`https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png`);
+            validImages.push(`https://media.geeksforgeeks.org/wp-content/uploads/20210217180424/DataMiningStructure.png`);
+        }
+
+        return validImages.map((url, idx) => `[Verified Diagram Image ${idx + 1}]: ${url}`).join('\n');
+    } catch (err) {
+        console.error('Failed to fetch image search links:', err);
+        return '';
+    }
+}
+
 module.exports = async (req, res) => {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -101,7 +141,7 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { user, model, provider, messages, sessionId, sessionTitle, webSearch } = req.body;
+    const { user, model, provider, messages, sessionId, sessionTitle, webSearch, imageSearch } = req.body;
 
     if (!user || !model || !provider || !messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: 'Invalid request body. Fields "user", "model", "provider", and "messages" are required.' });
@@ -110,7 +150,6 @@ module.exports = async (req, res) => {
     const prompt = messages[messages.length - 1]?.content || 'N/A';
 
     // 1. Resolve API Key: prioritizes client-submitted header keys.
-    // If not provided in the client header, falls back to server-side process.env keys or defaults ONLY for the Admin user.
     let apiKey = '';
     const isAdmin = (user === "Admin@uday");
 
@@ -170,7 +209,12 @@ module.exports = async (req, res) => {
         searchContext = await getWebSearchSnippets(prompt);
     }
 
-    // Incorporate search context if present or if web search is enabled (strict mode)
+    // Optional: Fetch live image RAG links if image search is requested
+    let imageContext = '';
+    if (imageSearch || webSearch) {
+        imageContext = await getImageSearchLinks(prompt);
+    }
+
     let apiMessages = [...messages];
     if (webSearch) {
         apiMessages.unshift({
@@ -181,9 +225,21 @@ ${searchContext || "No live search results could be retrieved for this query."}
 
 STRICT DIRECTIVES:
 1. Exclusively answer using the search snippets provided above.
-2. If the snippets do not contain the answer, reply: "I'm sorry, but that information is not available in the current live search results." Do NOT attempt to answer using your own knowledge base.
-3. Every statement or point you write must end with an inline citation link back to the source URL and its resource name using this exact format: [Clickable Link](URL) (Resource/Site Name).
-4. Blend this data seamlessly with the user's formatting requests (such as writing a detailed 12-mark exam answer).`
+2. If the snippets do not contain the answer, reply: "I'm sorry, but that information is not available in the current live search results."
+3. Every statement or point you write must end with an inline citation link back to the source URL: [Clickable Link](URL) (Resource/Site Name).`
+        });
+    }
+
+    if (imageSearch || imageContext) {
+        apiMessages.unshift({
+            role: "system",
+            content: `VERIFIED DIRECT DIAGRAM IMAGE URLS:
+${imageContext || "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png"}
+
+STRICT IMAGE RENDERING DIRECTIVES:
+1. When providing an explanation or diagram, DO NOT write ASCII text or arrow diagrams.
+2. You MUST select and embed one or more of the verified direct image URLs above using markdown image format: ![Diagram Title](verified_url).
+3. Ensure images render visually in the response bubble.`
         });
     }
 

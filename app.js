@@ -4470,6 +4470,8 @@ function showMainAreaView(viewName) {
     lockApiSettings();
   }
   
+  const arenaLabView = document.getElementById('arena-lab-view');
+
   activeChatView.style.display = 'none';
   modelGuideView.style.display = 'none';
   apiGuideView.style.display = 'none';
@@ -4478,6 +4480,7 @@ function showMainAreaView(viewName) {
   secureSettingsView.style.display = 'none';
   if (bookmarksView) bookmarksView.style.display = 'none';
   if (examPrepView) examPrepView.style.display = 'none';
+  if (arenaLabView) arenaLabView.style.display = 'none';
   
   if (viewName === 'chat') {
     activeChatView.style.display = 'flex';
@@ -4878,7 +4881,8 @@ async function reSubmitFromUserMessage(index) {
           messages: messagesToSend,
           sessionId: activeChatId,
           sessionTitle: activeSession.title,
-          webSearch: isWebSearch
+          webSearch: isWebSearch,
+          imageSearch: document.getElementById('image-search-checkbox')?.checked || false
         })
       });
       responseOk = response.ok;
@@ -4901,6 +4905,7 @@ async function reSubmitFromUserMessage(index) {
       saveChatSessionsToStorage();
       renderMessages(activeSession.messages);
       renderHistoryList();
+      playCompletionAudioNotification();
     } else {
       const errMsg = responseData?.error || 'Unknown Error';
       showToast(`Failed: ${errMsg}`, 'error');
@@ -6244,6 +6249,11 @@ function exportMessageToWord(rawContent, msgIdx) {
 // ⚔️ DEDICATED MODEL & PROMPT ARENA LAB LOGIC
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ⚔️ DEDICATED ARENA LAB LOGIC (MODEL ARENA LAB & PROMPT ARENA LAB)
+// ─────────────────────────────────────────────────────────────────────────────
+
+let currentArenaMode = 'model'; // 'model' or 'prompt'
 let arenaLabTurns = 0;
 let arenaLabTurnHistoryA = [];
 let arenaLabTurnHistoryB = [];
@@ -6269,11 +6279,20 @@ function setupArenaLabView() {
       // Show Arena Lab view
       if (arenaView) arenaView.style.display = 'flex';
 
-      // Initialize provider & model dropdowns for Col A and Col B
+      // Initialize provider & model dropdowns
       initArenaLabDropdowns();
-      // Populate prompt templates dropdown
-      populateArenaTemplateSelect();
+      // Populate prompt templates dropdowns
+      populateArenaTemplateSelects();
     });
+  }
+
+  // Sub-Navigation Mode Buttons Handler
+  const tabModelBtn = document.getElementById('arena-tab-model');
+  const tabPromptBtn = document.getElementById('arena-tab-prompt');
+
+  if (tabModelBtn && tabPromptBtn) {
+    tabModelBtn.addEventListener('click', () => setArenaLabMode('model'));
+    tabPromptBtn.addEventListener('click', () => setArenaLabMode('prompt'));
   }
 
   // Clear Session Handler
@@ -6294,7 +6313,7 @@ function setupArenaLabView() {
         colAOutput.innerHTML = `
           <div id="arena-col-a-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
             <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
-            <div style="font-weight: 600; font-size: 0.9rem;">Model A Standby</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">Column A Standby</div>
             <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
           </div>
         `;
@@ -6304,7 +6323,7 @@ function setupArenaLabView() {
         colBOutput.innerHTML = `
           <div id="arena-col-b-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
             <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
-            <div style="font-weight: 600; font-size: 0.9rem;">Model B Standby</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">Column B Standby</div>
             <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
           </div>
         `;
@@ -6353,37 +6372,130 @@ function setupArenaLabView() {
   }
 }
 
-function initArenaLabDropdowns() {
-  const colAProv = document.getElementById('arena-col-a-provider');
-  const colBProv = document.getElementById('arena-col-b-provider');
-  const mainProv = document.getElementById('provider-select');
+function setArenaLabMode(mode) {
+  currentArenaMode = mode;
+  const tabModelBtn = document.getElementById('arena-tab-model');
+  const tabPromptBtn = document.getElementById('arena-tab-prompt');
 
-  if (mainProv && colAProv && colBProv) {
-    colAProv.innerHTML = mainProv.innerHTML;
-    colBProv.innerHTML = mainProv.innerHTML;
+  const modelTemplateGroup = document.getElementById('arena-model-mode-template-group');
+  const promptModelGroup = document.getElementById('arena-prompt-mode-model-group');
 
-    colAProv.value = mainProv.value || 'openrouter';
-    colBProv.value = 'nvidia'; // default comparison provider
+  const colAModelGroup = document.getElementById('arena-col-a-model-select-group');
+  const colATemplateGroup = document.getElementById('arena-col-a-template-select-group');
 
-    populateModels(colAProv.value, 'arena-col-a-model');
-    populateModels(colBProv.value, 'arena-col-b-model');
+  const colBModelGroup = document.getElementById('arena-col-b-model-select-group');
+  const colBTemplateGroup = document.getElementById('arena-col-b-template-select-group');
 
-    colAProv.addEventListener('change', () => populateModels(colAProv.value, 'arena-col-a-model'));
-    colBProv.addEventListener('change', () => populateModels(colBProv.value, 'arena-col-b-model'));
+  const colATitle = document.getElementById('arena-col-a-title');
+  const colBTitle = document.getElementById('arena-col-b-title');
+
+  if (mode === 'model') {
+    if (tabModelBtn) {
+      tabModelBtn.style.background = 'var(--accent-primary)';
+      tabModelBtn.style.color = 'white';
+    }
+    if (tabPromptBtn) {
+      tabPromptBtn.style.background = 'transparent';
+      tabPromptBtn.style.color = 'var(--text-secondary)';
+    }
+
+    if (modelTemplateGroup) modelTemplateGroup.style.display = 'flex';
+    if (promptModelGroup) promptModelGroup.style.display = 'none';
+
+    if (colAModelGroup) colAModelGroup.style.display = 'flex';
+    if (colATemplateGroup) colATemplateGroup.style.display = 'none';
+
+    if (colBModelGroup) colBModelGroup.style.display = 'flex';
+    if (colBTemplateGroup) colBTemplateGroup.style.display = 'none';
+
+    if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-robot"></i> MODEL A / COLUMN A';
+    if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B';
+  } else {
+    if (tabPromptBtn) {
+      tabPromptBtn.style.background = 'var(--accent-primary)';
+      tabPromptBtn.style.color = 'white';
+    }
+    if (tabModelBtn) {
+      tabModelBtn.style.background = 'transparent';
+      tabModelBtn.style.color = 'var(--text-secondary)';
+    }
+
+    if (modelTemplateGroup) modelTemplateGroup.style.display = 'none';
+    if (promptModelGroup) promptModelGroup.style.display = 'flex';
+
+    if (colAModelGroup) colAModelGroup.style.display = 'none';
+    if (colATemplateGroup) colATemplateGroup.style.display = 'flex';
+
+    if (colBModelGroup) colBModelGroup.style.display = 'none';
+    if (colBTemplateGroup) colBTemplateGroup.style.display = 'flex';
+
+    if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE A';
+    if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE B';
   }
 }
 
-function populateArenaTemplateSelect() {
-  const tSelect = document.getElementById('arena-template-select');
-  if (!tSelect) return;
+function initArenaLabDropdowns() {
+  const colAProv = document.getElementById('arena-col-a-provider');
+  const colBProv = document.getElementById('arena-col-b-provider');
+  const sharedProv = document.getElementById('arena-shared-provider-select');
+  const mainProv = document.getElementById('provider-select');
 
-  tSelect.innerHTML = '<option value="">-- Direct Raw Prompt --</option>';
-  DEFAULT_PROMPTS.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = `[${p.badge}] ${p.title} (${p.contributor || 'uday01'})`;
-    tSelect.appendChild(opt);
-  });
+  if (mainProv) {
+    if (colAProv) {
+      colAProv.innerHTML = mainProv.innerHTML;
+      colAProv.value = mainProv.value || 'openrouter';
+      populateModels(colAProv.value, 'arena-col-a-model');
+      colAProv.addEventListener('change', () => populateModels(colAProv.value, 'arena-col-a-model'));
+    }
+    if (colBProv) {
+      colBProv.innerHTML = mainProv.innerHTML;
+      colBProv.value = 'nvidia';
+      populateModels(colBProv.value, 'arena-col-b-model');
+      colBProv.addEventListener('change', () => populateModels(colBProv.value, 'arena-col-b-model'));
+    }
+    if (sharedProv) {
+      sharedProv.innerHTML = mainProv.innerHTML;
+      sharedProv.value = mainProv.value || 'openrouter';
+      populateModels(sharedProv.value, 'arena-shared-model-select');
+      sharedProv.addEventListener('change', () => populateModels(sharedProv.value, 'arena-shared-model-select'));
+    }
+  }
+}
+
+function populateArenaTemplateSelects() {
+  const tSelect = document.getElementById('arena-template-select');
+  const colATemplate = document.getElementById('arena-col-a-template');
+  const colBTemplate = document.getElementById('arena-col-b-template');
+
+  if (tSelect) {
+    tSelect.innerHTML = '<option value="">-- Direct Raw Prompt --</option>';
+    DEFAULT_PROMPTS.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `[${p.badge}] ${p.title} (${p.contributor || 'uday01'})`;
+      tSelect.appendChild(opt);
+    });
+  }
+
+  if (colATemplate && colBTemplate) {
+    colATemplate.innerHTML = '';
+    colBTemplate.innerHTML = '';
+
+    DEFAULT_PROMPTS.forEach((p, idx) => {
+      const optA = document.createElement('option');
+      optA.value = p.id;
+      optA.textContent = `[${p.badge}] ${p.title}`;
+      colATemplate.appendChild(optA);
+
+      const optB = document.createElement('option');
+      optB.value = p.id;
+      optB.textContent = `[${p.badge}] ${p.title}`;
+      colBTemplate.appendChild(optB);
+    });
+
+    if (colATemplate.options.length > 0) colATemplate.selectedIndex = 0;
+    if (colBTemplate.options.length > 1) colBTemplate.selectedIndex = 1;
+  }
 }
 
 async function runArenaLabComparison(userPrompt) {
@@ -6395,59 +6507,80 @@ async function runArenaLabComparison(userPrompt) {
   if (emptyA) emptyA.remove();
   if (emptyB) emptyB.remove();
 
-  // Selected Template Wrapper
-  const tSelect = document.getElementById('arena-template-select');
-  const templateId = tSelect ? tSelect.value : '';
-  let finalPrompt = userPrompt;
+  let provA, modelA, promptA;
+  let provB, modelB, promptB;
 
-  if (templateId) {
-    const foundT = DEFAULT_PROMPTS.find(p => p.id === templateId);
-    if (foundT) {
-      finalPrompt = `${foundT.promptText}\n\nSTUDENT QUESTION:\n${userPrompt}`;
+  if (currentArenaMode === 'model') {
+    // Model Arena Mode: Compare Model A vs Model B on same prompt/template
+    const tSelect = document.getElementById('arena-template-select');
+    const templateId = tSelect ? tSelect.value : '';
+    let wrappedPrompt = userPrompt;
+
+    if (templateId) {
+      const foundT = DEFAULT_PROMPTS.find(p => p.id === templateId);
+      if (foundT) wrappedPrompt = `${foundT.promptText}\n\nSTUDENT QUESTION:\n${userPrompt}`;
     }
+
+    provA = document.getElementById('arena-col-a-provider').value;
+    modelA = document.getElementById('arena-col-a-model').value;
+    promptA = wrappedPrompt;
+
+    provB = document.getElementById('arena-col-b-provider').value;
+    modelB = document.getElementById('arena-col-b-model').value;
+    promptB = wrappedPrompt;
+  } else {
+    // Prompt Arena Mode: Compare Prompt Template A vs Prompt Template B on 1 shared Model
+    const sharedProv = document.getElementById('arena-shared-provider-select').value;
+    const sharedModel = document.getElementById('arena-shared-model-select').value;
+
+    const tA = document.getElementById('arena-col-a-template').value;
+    const tB = document.getElementById('arena-col-b-template').value;
+
+    const foundTA = DEFAULT_PROMPTS.find(p => p.id === tA);
+    const foundTB = DEFAULT_PROMPTS.find(p => p.id === tB);
+
+    provA = sharedProv;
+    modelA = sharedModel;
+    promptA = foundTA ? `${foundTA.promptText}\n\nSTUDENT QUESTION:\n${userPrompt}` : userPrompt;
+
+    provB = sharedProv;
+    modelB = sharedModel;
+    promptB = foundTB ? `${foundTB.promptText}\n\nSTUDENT QUESTION:\n${userPrompt}` : userPrompt;
   }
 
-  // Col A Config
-  const provA = document.getElementById('arena-col-a-provider').value;
-  const modelA = document.getElementById('arena-col-a-model').value;
-
-  // Col B Config
-  const provB = document.getElementById('arena-col-b-provider').value;
-  const modelB = document.getElementById('arena-col-b-model').value;
-
-  // Render User Message Bubbles in Col A and Col B
-  const userMsgHtmlA = `
+  // Render User Message Bubbles
+  const userMsgHtml = `
     <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem;">
       <strong style="color: var(--accent-primary);"><i class="fa-solid fa-user"></i> You:</strong>
       <div style="margin-top: 4px; color: var(--text-primary);">${escapeHtml(userPrompt)}</div>
     </div>
   `;
-  colAOutput.insertAdjacentHTML('beforeend', userMsgHtmlA);
-  colBOutput.insertAdjacentHTML('beforeend', userMsgHtmlA);
+  colAOutput.insertAdjacentHTML('beforeend', userMsgHtml);
+  colBOutput.insertAdjacentHTML('beforeend', userMsgHtml);
 
-  // Place Loading Indicator Cards in Col A and Col B
+  // Loading Placeholders
   const loadingCardAId = `arena-load-a-${Date.now()}`;
   const loadingCardBId = `arena-load-b-${Date.now()}`;
 
   colAOutput.insertAdjacentHTML('beforeend', `
     <div id="${loadingCardAId}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
       <i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-primary);"></i>
-      <span>Generating response with ${escapeHtml(modelA)}...</span>
+      <span>Generating Column A with ${escapeHtml(modelA)}...</span>
     </div>
   `);
 
   colBOutput.insertAdjacentHTML('beforeend', `
     <div id="${loadingCardBId}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
       <i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-secondary);"></i>
-      <span>Generating response with ${escapeHtml(modelB)}...</span>
+      <span>Generating Column B with ${escapeHtml(modelB)}...</span>
     </div>
   `);
 
-  // Parallel API Requests
+  // Parallel Execution
   try {
     const [resA, resB] = await Promise.allSettled([
-      fetchAIResponse(provA, modelA, finalPrompt, arenaLabTurnHistoryA),
-      fetchAIResponse(provB, modelB, finalPrompt, arenaLabTurnHistoryB)
+      fetchAIResponse(provA, modelA, promptA, arenaLabTurnHistoryA),
+      fetchAIResponse(provB, modelB, promptB, arenaLabTurnHistoryB)
     ]);
 
     const cardA = document.getElementById(loadingCardAId);
@@ -6456,7 +6589,6 @@ async function runArenaLabComparison(userPrompt) {
     const textA = resA.status === 'fulfilled' ? resA.value : `Error: ${resA.reason?.message || 'Failed to fetch response.'}`;
     const textB = resB.status === 'fulfilled' ? resB.value : `Error: ${resB.reason?.message || 'Failed to fetch response.'}`;
 
-    // Update Col A output card
     if (cardA) {
       cardA.outerHTML = `
         <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
@@ -6468,7 +6600,6 @@ async function runArenaLabComparison(userPrompt) {
       `;
     }
 
-    // Update Col B output card
     if (cardB) {
       cardB.outerHTML = `
         <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
@@ -6480,16 +6611,18 @@ async function runArenaLabComparison(userPrompt) {
       `;
     }
 
-    // Record turn histories
-    arenaLabTurnHistoryA.push({ role: 'user', content: finalPrompt });
+    arenaLabTurnHistoryA.push({ role: 'user', content: promptA });
     arenaLabTurnHistoryA.push({ role: 'assistant', content: textA });
 
-    arenaLabTurnHistoryB.push({ role: 'user', content: finalPrompt });
+    arenaLabTurnHistoryB.push({ role: 'user', content: promptB });
     arenaLabTurnHistoryB.push({ role: 'assistant', content: textB });
 
     arenaLabTurns++;
     const countDisplay = document.getElementById('arena-turn-count');
     if (countDisplay) countDisplay.textContent = `${arenaLabTurns} / 5 Turns`;
+
+    // Trigger Audio Ping & Voice Notification ("Your answer is ready!")
+    playCompletionAudioNotification();
 
   } catch (err) {
     console.error('Arena Lab Comparison Error:', err);
@@ -6497,8 +6630,52 @@ async function runArenaLabComparison(userPrompt) {
   }
 }
 
+function playCompletionAudioNotification() {
+  const audioToggle = document.getElementById('setting-toggle-audio-ping');
+  if (audioToggle && !audioToggle.checked) return;
+
+  try {
+    // 1. Play Audio Chime Ping using Web Audio API
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 note
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5 note
+
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    }
+
+    // 2. Speak "Your answer is ready!" using SpeechSynthesis API
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // clear previous speech
+      const utter = new SpeechSynthesisUtterance("Your answer is ready!");
+      utter.rate = 1.05;
+      utter.pitch = 1.1;
+      window.speechSynthesis.speak(utter);
+    }
+  } catch (err) {
+    console.warn('Audio notification sound error:', err);
+  }
+}
+
 async function fetchAIResponse(provider, model, prompt, turnHistory) {
   const keys = getAPIKeysForProvider(provider);
+  const webSearchCb = document.getElementById('web-search-checkbox');
+  const imageSearchCb = document.getElementById('image-search-checkbox');
+
+  const webSearch = webSearchCb ? webSearchCb.checked : false;
+  const imageSearch = imageSearchCb ? imageSearchCb.checked : false;
 
   const response = await fetch('/api/chat', {
     method: 'POST',
@@ -6507,6 +6684,8 @@ async function fetchAIResponse(provider, model, prompt, turnHistory) {
       provider,
       model,
       messages: [...turnHistory, { role: 'user', content: prompt }],
+      webSearch,
+      imageSearch,
       keys
     })
   });

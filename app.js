@@ -4147,11 +4147,91 @@ let tokenTrackerData = {
   models: {}     // e.g. 'llama-3.1-8b': { provider: 'groq', prompt: 0, completion: 0, total: 0 }
 };
 
+function loadTokenTrackerFromStorage() {
+  try {
+    const stored = localStorage.getItem('chatterbot_token_tracker');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && parsed.total) {
+        tokenTrackerData = parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load local token tracker data:', e);
+  }
+}
+
+async function syncTokenTrackerWithCloud() {
+  if (!currentUser) return;
+  loadTokenTrackerFromStorage();
+
+  try {
+    const res = await fetch(`/api/sessions?user=${encodeURIComponent(currentUser)}`);
+    if (!res.ok) return;
+    const serverSessions = await res.json();
+    const serverStorage = serverSessions['token_tracker_storage'];
+
+    const hasMergedKey = localStorage.getItem(`chatterbot_token_cloud_merged_${currentUser}`);
+
+    if (serverStorage && serverStorage.data && !hasMergedKey) {
+      const cloudData = serverStorage.data;
+
+      // 1. Merge Totals
+      tokenTrackerData.total.prompt = (tokenTrackerData.total.prompt || 0) + (cloudData.total?.prompt || 0);
+      tokenTrackerData.total.completion = (tokenTrackerData.total.completion || 0) + (cloudData.total?.completion || 0);
+      tokenTrackerData.total.total = (tokenTrackerData.total.total || 0) + (cloudData.total?.total || 0);
+
+      // 2. Merge Providers
+      const cloudProviders = cloudData.providers || {};
+      for (const [prov, pData] of Object.entries(cloudProviders)) {
+        if (!tokenTrackerData.providers[prov]) {
+          tokenTrackerData.providers[prov] = { prompt: 0, completion: 0, total: 0 };
+        }
+        tokenTrackerData.providers[prov].prompt += (pData.prompt || 0);
+        tokenTrackerData.providers[prov].completion += (pData.completion || 0);
+        tokenTrackerData.providers[prov].total += (pData.total || 0);
+      }
+
+      // 3. Merge Models Granular
+      const cloudModels = cloudData.models || {};
+      for (const [mName, mData] of Object.entries(cloudModels)) {
+        if (!tokenTrackerData.models[mName]) {
+          tokenTrackerData.models[mName] = { provider: mData.provider || 'unknown', prompt: 0, completion: 0, total: 0 };
+        }
+        tokenTrackerData.models[mName].prompt += (mData.prompt || 0);
+        tokenTrackerData.models[mName].completion += (mData.completion || 0);
+        tokenTrackerData.models[mName].total += (mData.total || 0);
+      }
+
+      // 4. Mark as One-Time Merged Safeguard
+      localStorage.setItem(`chatterbot_token_cloud_merged_${currentUser}`, 'true');
+      localStorage.setItem('chatterbot_token_tracker', JSON.stringify(tokenTrackerData));
+
+      // Save Merged State back to Cloud
+      await saveTokenTrackerToServer();
+      showToast('Merged local and cloud token tracker statistics!', 'success');
+    } else if (serverStorage && serverStorage.data && hasMergedKey) {
+      // If already merged once, sync server state if newer
+      tokenTrackerData = serverStorage.data;
+      localStorage.setItem('chatterbot_token_tracker', JSON.stringify(tokenTrackerData));
+    } else {
+      // First time saving to server
+      localStorage.setItem(`chatterbot_token_cloud_merged_${currentUser}`, 'true');
+      await saveTokenTrackerToServer();
+    }
+  } catch (err) {
+    console.warn('Failed to sync token tracker with cloud:', err);
+  }
+}
+
 // ── Unified Token Tracker Component Controller ──
 function setupTokenTracker() {
   const tokenTrackerBtn = document.getElementById('token-tracker-btn');
   const closeBtn = document.getElementById('close-token-tracker-btn');
   const resetBtn = document.getElementById('reset-tracker-btn');
+
+  loadTokenTrackerFromStorage();
+  syncTokenTrackerWithCloud();
 
   if (tokenTrackerBtn) {
     tokenTrackerBtn.addEventListener('click', () => {
@@ -4174,9 +4254,10 @@ function setupTokenTracker() {
           models: {}
         };
         localStorage.setItem('chatterbot_token_tracker', JSON.stringify(tokenTrackerData));
+        localStorage.setItem(`chatterbot_token_cloud_merged_${currentUser}`, 'true');
         saveTokenTrackerToServer();
         renderTokenTracker();
-        showToast('Token statistics reset successfully.', 'success');
+        showToast('Token statistics reset to Ground Zero successfully.', 'success');
       }
     });
   }

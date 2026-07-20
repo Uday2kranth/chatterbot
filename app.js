@@ -911,6 +911,31 @@ function setupHeaderControlsDrawer() {
   });
 }
 
+function lockApiSettings() {
+  apiSettingsUnlocked = false;
+  const lockIcon = document.getElementById('api-tab-lock-icon') || document.getElementById('settings-tab-lock-icon');
+  if (lockIcon) {
+    lockIcon.className = 'fa-solid fa-lock';
+    lockIcon.style.color = 'var(--text-muted)';
+  }
+  const apiPanel = document.getElementById('api-settings-panel') || document.getElementById('settings-panel-api');
+  if (apiPanel && apiPanel.style.display !== 'none') {
+    const tabChat = document.getElementById('tab-chat-settings');
+    const tabApi = document.getElementById('tab-api-settings');
+    const panelChat = document.getElementById('chat-settings-panel');
+    if (tabChat) tabChat.classList.add('active');
+    if (tabApi) tabApi.classList.remove('active');
+    if (panelChat) panelChat.style.display = 'flex';
+    if (apiPanel) apiPanel.style.display = 'none';
+  }
+}
+
+// Automatically lock API key configuration when leaving tab, app blur, or hidden state
+window.addEventListener('blur', lockApiSettings);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) lockApiSettings();
+});
+
 // Settings Drawer Handler
 function setupSettingsDrawer() {
   const closeViewBtn = document.getElementById('close-settings-view-btn');
@@ -1152,14 +1177,22 @@ function setupSettingsDrawer() {
     }
   };
 
+  const lockKeysBtn = document.getElementById('lock-keys-btn');
+  if (lockKeysBtn) {
+    lockKeysBtn.addEventListener('click', () => {
+      lockApiSettings();
+      showToast('API Keys section locked.', 'info');
+    });
+  }
+
+  // Profile Click Event to request password validation
+  const passwordOverlay = document.getElementById('password-auth-overlay');
   if (tabChat) {
     tabChat.addEventListener('click', () => {
       switchSettingsTab('chat');
     });
   }
 
-  // Profile Click Event to request password validation
-  const passwordOverlay = document.getElementById('password-auth-overlay');
   const confirmUnlockBtn = document.getElementById('confirm-unlock-btn');
   const cancelUnlockBtn = document.getElementById('cancel-unlock-btn');
   const unlockPasswordInput = document.getElementById('settings-unlock-password');
@@ -1622,18 +1655,29 @@ async function loadChatSessions() {
 
   renderHistoryList();
 
-  // Load chronological latest, query-parameter specified session, or fallback initialization
+  // Load saved active session, query-parameter specified session, or fallback initialization
   const urlParams = new URLSearchParams(window.location.search);
   const paramSessionId = urlParams.get('session');
+  const savedActiveId = localStorage.getItem(`chatterbot_active_chat_${currentUser}`);
   
   const sessionIds = Object.keys(chatSessions).filter(id => id !== 'api_keys_storage' && id !== 'token_tracker_storage' && id !== 'chat_settings_storage');
   if (paramSessionId && chatSessions[paramSessionId]) {
     loadChatSession(paramSessionId);
+  } else if (savedActiveId && chatSessions[savedActiveId]) {
+    loadChatSession(savedActiveId);
   } else if (sessionIds.length > 0) {
     sessionIds.sort((a, b) => chatSessions[b].timestamp - chatSessions[a].timestamp);
     loadChatSession(sessionIds[0]);
   } else {
     createNewChatSession("Study Session 1", true);
+  }
+
+  // Restore active sub-view across page refresh
+  const savedViewName = localStorage.getItem(`chatterbot_active_view_${currentUser}`);
+  if (savedViewName && savedViewName !== 'secure-settings') {
+    showMainAreaView(savedViewName);
+  } else {
+    showMainAreaView('chat');
   }
 }
 
@@ -1782,6 +1826,9 @@ function loadChatSession(id) {
   if (!chatSessions[id]) return;
   
   activeChatId = id;
+  if (currentUser) {
+    localStorage.setItem(`chatterbot_active_chat_${currentUser}`, id);
+  }
   const data = chatSessions[id];
 
   // Update UI Selectors to match saved session
@@ -3962,6 +4009,14 @@ function showMainAreaView(viewName) {
   const examPrepView = document.getElementById('exam-prep-view');
   
   if (!activeChatView || !modelGuideView || !apiGuideView || !tokenTrackerView || !promptsLibraryView || !secureSettingsView) return;
+
+  if (currentUser) {
+    localStorage.setItem(`chatterbot_active_view_${currentUser}`, viewName);
+  }
+
+  if (viewName !== 'secure-settings' && typeof lockApiSettings === 'function') {
+    lockApiSettings();
+  }
   
   activeChatView.style.display = 'none';
   modelGuideView.style.display = 'none';

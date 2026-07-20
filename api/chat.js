@@ -243,6 +243,18 @@ graph TD
         });
     }
 
+    // Global Diagram System Directive: Enforce Mermaid.js for visual diagrams across all chat queries
+    apiMessages.unshift({
+        role: "system",
+        content: `DIAGRAM & FLOWCHART DIRECTIVES:
+When asked to explain, draw, or provide a flowchart, architecture, pipeline, tree structure, or process diagram, ALWAYS output a native Mermaid.js code block:
+\`\`\`mermaid
+graph TD
+  A[Component / Layer 1] --> B[Component / Layer 2]
+\`\`\`
+DO NOT output raw LaTeX TikZ code (such as \\documentclass or \\usepackage{tikz}) or raw ASCII text art, as TikZ code cannot render visually inside web browsers.`
+    });
+
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols
     apiMessages.unshift({
         role: "system",

@@ -2368,6 +2368,87 @@ function renderMessages(messages) {
   if (emptyState) emptyState.style.display = 'none';
 
   messages.forEach((msg, idx) => {
+    if (msg.isArena) {
+      const arenaWrapper = document.createElement('div');
+      arenaWrapper.className = 'message ai arena-message-wrapper';
+      arenaWrapper.setAttribute('data-index', idx);
+      arenaWrapper.style.width = '100%';
+      arenaWrapper.style.margin = '16px 0';
+
+      const gridContainer = document.createElement('div');
+      gridContainer.className = 'arena-comparison-container';
+      gridContainer.style.display = 'grid';
+      gridContainer.style.gridTemplateColumns = '1fr 1fr';
+      gridContainer.style.gap = '16px';
+      gridContainer.style.width = '100%';
+
+      // ── Model A Column (Left) ──
+      const colA = document.createElement('div');
+      colA.className = 'arena-model-column';
+      colA.style.background = 'var(--bg-secondary)';
+      colA.style.border = '1px solid var(--border-color)';
+      colA.style.borderRadius = '14px';
+      colA.style.padding = '16px';
+      colA.style.display = 'flex';
+      colA.style.flexDirection = 'column';
+      colA.style.gap = '10px';
+
+      const headerA = document.createElement('div');
+      headerA.className = 'arena-model-header';
+      headerA.style.fontWeight = '700';
+      headerA.style.color = 'var(--accent-primary)';
+      headerA.style.borderBottom = '1px solid var(--border-color)';
+      headerA.style.paddingBottom = '8px';
+      headerA.style.display = 'flex';
+      headerA.style.alignItems = 'center';
+      headerA.style.justifyContent = 'space-between';
+      headerA.innerHTML = `<span>🤖 MODEL A: ${msg.modelAProvider.toUpperCase()}</span> <span style="font-size:0.75rem; background:var(--bg-tertiary); padding:2px 8px; border-radius:6px; color:var(--text-primary);">${msg.modelAName}</span>`;
+      colA.appendChild(headerA);
+
+      const bodyA = document.createElement('div');
+      bodyA.className = 'arena-model-body message-bubble';
+      bodyA.style.background = 'transparent';
+      bodyA.style.padding = '0';
+      bodyA.innerHTML = renderMarkdownWithMath(msg.modelAContent || '');
+      colA.appendChild(bodyA);
+
+      // ── Model B Column (Right) ──
+      const colB = document.createElement('div');
+      colB.className = 'arena-model-column';
+      colB.style.background = 'var(--bg-secondary)';
+      colB.style.border = '1px solid var(--border-color)';
+      colB.style.borderRadius = '14px';
+      colB.style.padding = '16px';
+      colB.style.display = 'flex';
+      colB.style.flexDirection = 'column';
+      colB.style.gap = '10px';
+
+      const headerB = document.createElement('div');
+      headerB.className = 'arena-model-header';
+      headerB.style.fontWeight = '700';
+      headerB.style.color = 'var(--accent-primary)';
+      headerB.style.borderBottom = '1px solid var(--border-color)';
+      headerB.style.paddingBottom = '8px';
+      headerB.style.display = 'flex';
+      headerB.style.alignItems = 'center';
+      headerB.style.justifyContent = 'space-between';
+      headerB.innerHTML = `<span>⚡ MODEL B: ${msg.modelBProvider.toUpperCase()}</span> <span style="font-size:0.75rem; background:var(--bg-tertiary); padding:2px 8px; border-radius:6px; color:var(--text-primary);">${msg.modelBName}</span>`;
+      colB.appendChild(headerB);
+
+      const bodyB = document.createElement('div');
+      bodyB.className = 'arena-model-body message-bubble';
+      bodyB.style.background = 'transparent';
+      bodyB.style.padding = '0';
+      bodyB.innerHTML = renderMarkdownWithMath(msg.modelBContent || '');
+      colB.appendChild(bodyB);
+
+      gridContainer.appendChild(colA);
+      gridContainer.appendChild(colB);
+      arenaWrapper.appendChild(gridContainer);
+      if (container) container.appendChild(arenaWrapper);
+      return;
+    }
+
     const msgElement = document.createElement('div');
     msgElement.className = `message ${msg.role === 'user' ? 'user' : 'ai'}`;
     msgElement.setAttribute('data-index', idx);
@@ -4551,24 +4632,20 @@ async function reSubmitFromUserMessage(index) {
         }).then(r => r.json()).catch(e => ({ error: e.message }))
       ]);
 
-      const contentA = resA.content || `❌ Error: ${resA.error || 'Model A request failed'}`;
-      const contentB = resB.content || `❌ Error: ${resB.error || 'Model B request failed'}`;
-
-      const arenaComparisonHtml = `<div class="arena-comparison-container">
-<div class="arena-model-column">
-  <div class="arena-model-header"><span>🤖 Model A: ${activeSession.provider.toUpperCase()}</span> <code>${activeSession.model}</code></div>
-  <div class="arena-model-body">${contentA}</div>
-</div>
-<div class="arena-model-column">
-  <div class="arena-model-header"><span>🤖 Model B: ${arenaProv.toUpperCase()}</span> <code>${arenaMod}</code></div>
-  <div class="arena-model-body">${contentB}</div>
-</div>
-</div>`;
+      const modelAObj = (PROVIDER_MODELS[activeSession.provider] || []).find(m => m.value === activeSession.model);
+      const modelBObj = (PROVIDER_MODELS[arenaProv] || []).find(m => m.value === arenaMod);
+      const modelAName = modelAObj ? modelAObj.name : activeSession.model;
+      const modelBName = modelBObj ? modelBObj.name : arenaMod;
 
       activeSession.messages.push({
         role: 'assistant',
-        content: arenaComparisonHtml,
-        isArena: true
+        isArena: true,
+        modelAProvider: activeSession.provider,
+        modelAName: modelAName,
+        modelAContent: contentA,
+        modelBProvider: arenaProv,
+        modelBName: modelBName,
+        modelBContent: contentB
       });
 
       if (resA.usage) trackTokens(activeSession.provider, activeSession.model, resA.usage);

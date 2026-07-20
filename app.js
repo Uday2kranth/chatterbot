@@ -101,6 +101,7 @@ function getAPIKeysHeaders() {
     'x-user-cerebras-key': localStorage.getItem('chatterbot_key_cerebras') || '',
     'x-user-groq-key': groqKeys.join(','),
     'x-user-sambanova-key': localStorage.getItem('chatterbot_key_sambanova') || '',
+    'x-user-nararouter-key': localStorage.getItem('chatterbot_key_nararouter') || '',
     'x-user-gemini-key': getGeminiKeysString()
   };
 }
@@ -536,6 +537,9 @@ function initializeApp() {
   setupBookmarks();
   setupExamPrep();
   setupSessionValidationLoop();
+
+  // Always restore to main chat view on hard page refresh
+  showMainAreaView('chat');
 }
 
 // Periodically check if session is still valid on this device (every 20 seconds)
@@ -1434,25 +1438,26 @@ function setupSettingsDrawer() {
         cerebras: document.getElementById('cerebras-key-input').value.trim(),
         groq: [],
         sambanova: document.getElementById('sambanova-key-input').value.trim(),
+        nararouter: document.getElementById('nararouter-key-input').value.trim(),
         gemini: [],
         local_endpoint: document.getElementById('local-endpoint-input').value.trim(),
         local_models: document.getElementById('local-models-input').value.trim(),
         local_key: document.getElementById('local-key-input').value.trim()
       };
       for (let i = 1; i <= 5; i++) {
-        keysObj.openrouter.push(document.getElementById(`openrouter-key-${i}`).value.trim());
+        keysObj.openrouter.push((document.getElementById(`openrouter-key-${i}`)?.value || '').trim());
       }
       for (let i = 1; i <= 5; i++) {
-        keysObj.nvidia.push(document.getElementById(`nvidia-key-${i}`).value.trim());
+        keysObj.nvidia.push((document.getElementById(`nvidia-key-${i}`)?.value || '').trim());
       }
-      for (let i = 1; i <= 2; i++) {
-        keysObj.mistral.push(document.getElementById(`mistral-key-${i}`).value.trim());
+      for (let i = 1; i <= 3; i++) {
+        keysObj.mistral.push((document.getElementById(`mistral-key-${i}`)?.value || '').trim());
       }
-      for (let i = 1; i <= 2; i++) {
-        keysObj.groq.push(document.getElementById(`groq-key-${i}`).value.trim());
+      for (let i = 1; i <= 3; i++) {
+        keysObj.groq.push((document.getElementById(`groq-key-${i}`)?.value || '').trim());
       }
-      for (let i = 1; i <= 5; i++) {
-        keysObj.gemini.push(document.getElementById(`gemini-key-${i}`).value.trim());
+      for (let i = 1; i <= 7; i++) {
+        keysObj.gemini.push((document.getElementById(`gemini-key-${i}`)?.value || '').trim());
       }
 
       const jsonStr = JSON.stringify(keysObj, null, 2);
@@ -2290,19 +2295,15 @@ function loadChatSession(id, switchView = true) {
   populateModels(data.provider);
   
   let modelExists = Array.from(modelSelect.options).some(opt => opt.value === data.model);
-  if (!modelExists) {
-    const availableModels = PROVIDER_MODELS[data.provider] || [];
-    if (availableModels.length > 0) {
-      data.model = availableModels[0].value;
-      saveChatSessionsToStorage();
-    } else {
-      const opt = document.createElement('option');
-      opt.value = data.model;
-      opt.textContent = `${data.model} (Unavailable)`;
-      modelSelect.appendChild(opt);
-    }
+  if (!modelExists && data.model) {
+    const opt = document.createElement('option');
+    opt.value = data.model;
+    opt.textContent = `${data.model}`;
+    modelSelect.appendChild(opt);
   }
-  modelSelect.value = data.model;
+  if (data.model) {
+    modelSelect.value = data.model;
+  }
   updateHeaderLabels();
   checkMistralWarning();
 

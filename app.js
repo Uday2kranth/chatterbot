@@ -3530,7 +3530,7 @@ function setupExamPrep() {
         <option value="crypto">Paper I: Cryptography (MDS-401)</option>
         <option value="datamining">Paper II: Data Mining (MDS-402)</option>
         <option value="scalable">Paper IV (C): Scalable Architecture (MDS-404 C)</option>
-        <option value="subject6">Paper III (B): Subject 6 (Coming Soon)</option>
+        <option value="vision">Paper III (B): Computer Vision (MDS-403 B)</option>
       `;
     }
     renderExamPrepContent();

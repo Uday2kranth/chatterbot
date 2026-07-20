@@ -1,13 +1,25 @@
 {
-  "name": "ChatterBot Exam Prep",
+  "name": "ChatterBot & A.V. College Exam Prep",
   "short_name": "ChatterBot",
-  "description": "Tailored Multi-Model AI Study Buddy & Exam Preparation Platform",
+  "description": "Tailored Multi-Model AI Study Buddy & Exam Preparation Platform for MSc Data Science",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0f19",
   "theme_color": "#8b5cf6",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/av-college-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/av-college-icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icon-192.png",
       "type": "image/png",

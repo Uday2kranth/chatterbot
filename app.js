@@ -21,27 +21,30 @@ const AUTHORIZED_USERS = {
 function updateDynamicAppBranding() {
   const isGuestStudent = userRole === 'guest_student';
   
-  // Dynamic favicon links, PWA manifest, and header branding image switcher
+  // Dynamic favicon links & header branding image switcher
   let faviconLink = document.querySelector('link[rel="icon"]');
   let altFaviconLink = document.querySelector('link[rel="alternate icon"]');
   let appleTouchLink = document.querySelector('link[rel="apple-touch-icon"]');
-  let manifestLink = document.querySelector('link[rel="manifest"]');
   let appLogoImg = document.getElementById('app-branding-logo-img');
   let appTitleSpan = document.querySelector('.app-title');
 
   if (isGuestStudent) {
-    if (faviconLink) faviconLink.href = '/av-college-favicon.png';
-    if (altFaviconLink) altFaviconLink.href = '/av-college-favicon.png';
-    if (appleTouchLink) appleTouchLink.href = '/av-college-apple-touch-icon.png';
-    if (manifestLink) manifestLink.href = '/av-college-manifest.json';
-    if (appLogoImg) appLogoImg.src = '/av-college-icon-192.png';
+    if (faviconLink) faviconLink.href = 'av-college-favicon.png';
+    if (altFaviconLink) altFaviconLink.href = 'av-college-favicon.png';
+    if (appleTouchLink) appleTouchLink.href = 'av-college-apple-touch-icon.png';
+    if (appLogoImg) {
+      appLogoImg.onerror = function() { this.onerror = null; this.src = 'icon.svg'; };
+      appLogoImg.src = 'av-college-icon-192.png';
+    }
     if (appTitleSpan) appTitleSpan.textContent = 'A.V. ChatterBot';
   } else {
-    if (faviconLink) faviconLink.href = '/icon.svg';
-    if (altFaviconLink) altFaviconLink.href = '/favicon.png';
-    if (appleTouchLink) appleTouchLink.href = '/apple-touch-icon.png';
-    if (manifestLink) manifestLink.href = '/manifest.json';
-    if (appLogoImg) appLogoImg.src = '/icon.svg';
+    if (faviconLink) faviconLink.href = 'icon.svg';
+    if (altFaviconLink) altFaviconLink.href = 'favicon.png';
+    if (appleTouchLink) appleTouchLink.href = 'apple-touch-icon.png';
+    if (appLogoImg) {
+      appLogoImg.onerror = null;
+      appLogoImg.src = 'icon.svg';
+    }
     if (appTitleSpan) appTitleSpan.textContent = 'ChatterBot';
   }
 }

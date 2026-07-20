@@ -39,6 +39,14 @@ function updateDynamicAppBranding() {
   }
 }
 
+function getPersistedUserRoles() {
+  const data = localStorage.getItem('chatterbot_user_roles_override');
+  if (data) {
+    try { return JSON.parse(data); } catch(e) {}
+  }
+  return {};
+}
+
 function getGeminiKeysString() {
   const geminiKeys = [];
   for (let i = 1; i <= 5; i++) {
@@ -65,7 +73,8 @@ function checkSession() {
       return false;
     }
     currentUser = session.user;
-    userRole = session.role || 'student';
+    const overrides = getPersistedUserRoles();
+    userRole = overrides[currentUser] || session.role || 'student';
     updateDynamicAppBranding();
     return true;
   } catch (e) {
@@ -961,6 +970,52 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) lockApiSettings();
 });
 
+function renderAdminUserRolesTable() {
+  const tbody = document.getElementById('admin-user-roles-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const overrides = getPersistedUserRoles();
+  const allUsers = Object.keys(AUTHORIZED_USERS);
+
+  allUsers.forEach(username => {
+    const defaultRole = AUTHORIZED_USERS[username].role || 'student';
+    const currentRole = overrides[username] || defaultRole;
+
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:1px solid var(--border-color);';
+    tr.innerHTML = `
+      <td style="padding:8px 12px; font-weight:600; color:var(--text-primary);">${username}</td>
+      <td style="padding:8px 12px;">
+        <select class="user-role-override-select" data-user="${username}" style="padding:4px 8px; font-size:0.8rem; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); outline:none;">
+          <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>👑 Admin</option>
+          <option value="student" ${currentRole === 'student' ? 'selected' : ''}>🎓 Student</option>
+          <option value="guest_student" ${currentRole === 'guest_student' ? 'selected' : ''}>🦅 Guest Student (A.V. Logo)</option>
+          <option value="guest" ${currentRole === 'guest' ? 'selected' : ''}>👤 Guest</option>
+        </select>
+      </td>
+      <td style="padding:8px 12px; text-align:right;">
+        <button type="button" class="save-single-user-role-btn" data-user="${username}" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; border:none; background:var(--accent-primary); color:white; cursor:pointer; font-weight:600;">Save Role</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.save-single-user-role-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const username = e.currentTarget.getAttribute('data-user');
+      const selectEl = tbody.querySelector(`.user-role-override-select[data-user="${username}"]`);
+      if (selectEl) {
+        const newRole = selectEl.value;
+        const currentOverrides = getPersistedUserRoles();
+        currentOverrides[username] = newRole;
+        localStorage.setItem('chatterbot_user_roles_override', JSON.stringify(currentOverrides));
+        showToast(`Role for user "${username}" saved as "${newRole}".`, 'success');
+      }
+    });
+  });
+}
+
 // Settings Drawer Handler
 function setupSettingsDrawer() {
   const closeViewBtn = document.getElementById('close-settings-view-btn');
@@ -1271,6 +1326,34 @@ function setupSettingsDrawer() {
       const settingsEmailInput = document.getElementById('settings-email-input');
       if (settingsEmailInput) {
         settingsEmailInput.value = localStorage.getItem('chatterbot_user_emails') || localStorage.getItem('chatterbot_user_email') || '';
+      }
+
+      // Display and populate Admin Role Management & Simulator section if user is Admin@uday
+      const adminSection = document.getElementById('admin-role-management-section');
+      if (adminSection) {
+        const isActualAdmin = currentUser === 'Admin@uday' || currentUser === 'admin' || userRole === 'admin';
+        adminSection.style.display = isActualAdmin ? 'flex' : 'none';
+        if (isActualAdmin) {
+          const simSelect = document.getElementById('admin-simulated-role-select');
+          if (simSelect) simSelect.value = userRole;
+          renderAdminUserRolesTable();
+        }
+      }
+    });
+  }
+
+  // Admin Role Simulator Apply Button
+  const applyRoleSimBtn = document.getElementById('apply-role-simulation-btn');
+  if (applyRoleSimBtn) {
+    applyRoleSimBtn.addEventListener('click', () => {
+      const simSelect = document.getElementById('admin-simulated-role-select');
+      if (simSelect) {
+        userRole = simSelect.value;
+        updateDynamicAppBranding();
+        checkExamPrepAccess();
+        const roleLabel = document.getElementById('active-user-role-display') || document.getElementById('user-role-label');
+        if (roleLabel) roleLabel.textContent = userRole;
+        showToast(`Active role simulation updated to: ${userRole}`, 'success');
       }
     });
   }

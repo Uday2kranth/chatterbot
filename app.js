@@ -1366,26 +1366,8 @@ function setupSettingsDrawer() {
         const isActualAdmin = currentUser === 'Admin@uday' || currentUser === 'admin' || userRole === 'admin';
         adminSection.style.display = isActualAdmin ? 'flex' : 'none';
         if (isActualAdmin) {
-          const simSelect = document.getElementById('admin-simulated-role-select');
-          if (simSelect) simSelect.value = userRole;
           renderAdminUserRolesTable();
         }
-      }
-    });
-  }
-
-  // Admin Role Simulator Apply Button
-  const applyRoleSimBtn = document.getElementById('apply-role-simulation-btn');
-  if (applyRoleSimBtn) {
-    applyRoleSimBtn.addEventListener('click', () => {
-      const simSelect = document.getElementById('admin-simulated-role-select');
-      if (simSelect) {
-        userRole = simSelect.value;
-        updateDynamicAppBranding();
-        checkExamPrepAccess();
-        const roleLabel = document.getElementById('active-user-role-display') || document.getElementById('user-role-label');
-        if (roleLabel) roleLabel.textContent = userRole;
-        showToast(`Active role simulation updated to: ${userRole}`, 'success');
       }
     });
   }

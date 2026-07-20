@@ -979,25 +979,36 @@ function renderAdminUserRolesTable() {
   const allUsers = Object.keys(AUTHORIZED_USERS);
 
   allUsers.forEach(username => {
+    const isMasterAdmin = AUTHORIZED_USERS[username].role === 'admin' || username === 'Admin@uday';
     const defaultRole = AUTHORIZED_USERS[username].role || 'student';
-    const currentRole = overrides[username] || defaultRole;
+    const currentRole = isMasterAdmin ? 'admin' : (overrides[username] || defaultRole);
 
     const tr = document.createElement('tr');
     tr.style.cssText = 'border-bottom:1px solid var(--border-color);';
-    tr.innerHTML = `
-      <td style="padding:8px 12px; font-weight:600; color:var(--text-primary);">${username}</td>
-      <td style="padding:8px 12px;">
-        <select class="user-role-override-select" data-user="${username}" style="padding:4px 8px; font-size:0.8rem; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); outline:none;">
-          <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>👑 Admin</option>
-          <option value="student" ${currentRole === 'student' ? 'selected' : ''}>🎓 Student</option>
-          <option value="guest_student" ${currentRole === 'guest_student' ? 'selected' : ''}>🦅 Guest Student (A.V. Logo)</option>
-          <option value="guest" ${currentRole === 'guest' ? 'selected' : ''}>👤 Guest</option>
-        </select>
-      </td>
-      <td style="padding:8px 12px; text-align:right;">
-        <button type="button" class="save-single-user-role-btn" data-user="${username}" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; border:none; background:var(--accent-primary); color:white; cursor:pointer; font-weight:600;">Save Role</button>
-      </td>
-    `;
+
+    if (isMasterAdmin) {
+      tr.innerHTML = `
+        <td style="padding:8px 12px; font-weight:600; color:var(--text-primary);">${username}</td>
+        <td style="padding:8px 12px; font-weight:700; color:#818cf8;">
+          <span style="background:rgba(99,102,241,0.15); border:1px solid #6366f1; padding:3px 8px; border-radius:6px; font-size:0.75rem;">👑 Master Admin (Vercel Env Protected)</span>
+        </td>
+        <td style="padding:8px 12px; text-align:right; color:var(--text-muted); font-size:0.75rem; font-style:italic;">Protected</td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td style="padding:8px 12px; font-weight:600; color:var(--text-primary);">${username}</td>
+        <td style="padding:8px 12px;">
+          <select class="user-role-override-select" data-user="${username}" style="padding:4px 8px; font-size:0.8rem; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); outline:none;">
+            <option value="student" ${currentRole === 'student' ? 'selected' : ''}>🎓 Student (Standard Study Buddy)</option>
+            <option value="guest_student" ${currentRole === 'guest_student' ? 'selected' : ''}>🦅 Guest Student (A.V. College Logo)</option>
+            <option value="guest" ${currentRole === 'guest' ? 'selected' : ''}>👤 Guest (Read-Only)</option>
+          </select>
+        </td>
+        <td style="padding:8px 12px; text-align:right;">
+          <button type="button" class="save-single-user-role-btn" data-user="${username}" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; border:none; background:var(--accent-primary); color:white; cursor:pointer; font-weight:600;">Save Role</button>
+        </td>
+      `;
+    }
     tbody.appendChild(tr);
   });
 
@@ -1006,7 +1017,10 @@ function renderAdminUserRolesTable() {
       const username = e.currentTarget.getAttribute('data-user');
       const selectEl = tbody.querySelector(`.user-role-override-select[data-user="${username}"]`);
       if (selectEl) {
-        const newRole = selectEl.value;
+        let newRole = selectEl.value;
+        if (newRole === 'admin') {
+          return showToast('Admin role can only be assigned via Vercel Environment Variables.', 'error');
+        }
         const currentOverrides = getPersistedUserRoles();
         currentOverrides[username] = newRole;
         localStorage.setItem('chatterbot_user_roles_override', JSON.stringify(currentOverrides));

@@ -73,6 +73,11 @@ module.exports = async (req, res) => {
                 database[user] = {};
             }
 
+            // Prevent non-Master Admin accounts from assigning themselves the admin role
+            if (id === 'chat_settings_storage' && session && session.data && session.data.assignedRole === 'admin' && user !== 'Admin@uday') {
+                session.data.assignedRole = 'student';
+            }
+
             // Save or update session (preserving deleted flag if already set)
             const existingSession = database[user][id] || {};
             database[user][id] = {

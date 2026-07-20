@@ -2540,6 +2540,22 @@ function renderMarkdownWithMath(text) {
   // 4. Force all anchor links to open in a new tab/page
   html = html.replace(/<a\s+(href="[^"]*")/gi, '<a $1 target="_blank" rel="noopener noreferrer"');
 
+  // 5. Enhance image tags: bypass hotlink/referrer blocks with no-referrer & automatic fallback
+  const defaultFallbackImg = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Apriori_algorithm.png/640px-Apriori_algorithm.png';
+  html = html.replace(/<img\s+([^>]*)\/?>/gi, (match, attrs) => {
+    let newAttrs = attrs;
+    if (!newAttrs.includes('referrerpolicy')) {
+      newAttrs += ' referrerpolicy="no-referrer"';
+    }
+    if (!newAttrs.includes('onerror')) {
+      newAttrs += ` onerror="this.onerror=null; this.src='${defaultFallbackImg}';"`;
+    }
+    if (!newAttrs.includes('style=')) {
+      newAttrs += ' style="max-width:100%; border-radius:10px; border:1px solid var(--border-color); margin:8px 0; box-shadow:0 4px 12px rgba(0,0,0,0.3);"';
+    }
+    return `<img ${newAttrs} />`;
+  });
+
   return html;
 }
 

@@ -65,6 +65,7 @@ module.exports = async (req, res) => {
     if (userRecord && userRecord.password === password) {
         let activeRole = userRecord.role;
         try {
+            const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL || process.env.STORAGE_URL || process.env.MONGODB_STORAGE_URL;
             const DB_FILE = path.join(process.cwd(), 'db', 'database.json');
             if (fs.existsSync(DB_FILE)) {
                 const database = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));

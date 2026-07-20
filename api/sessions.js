@@ -25,7 +25,7 @@ let cachedClient = null;
 let cachedDb = null;
 
 async function connectToMongo() {
-    const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL;
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL || process.env.STORAGE_URL || process.env.MONGODB_STORAGE_URL;
     if (!mongoUri || !MongoClient) return null;
 
     if (cachedClient && cachedDb) {

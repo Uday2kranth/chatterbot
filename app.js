@@ -6567,6 +6567,16 @@ function populateArenaTemplateSelects() {
   }
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function runArenaLabComparison(userPrompt) {
   const colAOutput = document.getElementById('arena-col-a-output');
   const colBOutput = document.getElementById('arena-col-b-output');

@@ -1818,9 +1818,7 @@ async function saveChatSessionsToStorage(sessionIdToSave = null) {
   // Always save to localStorage as a robust client fallback
   localStorage.setItem(`chatterbot_history_${currentUser}`, JSON.stringify(chatSessions));
 
-
-
-  // Persist session payload to backend database
+  // Persist primary target session payload to backend database
   const idToSave = sessionIdToSave || activeChatId;
   if (idToSave && idToSave !== 'api_keys_storage' && idToSave !== 'token_tracker_storage' && chatSessions[idToSave]) {
     try {
@@ -1835,6 +1833,22 @@ async function saveChatSessionsToStorage(sessionIdToSave = null) {
       });
     } catch (err) {
       console.error('Failed to persist session to backend database:', err);
+    }
+  }
+
+  // Also sync any unsaved local chat sessions to MongoDB Atlas asynchronously
+  const allSessionIds = Object.keys(chatSessions).filter(id => id !== 'api_keys_storage' && id !== 'token_tracker_storage' && id !== 'chat_settings_storage' && id !== 'active_device_session');
+  for (const sId of allSessionIds) {
+    if (sId !== idToSave && chatSessions[sId] && !chatSessions[sId].deleted && chatSessions[sId].messages && chatSessions[sId].messages.length > 0) {
+      fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: currentUser,
+          id: sId,
+          session: chatSessions[sId]
+        })
+      }).catch(e => {});
     }
   }
 }

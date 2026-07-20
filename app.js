@@ -1010,7 +1010,25 @@ function renderAdminUserRolesTable() {
         const currentOverrides = getPersistedUserRoles();
         currentOverrides[username] = newRole;
         localStorage.setItem('chatterbot_user_roles_override', JSON.stringify(currentOverrides));
-        showToast(`Role for user "${username}" saved as "${newRole}".`, 'success');
+
+        // Sync role change to Vercel backend database
+        fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user: username,
+            id: 'chat_settings_storage',
+            session: {
+              timestamp: Date.now(),
+              data: { assignedRole: newRole }
+            }
+          })
+        }).then(() => {
+          showToast(`Role for user "${username}" saved & synced to server as "${newRole}".`, 'success');
+        }).catch(err => {
+          console.warn('Failed to sync role to server:', err);
+          showToast(`Role saved locally for "${username}".`, 'info');
+        });
       }
     });
   });
@@ -1676,6 +1694,17 @@ async function loadChatSessions() {
 
       // ── Process and extract chat settings storage ──
       if (chatSessions.chat_settings_storage && chatSessions.chat_settings_storage.data) {
+        if (chatSessions.chat_settings_storage.data.assignedRole) {
+          userRole = chatSessions.chat_settings_storage.data.assignedRole;
+          const currentSess = JSON.parse(localStorage.getItem('chatterbot_session') || '{}');
+          currentSess.role = userRole;
+          localStorage.setItem('chatterbot_session', JSON.stringify(currentSess));
+          const roleLabel = document.getElementById('active-user-role-display') || document.getElementById('user-role-label');
+          if (roleLabel) roleLabel.textContent = userRole;
+          updateDynamicAppBranding();
+          checkExamPrepAccess();
+        }
+
         chatSettings = { ...chatSettings, ...chatSessions.chat_settings_storage.data };
         localStorage.setItem(`chatterbot_chat_settings_${currentUser}`, JSON.stringify(chatSettings));
         if (chatSettings.userEmails) {

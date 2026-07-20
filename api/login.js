@@ -63,10 +63,21 @@ module.exports = async (req, res) => {
     const userRecord = authorizedUsers[trimmedUser];
 
     if (userRecord && userRecord.password === password) {
+        let activeRole = userRecord.role;
+        try {
+            const DB_FILE = path.join(process.cwd(), 'db', 'database.json');
+            if (fs.existsSync(DB_FILE)) {
+                const database = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+                if (database[trimmedUser] && database[trimmedUser].chat_settings_storage && database[trimmedUser].chat_settings_storage.data && database[trimmedUser].chat_settings_storage.data.assignedRole) {
+                    activeRole = database[trimmedUser].chat_settings_storage.data.assignedRole;
+                }
+            }
+        } catch (e) {}
+
         return res.status(200).json({
             success: true,
             user: trimmedUser,
-            role: userRecord.role
+            role: activeRole
         });
     } else {
         return res.status(401).json({

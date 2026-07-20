@@ -9,6 +9,8 @@ const logHandler = require('./api/log');
 const sessionsHandler = require('./api/sessions');
 const transcribeHandler = require('./api/transcribe');
 const sendEmailHandler = require('./api/send-email');
+const loginHandler = require('./api/login');
+const benchmarksHandler = require('./api/benchmarks');
 
 const PORT = process.env.PORT || 3000;
 
@@ -71,6 +73,10 @@ const server = http.createServer((req, res) => {
       try {
         if (pathname === '/api/chat') {
           await chatHandler(mockReq, mockRes);
+        } else if (pathname === '/api/login') {
+          await loginHandler(mockReq, mockRes);
+        } else if (pathname === '/api/benchmarks') {
+          await benchmarksHandler(mockReq, mockRes);
         } else if (pathname === '/api/log') {
           await logHandler(mockReq, mockRes);
         } else if (pathname === '/api/sessions') {

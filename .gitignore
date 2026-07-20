@@ -50,6 +50,10 @@ db/
 
 # Dev Scratch scripts and temporary files
 scratch/
+public/custom_audio/
+*.mp3
+*.wav
+*.ogg
 .gemini/
 .tempmediaStorage/
 .agents/

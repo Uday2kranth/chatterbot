@@ -6563,12 +6563,26 @@ async function runArenaLabComparison(userPrompt) {
     </div>
   `);
 
-  // Parallel Execution
+  // Parallel Execution with Staggered Rate-Limit Protection for Same Provider/Model
   try {
-    const [resA, resB] = await Promise.allSettled([
-      fetchAIResponse(provA, modelA, promptA, arenaLabTurnHistoryA),
-      fetchAIResponse(provB, modelB, promptB, arenaLabTurnHistoryB)
-    ]);
+    let resA, resB;
+    if (provA === provB) {
+      // Stagger dispatch by 350ms when querying same provider to prevent rate-limit 429 errors
+      const taskA = fetchAIResponse(provA, modelA, promptA, arenaLabTurnHistoryA);
+      await new Promise(r => setTimeout(r, 350));
+      const taskB = fetchAIResponse(provB, modelB, promptB, arenaLabTurnHistoryB);
+
+      const results = await Promise.allSettled([taskA, taskB]);
+      resA = results[0];
+      resB = results[1];
+    } else {
+      const results = await Promise.allSettled([
+        fetchAIResponse(provA, modelA, promptA, arenaLabTurnHistoryA),
+        fetchAIResponse(provB, modelB, promptB, arenaLabTurnHistoryB)
+      ]);
+      resA = results[0];
+      resB = results[1];
+    }
 
     const cardA = document.getElementById(loadingCardAId);
     const cardB = document.getElementById(loadingCardBId);
@@ -6617,15 +6631,51 @@ async function runArenaLabComparison(userPrompt) {
   }
 }
 
+// ── Global Web Audio & Speech Context Unlocker ──
+let isAudioContextUnlocked = false;
+function unlockGlobalAudioContext() {
+  if (isAudioContextUnlocked) return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const dummyCtx = new AudioCtx();
+      if (dummyCtx.state === 'suspended') {
+        dummyCtx.resume();
+      }
+    }
+    if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+    isAudioContextUnlocked = true;
+  } catch (err) {
+    console.warn('AudioContext unlock warning:', err);
+  }
+}
+document.addEventListener('click', unlockGlobalAudioContext, { once: true });
+
 function playCompletionAudioNotification() {
   const audioToggle = document.getElementById('setting-toggle-audio-ping');
   if (audioToggle && !audioToggle.checked) return;
 
+  unlockGlobalAudioContext();
+
   try {
-    // 1. Play Audio Chime Ping using Web Audio API
+    // 1. Check for Custom Uploaded Sound Chime (Base64 audio file in localStorage up to 5-6MB pool)
+    const customAudioData = localStorage.getItem(`chatterbot_custom_chime_audio_${currentUser}`) || localStorage.getItem('chatterbot_custom_chime_audio');
+    
+    if (customAudioData) {
+      const player = new Audio(customAudioData);
+      player.volume = 0.8;
+      player.play().catch(e => console.warn('Custom chime playback blocked by browser:', e));
+      return;
+    }
+
+    // 2. Default Synthesized Pleasant Double-Note Chime Ping via Web Audio API
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (AudioCtx) {
       const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
@@ -6634,25 +6684,25 @@ function playCompletionAudioNotification() {
       osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5 note
 
       gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start();
-      osc.stop(ctx.currentTime + 0.3);
+      osc.stop(ctx.currentTime + 0.35);
     }
 
-    // 2. Speak "Your answer is ready!" using SpeechSynthesis API
+    // 3. Web Speech Chime Voice: "Your answer is ready!"
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // clear previous speech
+      window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance("Your answer is ready!");
       utter.rate = 1.05;
       utter.pitch = 1.1;
       window.speechSynthesis.speak(utter);
     }
   } catch (err) {
-    console.warn('Audio notification sound error:', err);
+    console.warn('Audio notification playback error:', err);
   }
 }
 

@@ -70,6 +70,41 @@ function getGeminiKeysString() {
   return geminiKeys.join(',');
 }
 
+function getAPIKeysHeaders() {
+  const openrouterKeys = [];
+  for (let i = 1; i <= 5; i++) {
+    const val = localStorage.getItem(`chatterbot_key_openrouter_${i}`) || '';
+    if (val.trim()) openrouterKeys.push(val.trim());
+  }
+  const nvidiaKeys = [];
+  for (let i = 1; i <= 5; i++) {
+    const val = localStorage.getItem(`chatterbot_key_nvidia_${i}`) || '';
+    if (val.trim()) nvidiaKeys.push(val.trim());
+  }
+  const mistralKeys = [];
+  for (let i = 1; i <= 2; i++) {
+    const val = localStorage.getItem(`chatterbot_key_mistral_${i}`) || '';
+    if (val.trim()) mistralKeys.push(val.trim());
+  }
+  const groqKeys = [];
+  for (let i = 1; i <= 2; i++) {
+    const val = localStorage.getItem(`chatterbot_key_groq_${i}`) || '';
+    if (val.trim()) groqKeys.push(val.trim());
+  }
+
+  return {
+    'Content-Type': 'application/json',
+    'x-user-openrouter-key': openrouterKeys.join(','),
+    'x-user-nvidia-key': nvidiaKeys.join(','),
+    'x-user-omnirouter-key': localStorage.getItem('chatterbot_key_omnirouter') || '',
+    'x-user-mistral-key': mistralKeys.join(','),
+    'x-user-cerebras-key': localStorage.getItem('chatterbot_key_cerebras') || '',
+    'x-user-groq-key': groqKeys.join(','),
+    'x-user-sambanova-key': localStorage.getItem('chatterbot_key_sambanova') || '',
+    'x-user-gemini-key': getGeminiKeysString()
+  };
+}
+
 function checkSession() {
   const sessionData = localStorage.getItem('chatterbot_session');
   if (!sessionData) {

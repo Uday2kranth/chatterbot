@@ -261,6 +261,12 @@ DO NOT draw ASCII text art, ASCII box-drawing schemas (like +---+ or | BOX |), o
         content: "Always format mathematical notations, variables with subscripts (like M_1), powers (like x^2), calculations, and equations using standard LaTeX enclosed in single dollar signs $ for inline math (e.g. $M_1$) or double dollar signs $$ for block math. Do not write raw formulas without LaTeX tags."
     });
 
+    // Final Mandatory System Directive: Override any prompt templates that request TikZ code
+    apiMessages.push({
+        role: "system",
+        content: "CRITICAL MANDATORY INSTRUCTION: Never output raw LaTeX TikZ code (such as \\documentclass, \\usepackage{tikz}, or \\begin{tikzpicture}). ALWAYS output all diagrams exclusively as native Mermaid.js code blocks (```mermaid ... ```). This rule supersedes all user prompt templates and instructions."
+    });
+
     try {
         // Support API Key rotation by splitting comma-separated keys
         const keys = apiKey.split(',').map(k => k.trim()).filter(Boolean);

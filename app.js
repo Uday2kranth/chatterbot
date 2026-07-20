@@ -2488,9 +2488,53 @@ function setupChatHandlers() {
   sendBtn.addEventListener('click', submitPrompt);
 }
 
+// Helper to automatically convert raw LaTeX TikZ code blocks into visual Mermaid.js diagrams
+function convertTikzToMermaid(code) {
+  if (!code || (!code.includes('\\begin{tikzpicture}') && !code.includes('\\documentclass'))) return code;
+
+  return code.replace(/(```(?:latex|tikz)?[\s\S]*?\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}[\s\S]*?```|\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\})/gi, (match) => {
+    const nodes = [];
+    const edges = [];
+    
+    // Extract nodes: \node [style] (id) {Label};
+    const nodeRegex = /\\node\s*\[[^\]]*\]\s*\(([^)]+)\)\s*\{([^}]+)\};/g;
+    let nMatch;
+    while ((nMatch = nodeRegex.exec(match)) !== null) {
+      const id = nMatch[1].trim();
+      const label = nMatch[2].trim();
+      if (!nodes.some(n => n.id === id)) {
+        nodes.push({ id, label });
+      }
+    }
+    
+    // Extract edges: \path [style] (from) -- (to);
+    const edgeRegex = /\\path\s*\[[^\]]*\]\s*\(([^)]+)\)\s*--\s*\(([^)]+)\);/g;
+    let eMatch;
+    while ((eMatch = edgeRegex.exec(match)) !== null) {
+      edges.push({ from: eMatch[1].trim(), to: eMatch[2].trim() });
+    }
+    
+    if (nodes.length === 0) return match;
+    
+    let mermaid = '\n```mermaid\ngraph TD\n';
+    nodes.forEach(n => {
+      mermaid += `  ${n.id}["${n.label}"]\n`;
+    });
+    edges.forEach(e => {
+      mermaid += `  ${e.from} --> ${e.to}\n`;
+    });
+    mermaid += '```\n';
+    
+    return mermaid;
+  });
+}
+
 // Render Markdown with KaTeX mathematical compilation
 function renderMarkdownWithMath(text) {
   if (!text) return '';
+
+  // Intercept and auto-convert any raw TikZ LaTeX code into visual Mermaid diagrams
+  text = convertTikzToMermaid(text);
 
   const mathBlocks = [];
   

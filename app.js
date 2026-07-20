@@ -4543,18 +4543,7 @@ function renderPromptsLibrary() {
   
   // Load custom user prompts
   const custom = JSON.parse(localStorage.getItem(`chatterbot_custom_prompts_${currentUser}`) || '[]');
-  let defaultPromptsForUser = [];
-  if (userRole !== 'guest') {
-    defaultPromptsForUser = DEFAULT_PROMPTS;
-  } else if (currentUser === 'uday01') {
-    // Only uday01 guest account gets these specific four prep templates
-    defaultPromptsForUser = DEFAULT_PROMPTS.filter(p => 
-      p.id === 'msc_ds_12_mark_prep' || 
-      p.id === 'msc_ds_theory_exam_prep' || 
-      p.id === 'msc_ds_2_mark_prep' ||
-      p.id === 'msc_ds_fools_gold'
-    );
-  }
+  const defaultPromptsForUser = DEFAULT_PROMPTS;
   const allPrompts = [...defaultPromptsForUser, ...custom];
   
   allPrompts.forEach(p => {

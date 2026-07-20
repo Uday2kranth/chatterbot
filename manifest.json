@@ -1,25 +1,13 @@
 {
-  "name": "A.V. College Exam Prep & AI Tutor",
-  "short_name": "A.V. ChatterBot",
-  "description": "A.V. College of Arts, Science & Commerce - MSc Data Science Exam Prep & Multi-Model AI Assistant",
+  "name": "ChatterBot Exam Prep",
+  "short_name": "ChatterBot",
+  "description": "Tailored Multi-Model AI Study Buddy & Exam Preparation Platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0f19",
-  "theme_color": "#6366f1",
+  "theme_color": "#8b5cf6",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    },
     {
       "src": "/icon.svg",
       "type": "image/svg+xml",

@@ -10,10 +10,34 @@ const AUTHORIZED_USERS = {
   "Sai_Ram": { password: "sai@ram", role: "student" },
   "Tharun": { password: "mama@kiransir", role: "student" },
   "Ban": { password: "DataScientist", role: "student" },
+  "guest_student": { password: "avcollege@student", role: "guest_student" },
+  "AV_Student": { password: "avcollege@student", role: "guest_student" },
   "uday01": { password: "uday@01", role: "guest" },
   "uday02": { password: "uday@02", role: "guest" },
   "uday03": { password: "uday@03", role: "guest" }
 };
+
+function updateDynamicAppBranding() {
+  const isGuestStudent = userRole === 'guest_student';
+  
+  // Dynamic favicon links & PWA manifest switcher
+  let faviconLink = document.querySelector('link[rel="icon"]');
+  let altFaviconLink = document.querySelector('link[rel="alternate icon"]');
+  let appleTouchLink = document.querySelector('link[rel="apple-touch-icon"]');
+  let manifestLink = document.querySelector('link[rel="manifest"]');
+
+  if (isGuestStudent) {
+    if (faviconLink) faviconLink.href = '/av-college-icon.svg';
+    if (altFaviconLink) altFaviconLink.href = '/av-college-favicon.png';
+    if (appleTouchLink) appleTouchLink.href = '/av-college-apple-touch-icon.png';
+    if (manifestLink) manifestLink.href = '/av-college-manifest.json';
+  } else {
+    if (faviconLink) faviconLink.href = '/icon.svg';
+    if (altFaviconLink) altFaviconLink.href = '/favicon.png';
+    if (appleTouchLink) appleTouchLink.href = '/apple-touch-icon.png';
+    if (manifestLink) manifestLink.href = '/manifest.json';
+  }
+}
 
 function getGeminiKeysString() {
   const geminiKeys = [];
@@ -42,6 +66,7 @@ function checkSession() {
     }
     currentUser = session.user;
     userRole = session.role || 'student';
+    updateDynamicAppBranding();
     return true;
   } catch (e) {
     window.location.href = 'login.html';
@@ -3404,7 +3429,7 @@ function renderBookmarksView() {
 
 // ── Exam Prep, Syllabus & Question Banks Controller ──
 function checkExamPrepAccess() {
-  const isAllowedUser = currentUser === 'admin' || currentUser === 'uday01' || userRole === 'student' || userRole === 'admin';
+  const isAllowedUser = currentUser === 'admin' || currentUser === 'uday01' || userRole === 'student' || userRole === 'guest_student' || userRole === 'admin';
   const prepBtn = document.getElementById('exam-prep-btn');
   if (prepBtn) {
     prepBtn.style.display = isAllowedUser ? 'flex' : 'none';

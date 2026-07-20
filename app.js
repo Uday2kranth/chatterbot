@@ -4516,7 +4516,7 @@ function validateImageSearchState() {
     } else {
       providerSelect.value = 'gemini';
       populateModels('gemini');
-      modelSelect.value = 'gemini-2.0-flash';
+      modelSelect.value = 'gemini-3.5-flash';
       updateHeaderLabels();
       saveActiveChatDetails();
       showToast('Switched to "Google Gemini (Gemini 2.0 Flash)" for Image & Diagram RAG capability.', 'info');

@@ -3431,38 +3431,40 @@ function renderMessages(messages) {
       actions.appendChild(editBtn);
     }
 
-    // Render Responding Model Badge for total transparency
-    const modelBadge = document.createElement('span');
-    modelBadge.className = 'msg-model-badge';
-    modelBadge.style.fontSize = '0.75rem';
-    modelBadge.style.color = 'var(--text-muted)';
-    modelBadge.style.opacity = '0.85';
-    modelBadge.style.marginRight = '8px';
-    modelBadge.style.display = 'inline-flex';
-    modelBadge.style.alignItems = 'center';
-    modelBadge.style.gap = '4px';
-    modelBadge.style.fontWeight = '600';
+    if (msg.role === 'assistant') {
+      // Render Responding Model Badge for total transparency (AI Assistant responses ONLY)
+      const modelBadge = document.createElement('span');
+      modelBadge.className = 'msg-model-badge';
+      modelBadge.style.fontSize = '0.75rem';
+      modelBadge.style.color = 'var(--text-muted)';
+      modelBadge.style.opacity = '0.85';
+      modelBadge.style.marginRight = '8px';
+      modelBadge.style.display = 'inline-flex';
+      modelBadge.style.alignItems = 'center';
+      modelBadge.style.gap = '4px';
+      modelBadge.style.fontWeight = '600';
 
-    const usedModelName = msg.modelUsed || (typeof activeSession !== 'undefined' && activeSession && activeSession.model) || 'AI Model';
-    modelBadge.innerHTML = `<i class="fa-solid fa-microchip" style="color:var(--accent-secondary);"></i> <span>${usedModelName}</span>`;
-    actions.insertBefore(modelBadge, actions.firstChild);
+      const rawModel = msg.modelUsed || (typeof activeChatId !== 'undefined' && chatSessions[activeChatId] ? chatSessions[activeChatId].model : '') || 'AI Assistant';
+      modelBadge.innerHTML = `<i class="fa-solid fa-microchip" style="color:var(--accent-secondary);"></i> <span>${rawModel}</span>`;
+      actions.insertBefore(modelBadge, actions.firstChild);
 
-    if (msg.role === 'assistant' && msg.usage && chatSettings.bubbleTokensEnabled !== false) {
-      const usageBadge = document.createElement('span');
-      usageBadge.className = 'msg-usage-badge';
-      usageBadge.style.fontSize = '0.75rem';
-      usageBadge.style.color = 'var(--text-muted)';
-      usageBadge.style.marginLeft = '12px';
-      usageBadge.style.display = 'inline-flex';
-      usageBadge.style.alignItems = 'center';
-      usageBadge.style.gap = '4px';
-      
-      const total = msg.usage.total_tokens || (msg.usage.prompt_tokens + msg.usage.completion_tokens) || 0;
-      const prompt = msg.usage.prompt_tokens || 0;
-      const completion = msg.usage.completion_tokens || 0;
-      
-      usageBadge.innerHTML = `<i class="fa-solid fa-bolt" style="color:var(--accent-primary);"></i> <span>${total} tokens (In: ${prompt}, Out: ${completion})</span>`;
-      actions.appendChild(usageBadge);
+      if (msg.usage && chatSettings.bubbleTokensEnabled !== false) {
+        const usageBadge = document.createElement('span');
+        usageBadge.className = 'msg-usage-badge';
+        usageBadge.style.fontSize = '0.75rem';
+        usageBadge.style.color = 'var(--text-muted)';
+        usageBadge.style.marginLeft = '12px';
+        usageBadge.style.display = 'inline-flex';
+        usageBadge.style.alignItems = 'center';
+        usageBadge.style.gap = '4px';
+        
+        const total = msg.usage.total_tokens || (msg.usage.prompt_tokens + msg.usage.completion_tokens) || 0;
+        const prompt = msg.usage.prompt_tokens || 0;
+        const completion = msg.usage.completion_tokens || 0;
+        
+        usageBadge.innerHTML = `<i class="fa-solid fa-bolt" style="color:var(--accent-primary);"></i> <span>${total} tokens (In: ${prompt}, Out: ${completion})</span>`;
+        actions.appendChild(usageBadge);
+      }
     }
 
     wrapper.appendChild(actions);

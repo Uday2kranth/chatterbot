@@ -2444,25 +2444,71 @@ body > svg[id^="mermaid"] {
   overflow: hidden !important;
 }
 
-/* ── Responsive adjustments for Diagram Card Toolbar on Mobile ── */
+.btn-label-mobile {
+  display: none;
+}
+
+/* ── Responsive adjustments for Diagram Card Toolbar & Toasts on Mobile ── */
 @media (max-width: 768px) {
+  .btn-label-desktop {
+    display: none !important;
+  }
+  .btn-label-mobile {
+    display: inline !important;
+  }
+
   .diagram-card-toolbar {
     flex-direction: column !important;
     align-items: center !important;
-    gap: 10px !important;
-    padding: 10px 8px !important;
+    gap: 6px !important;
+    padding: 6px 8px !important;
+    margin-bottom: 8px !important;
   }
   
   .ios-glass-btn-group {
     width: 100% !important;
-    justify-content: space-around !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    padding: 2px !important;
     flex-shrink: 0 !important;
   }
   
   .ios-glass-btn {
-    padding: 6px 8px !important;
-    font-size: 0.72rem !important;
+    padding: 5px 6px !important;
+    font-size: 0.68rem !important;
     justify-content: center !important;
     flex: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  .ios-glass-btn span {
+    white-space: nowrap !important;
+  }
+
+  /* Mobile Toast Notification Repositioning to Top Center */
+  .toast-container {
+    top: 16px !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important;
+    max-width: 400px !important;
+    align-items: center !important;
+  }
+
+  .toast {
+    padding: 10px 16px !important;
+    font-size: 0.82rem !important;
+    min-width: unset !important;
+    width: 100% !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-120%) !important;
+  }
+
+  .toast.show {
+    transform: translateY(0) !important;
   }
 }

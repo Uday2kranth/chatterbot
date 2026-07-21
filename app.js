@@ -540,9 +540,31 @@ function initializeApp() {
   setupBookmarks();
   setupExamPrep();
   setupSessionValidationLoop();
+  checkReleaseAnnouncement();
 
   // Always restore to main chat view on hard page refresh
   showMainAreaView('chat');
+}
+
+function checkReleaseAnnouncement() {
+  const hasSeen = localStorage.getItem('chatterbot_seen_announcement_gemini_36_v3');
+  const modal = document.getElementById('release-announcement-modal');
+  const closeBtn = document.getElementById('close-release-modal-btn');
+  const ackBtn = document.getElementById('ack-release-modal-btn');
+
+  const dismissModal = () => {
+    if (modal) modal.style.display = 'none';
+    localStorage.setItem('chatterbot_seen_announcement_gemini_36_v3', 'true');
+  };
+
+  if (closeBtn) closeBtn.onclick = dismissModal;
+  if (ackBtn) ackBtn.onclick = dismissModal;
+
+  if (!hasSeen && modal) {
+    setTimeout(() => {
+      modal.style.display = 'flex';
+    }, 800);
+  }
 }
 
 // Periodically check if session is still valid on this device (every 20 seconds)
@@ -3544,17 +3566,17 @@ function renderMessages(messages) {
       const btnFull = document.createElement('button');
       btnFull.className = 'ios-glass-btn active';
       btnFull.title = 'Show full multi-branch diagram with all decision splits';
-      btnFull.innerHTML = `<i class="fa-solid fa-sitemap"></i> <span>Full Vector</span>`;
+      btnFull.innerHTML = `<i class="fa-solid fa-sitemap"></i> <span class="btn-label-desktop">Full Vector</span><span class="btn-label-mobile">Vector</span>`;
 
       const btnSimple = document.createElement('button');
       btnSimple.className = 'ios-glass-btn';
       btnSimple.title = 'Show clean 1-line simplified flowchart';
-      btnSimple.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Clean Linear</span>`;
+      btnSimple.innerHTML = `<i class="fa-solid fa-bolt"></i> <span class="btn-label-desktop">Clean Linear</span><span class="btn-label-mobile">Linear</span>`;
 
       const btnText = document.createElement('button');
       btnText.className = 'ios-glass-btn';
       btnText.title = 'Show ASCII text flowchart schema';
-      btnText.innerHTML = `<i class="fa-solid fa-code"></i> <span>ASCII Schema</span>`;
+      btnText.innerHTML = `<i class="fa-solid fa-code"></i> <span class="btn-label-desktop">ASCII Schema</span><span class="btn-label-mobile">Schema</span>`;
 
       let simpleRendered = false;
 
@@ -4011,9 +4033,10 @@ function playCompletionAudioNotification() {
   }
 }
 
-// Toast notification helper utility
-function showToast(message, type = 'info') {
+// Toast notification helper utility (duration = 0 for persistent toasts that stay until user closes with [X])
+function showToast(message, type = 'info', duration = 4000) {
   const container = document.getElementById('toast-container');
+  if (!container) return;
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   
@@ -4021,17 +4044,21 @@ function showToast(message, type = 'info') {
   if (type === 'success') icon = '<i class="fa-solid fa-circle-check"></i>';
   if (type === 'error') icon = '<i class="fa-solid fa-circle-exclamation"></i>';
   
-  toast.innerHTML = `${icon}<span>${message}</span>`;
+  toast.innerHTML = `${icon}<span style="flex:1;">${message}</span><button type="button" class="toast-close-btn" style="background:none; border:none; color:inherit; opacity:0.6; cursor:pointer; font-size:1.1rem; padding:0 4px; display:inline-flex; align-items:center; justify-content:center; transition:opacity 0.2s;" onclick="this.parentElement.classList.remove('show'); setTimeout(() => this.parentElement.remove(), 300);">&times;</button>`;
   container.appendChild(toast);
 
   // Trigger reflow for animation
   setTimeout(() => toast.classList.add('show'), 10);
 
-  // Remove toast
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
+  // Remove toast automatically after duration (if duration > 0)
+  if (duration > 0) {
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, duration);
+  }
 }
 
 function clearAttachedImage() {

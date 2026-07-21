@@ -6508,15 +6508,22 @@ async function exportChatToPDF() {
           continue;
         }
 
-        // Stage 1: Check if live SVG exists in DOM without syntax error
-        const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+        // Stage 1: Check if live SVG exists in DOM without syntax error for the active mode
+        let existingSvg = null;
+        if (activeMode === 'simple') {
+          existingSvg = card.querySelector('.mermaid-simple svg');
+        } else {
+          existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+        }
+
         if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
           card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
           continue;
         }
 
-        // Stage 2: Pre-render vector in main window JS scope
-        const sanitizedCode = sanitizeRawMermaidSyntax(rawCode);
+        // Stage 2: Pre-render vector in main window JS scope corresponding to activeMode
+        const codeToRender = activeMode === 'simple' ? formatMermaidToSimplifiedLinear(rawCode) : rawCode;
+        const sanitizedCode = sanitizeRawMermaidSyntax(codeToRender);
         let renderedSvg = null;
 
         if (window.mermaid) {
@@ -6528,8 +6535,8 @@ async function exportChatToPDF() {
             }
           } catch (err1) {}
 
-          // Stage 3: Try simplified linear fallback
-          if (!renderedSvg) {
+          // Stage 3: Try simplified linear fallback (only if activeMode is 'full' and it failed)
+          if (!renderedSvg && activeMode === 'full') {
             try {
               const simpleCode = formatMermaidToSimplifiedLinear(sanitizedCode);
               const fbRenderId = 'pdf-main-fb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
@@ -6567,14 +6574,11 @@ async function exportChatToPDF() {
   htmlContent += `
       </div>
       <script>
-                }
-              }
-            }
-          }
+        window.onload = function() {
           setTimeout(function() {
             window.print();
           }, 800);
-        }
+        };
       </script>
     </body>
     </html>
@@ -6583,6 +6587,18 @@ async function exportChatToPDF() {
   printWindow.document.write(htmlContent);
   printWindow.document.close();
   showToast('Opening PDF compilation window...', 'success');
+
+  // Trigger print dialog automatically from parent scope as backup for mobile WebViews
+  setTimeout(() => {
+    try {
+      if (printWindow && !printWindow.closed) {
+        printWindow.focus();
+        printWindow.print();
+      }
+    } catch (e) {
+      console.warn('Parent print trigger caught:', e);
+    }
+  }, 1000);
 }
 
 // ── Export Chat thread as interactive presentation slide deck ──
@@ -7011,15 +7027,22 @@ async function exportMessageToPDF(rawContent, msgIdx) {
           continue;
         }
 
-        // Stage 1: Check if live SVG exists in DOM without syntax error
-        const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+        // Stage 1: Check if live SVG exists in DOM without syntax error for the active mode
+        let existingSvg = null;
+        if (activeMode === 'simple') {
+          existingSvg = card.querySelector('.mermaid-simple svg');
+        } else {
+          existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+        }
+
         if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
           card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
           continue;
         }
 
-        // Stage 2: Pre-render vector in main window JS scope
-        const sanitizedCode = sanitizeRawMermaidSyntax(rawCode);
+        // Stage 2: Pre-render vector in main window JS scope corresponding to activeMode
+        const codeToRender = activeMode === 'simple' ? formatMermaidToSimplifiedLinear(rawCode) : rawCode;
+        const sanitizedCode = sanitizeRawMermaidSyntax(codeToRender);
         let renderedSvg = null;
 
         if (window.mermaid) {
@@ -7031,8 +7054,8 @@ async function exportMessageToPDF(rawContent, msgIdx) {
             }
           } catch (err1) {}
 
-          // Stage 3: Try simplified linear fallback
-          if (!renderedSvg) {
+          // Stage 3: Try simplified linear fallback (only if activeMode is 'full' and it failed)
+          if (!renderedSvg && activeMode === 'full') {
             try {
               const simpleCode = formatMermaidToSimplifiedLinear(sanitizedCode);
               const fbRenderId = 'pdf-msg-fb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
@@ -7098,10 +7121,7 @@ async function exportMessageToPDF(rawContent, msgIdx) {
       </div>
       <div class="content">${targetContentHTML}</div>
       <script>
-                }
-              }
-            }
-          }
+        window.onload = function() {
           setTimeout(function() {
             window.print();
           }, 800);
@@ -7114,6 +7134,18 @@ async function exportMessageToPDF(rawContent, msgIdx) {
   printWindow.document.write(htmlContent);
   printWindow.document.close();
   showToast('Opening PDF compilation window...', 'success');
+
+  // Trigger print dialog automatically from parent scope as backup for mobile WebViews
+  setTimeout(() => {
+    try {
+      if (printWindow && !printWindow.closed) {
+        printWindow.focus();
+        printWindow.print();
+      }
+    } catch (e) {
+      console.warn('Parent print trigger caught:', e);
+    }
+  }, 1000);
 }
 
 function exportMessageToWord(rawContent, msgIdx) {

@@ -316,9 +316,9 @@ graph TD
             // Build model candidates for Gemini to handle preview and fallback models gracefully
             let modelCandidates = [model];
             if (provider === "gemini") {
-                if (model === "gemini-3.6-flash" || model === "gemini-3.5-flash-lite") {
+                if (model === "gemini-3.6-flash" || model === "gemini-3.5-flash-lite" || model === "gemini-3.5-flash") {
                     modelCandidates.push("gemini-2.0-flash", "gemini-2.0-flash-lite");
-                } else if (!["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro"].includes(model)) {
+                } else if (!["gemini-2.0-flash", "gemini-2.0-flash-lite"].includes(model)) {
                     modelCandidates.push("gemini-2.0-flash");
                 }
             }

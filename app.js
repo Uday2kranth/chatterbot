@@ -439,9 +439,7 @@ const PROVIDER_MODELS = {
     { value: "gemini-3.5-flash", name: "Gemini 3.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
     { value: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash-Lite", multimodal: true, voice: true },
     { value: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Preview)", multimodal: true, voice: true },
-    { value: "gemma-4-31b-it", name: "Gemma 4 31B (AI Studio) [WS]", webSearch: true, multimodal: true, preferredVision: true },
-    { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro", multimodal: true, voice: true },
-    { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash", multimodal: true, voice: true }
+    { value: "gemma-4-31b-it", name: "Gemma 4 31B (AI Studio) [WS]", webSearch: true, multimodal: true, preferredVision: true }
   ],
   nararouter: [
     { value: "mistral-large", name: "Mistral Large (Free) [WS]", webSearch: true },

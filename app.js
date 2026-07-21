@@ -5301,6 +5301,7 @@ function showMainAreaView(viewName) {
   const bookmarksView = document.getElementById('bookmarks-view');
   const examPrepView = document.getElementById('exam-prep-view');
   const arenaLabView = document.getElementById('arena-lab-view');
+  const whyModel4UView = document.getElementById('why-model-4u-view');
   
   if (!activeChatView) return;
 
@@ -5321,6 +5322,7 @@ function showMainAreaView(viewName) {
   if (bookmarksView) bookmarksView.style.display = 'none';
   if (examPrepView) examPrepView.style.display = 'none';
   if (arenaLabView) arenaLabView.style.display = 'none';
+  if (whyModel4UView) whyModel4UView.style.display = 'none';
   
   if (viewName === 'chat') {
     activeChatView.style.display = 'flex';
@@ -5340,13 +5342,13 @@ function showMainAreaView(viewName) {
     renderTokenTracker();
   } else if (viewName === 'prompts-library') {
     if (promptsLibraryView) promptsLibraryView.style.display = 'flex';
-    document.getElementById('active-provider-label').textContent = 'TEMPLATES';
-    document.getElementById('active-model-label').textContent = 'Curated Prompts Library';
+    document.getElementById('active-provider-label').textContent = 'PROMPTS';
+    document.getElementById('active-model-label').textContent = 'Prompt Engineering Library';
     renderPromptsLibrary();
   } else if (viewName === 'secure-settings') {
     if (secureSettingsView) secureSettingsView.style.display = 'flex';
-    document.getElementById('active-provider-label').textContent = 'SECURITY';
-    document.getElementById('active-model-label').textContent = 'Secure Settings & API Keys';
+    document.getElementById('active-provider-label').textContent = 'SETTINGS';
+    document.getElementById('active-model-label').textContent = 'API Credentials & Account Control';
   } else if (viewName === 'bookmarks') {
     if (bookmarksView) bookmarksView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'BOOKMARKS';
@@ -5363,6 +5365,11 @@ function showMainAreaView(viewName) {
     document.getElementById('active-model-label').textContent = 'Side-by-Side Dual AI Model & Prompt Engineering Canvas';
     initArenaLabDropdowns();
     populateArenaTemplateSelects();
+  } else if (viewName === 'why-model-4u') {
+    if (whyModel4UView) whyModel4UView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'EXAM MATRIX';
+    document.getElementById('active-model-label').textContent = 'Why Model 4 U';
+    renderWhyModel4UCards('2marks');
   }
 
   // Auto-close mobile sidebar drawer when switching rooms/subviews
@@ -8116,6 +8123,17 @@ const WHY_MODEL_4U_DATA = [
     desc: "Ultra-high speed 70B parameter engine. Generates full multi-page exam answers in under 3 seconds."
   },
   {
+    name: "Gemma 4 26B (AI Studio)",
+    provider: "Google Gemini",
+    category: "12marks",
+    tpm: "250,000 TPM",
+    vision: true,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "🔥 26B Multimodal Reasoning",
+    desc: "26 Billion parameter open-weights model on Google AI Studio with 250k TPM limit and high-precision OCR / Vision."
+  },
+  {
     name: "Gemini 3.1 Flash-Lite",
     provider: "Google Gemini",
     category: "2marks",
@@ -8184,23 +8202,13 @@ function renderWhyModel4UCards(category = '2marks') {
 // Bind Why Model 4 U Listeners
 function bindWhyModel4UListeners() {
   const whyModelBtn = document.getElementById('why-model-4u-btn');
-  const whyModelModal = document.getElementById('why-model-4u-modal');
-  const closeWhyModelBtn = document.getElementById('close-why-model-4u-btn');
   const tab2Marks = document.getElementById('why-model-tab-2marks');
   const tab12Marks = document.getElementById('why-model-tab-12marks');
 
-  if (whyModelBtn && whyModelModal) {
+  if (whyModelBtn) {
     whyModelBtn.onclick = (e) => {
       e.preventDefault();
-      whyModelModal.style.display = 'flex';
-      renderWhyModel4UCards('2marks');
-    };
-  }
-
-  if (closeWhyModelBtn && whyModelModal) {
-    closeWhyModelBtn.onclick = (e) => {
-      e.preventDefault();
-      whyModelModal.style.display = 'none';
+      showMainAreaView('why-model-4u');
     };
   }
 

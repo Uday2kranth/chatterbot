@@ -8184,7 +8184,7 @@ function renderWhyModel4UCards(category = '2marks') {
 }
 
 // Bind Why Model 4 U Listeners
-document.addEventListener('DOMContentLoaded', () => {
+function bindWhyModel4UListeners() {
   const whyModelBtn = document.getElementById('why-model-4u-btn');
   const whyModelModal = document.getElementById('why-model-4u-modal');
   const closeWhyModelBtn = document.getElementById('close-why-model-4u-btn');
@@ -8192,33 +8192,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const tab12Marks = document.getElementById('why-model-tab-12marks');
 
   if (whyModelBtn && whyModelModal) {
-    whyModelBtn.addEventListener('click', () => {
+    whyModelBtn.onclick = (e) => {
+      e.preventDefault();
       whyModelModal.style.display = 'flex';
       renderWhyModel4UCards('2marks');
-    });
+    };
   }
 
   if (closeWhyModelBtn && whyModelModal) {
-    closeWhyModelBtn.addEventListener('click', () => {
+    closeWhyModelBtn.onclick = (e) => {
+      e.preventDefault();
       whyModelModal.style.display = 'none';
-    });
+    };
   }
 
   if (tab2Marks && tab12Marks) {
-    tab2Marks.addEventListener('click', () => {
+    tab2Marks.onclick = () => {
       tab2Marks.style.background = 'var(--accent-primary)';
       tab2Marks.style.color = 'white';
       tab12Marks.style.background = 'transparent';
       tab12Marks.style.color = 'var(--text-secondary)';
       renderWhyModel4UCards('2marks');
-    });
+    };
 
-    tab12Marks.addEventListener('click', () => {
+    tab12Marks.onclick = () => {
       tab12Marks.style.background = 'var(--accent-primary)';
       tab12Marks.style.color = 'white';
       tab2Marks.style.background = 'transparent';
       tab2Marks.style.color = 'var(--text-secondary)';
       renderWhyModel4UCards('12marks');
-    });
+    };
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindWhyModel4UListeners);
+} else {
+  bindWhyModel4UListeners();
+}

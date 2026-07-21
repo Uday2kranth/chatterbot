@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chatterbot-pwa-cache-v8';
+const CACHE_NAME = 'chatterbot-pwa-cache-v10';
 const ASSETS = [
   '/',
   '/index.html',

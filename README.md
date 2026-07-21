@@ -2,6 +2,12 @@
 
 ChatterBot is a modern, premium, feature-rich multi-model AI chatbot dashboard built with standard HTML5, CSS3, and JavaScript, designed to connect with various top-tier AI providers (Groq, OpenRouter, NVIDIA, Mistral, and local endpoints like Ollama or LM Studio). It offers advanced functionalities like audio transcription, conversation branching, message editing, high-resolution image exports, and text-to-speech synthesis.
 
+> [!CRITICAL]
+> **DEVELOPER SECURITY DIRECTIVE**:
+> Never implement username-based exceptions in the logic (e.g. checking for `"uday01"`, `"Admin@uday"`, or other string patterns directly in code branches). 
+> All access overrides and multi-device bypass constraints must resolve strictly via **userRole permissions** (`admin`, `guest_admin`, etc.).
+> To grant special permissions, change the user's role to `guest_admin` in the Admin panel. Do not hardcode username exceptions in the code.
+
 ---
 
 ## 🚀 Technology Stack

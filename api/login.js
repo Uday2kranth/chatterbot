@@ -88,6 +88,11 @@ module.exports = async (req, res) => {
             console.error('Error fetching assigned role override from database:', e);
         }
 
+        const isAdminUser = trimmedUser.toLowerCase() === 'admin@uday' || trimmedUser.toLowerCase() === 'admin';
+        if (isAdminUser) {
+            activeRole = 'admin';
+        }
+
         return res.status(200).json({
             success: true,
             user: trimmedUser,

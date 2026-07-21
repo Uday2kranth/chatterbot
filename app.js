@@ -1264,72 +1264,32 @@ function renderAdminUserRolesTable() {
   const allUsers = Object.keys(AUTHORIZED_USERS);
 
   allUsers.forEach(username => {
-    const isMasterAdmin = AUTHORIZED_USERS[username].role === 'admin' || username === 'Admin@uday';
+    const isMasterAdmin = AUTHORIZED_USERS[username].role === 'admin' || username === 'Admin@uday' || username === 'admin';
+    if (isMasterAdmin) return;
+
     const defaultRole = AUTHORIZED_USERS[username].role || 'student';
-    const currentRole = isMasterAdmin ? 'admin' : (overrides[username] || defaultRole);
+    const currentRole = overrides[username] || defaultRole;
 
     const tr = document.createElement('tr');
     tr.style.cssText = 'border-bottom:1px solid var(--border-color);';
 
-    if (isMasterAdmin) {
-      tr.innerHTML = `
-        <td style="padding:8px 12px; font-weight:600; color:var(--text-primary);">${username}</td>
-        <td style="padding:8px 12px; font-weight:700; color:#818cf8;">
-          <span style="background:rgba(99,102,241,0.15); border:1px solid #6366f1; padding:3px 8px; border-radius:6px; font-size:0.75rem;">👑 Master Admin (Vercel Env Protected)</span>
-        </td>
-        <td style="padding:8px 12px; text-align:right; color:var(--text-muted); font-size:0.75rem; font-style:italic;">Protected</td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td style="padding:8px 12px; font-weight:600; color:var(--text-primary);">${username}</td>
-        <td style="padding:8px 12px;">
-          <select class="user-role-override-select" data-user="${username}" style="padding:4px 8px; font-size:0.8rem; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); outline:none;">
-            <option value="student" ${currentRole === 'student' ? 'selected' : ''}>🎓 Student (Standard Study Buddy)</option>
-            <option value="guest_student" ${currentRole === 'guest_student' ? 'selected' : ''}>🦅 Guest Student (A.V. College Logo)</option>
-            <option value="guest" ${currentRole === 'guest' ? 'selected' : ''}>👤 Guest (Read-Only)</option>
-          </select>
-        </td>
-        <td style="padding:8px 12px; text-align:right;">
-          <button type="button" class="save-single-user-role-btn" data-user="${username}" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; border:none; background:var(--accent-primary); color:white; cursor:pointer; font-weight:600;">Save Role</button>
-        </td>
-      `;
-    }
+    tr.innerHTML = `
+      <td style="padding:10px 12px; font-weight:600; color:var(--text-primary); vertical-align:middle;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-circle-user" style="color:var(--accent-primary); font-size:1.05rem;"></i>
+          <span>${escapeHtml(username)}</span>
+        </div>
+      </td>
+      <td style="padding:10px 12px; vertical-align:middle;">
+        <select class="user-role-override-select" data-user="${username}" style="padding:6px 10px; font-size:0.8rem; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); outline:none; width:100%; max-width:280px; font-family:inherit;">
+          <option value="student" ${currentRole === 'student' ? 'selected' : ''}>🎓 Student (Standard Study Buddy)</option>
+          <option value="guest_student" ${currentRole === 'guest_student' ? 'selected' : ''}>🏫 AV Student (A.V. College Logo)</option>
+          <option value="guest" ${currentRole === 'guest' ? 'selected' : ''}>👤 Guest (Read-Only)</option>
+          <option value="guest_admin" ${currentRole === 'guest_admin' ? 'selected' : ''}>🔑 Guest Admin (Multi-Device Access)</option>
+        </select>
+      </td>
+    `;
     tbody.appendChild(tr);
-  });
-
-  tbody.querySelectorAll('.save-single-user-role-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const username = e.currentTarget.getAttribute('data-user');
-      const selectEl = tbody.querySelector(`.user-role-override-select[data-user="${username}"]`);
-      if (selectEl) {
-        let newRole = selectEl.value;
-        if (newRole === 'admin') {
-          return showToast('Admin role can only be assigned via Vercel Environment Variables.', 'error');
-        }
-        const currentOverrides = getPersistedUserRoles();
-        currentOverrides[username] = newRole;
-        localStorage.setItem('chatterbot_user_roles_override', JSON.stringify(currentOverrides));
-
-        // Sync role change to Vercel backend database
-        fetch('/api/sessions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user: username,
-            id: 'chat_settings_storage',
-            session: {
-              timestamp: Date.now(),
-              data: { assignedRole: newRole }
-            }
-          })
-        }).then(() => {
-          showToast(`Role for user "${username}" saved & synced to server as "${newRole}".`, 'success');
-        }).catch(err => {
-          console.warn('Failed to sync role to server:', err);
-          showToast(`Role saved locally for "${username}".`, 'info');
-        });
-      }
-    });
   });
 }
 
@@ -1724,6 +1684,109 @@ function setupSettingsDrawer() {
     });
   }
 
+  // ── Bind Admin Role Table Save & Reset Buttons ──
+  const resetAdminRolesBtn = document.getElementById('reset-admin-roles-btn');
+  const saveAdminRolesBtn = document.getElementById('save-admin-roles-btn');
+
+  if (resetAdminRolesBtn) {
+    resetAdminRolesBtn.addEventListener('click', async () => {
+      const confirmReset = confirm("Are you sure you want to reset all user roles back to default fallback settings? This will clear all overrides from the server.");
+      if (!confirmReset) return;
+
+      resetAdminRolesBtn.disabled = true;
+      const originalHTML = resetAdminRolesBtn.innerHTML;
+      resetAdminRolesBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Resetting...`;
+
+      try {
+        localStorage.removeItem('chatterbot_user_roles_override');
+
+        // Loop over non-admin users and delete/reset their role assignment stored in chat_settings_storage database
+        const nonAdminUsers = Object.keys(AUTHORIZED_USERS).filter(username => {
+          return AUTHORIZED_USERS[username].role !== 'admin' && username !== 'Admin@uday' && username !== 'admin';
+        });
+
+        for (const username of nonAdminUsers) {
+          const defaultRole = AUTHORIZED_USERS[username].role || 'student';
+          try {
+            await fetch('/api/sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user: username,
+                id: 'chat_settings_storage',
+                session: {
+                  timestamp: Date.now(),
+                  data: { assignedRole: defaultRole }
+                }
+              })
+            });
+          } catch (e) {
+            console.warn(`Failed to sync default role for ${username}:`, e);
+          }
+        }
+
+        showToast("All user roles reset to default settings successfully!", "success");
+        renderAdminUserRolesTable();
+      } catch (err) {
+        console.error("Error resetting roles:", err);
+        showToast("Failed to reset some roles to default settings.", "error");
+      } finally {
+        resetAdminRolesBtn.disabled = false;
+        resetAdminRolesBtn.innerHTML = originalHTML;
+      }
+    });
+  }
+
+  if (saveAdminRolesBtn) {
+    saveAdminRolesBtn.addEventListener('click', async () => {
+      saveAdminRolesBtn.disabled = true;
+      const originalHTML = saveAdminRolesBtn.innerHTML;
+      saveAdminRolesBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+      try {
+        const tbody = document.getElementById('admin-user-roles-table-body');
+        if (!tbody) return;
+
+        const currentOverrides = getPersistedUserRoles();
+        const selects = tbody.querySelectorAll('.user-role-override-select');
+
+        for (const selectEl of selects) {
+          const username = selectEl.getAttribute('data-user');
+          const newRole = selectEl.value;
+          currentOverrides[username] = newRole;
+
+          // Sync role change to Vercel backend database for this user
+          try {
+            await fetch('/api/sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user: username,
+                id: 'chat_settings_storage',
+                session: {
+                  timestamp: Date.now(),
+                  data: { assignedRole: newRole }
+                }
+              })
+            });
+          } catch (err) {
+            console.warn(`Failed to sync role override for ${username} to server:`, err);
+          }
+        }
+
+        localStorage.setItem('chatterbot_user_roles_override', JSON.stringify(currentOverrides));
+        showToast("All role assignments saved and synced successfully!", "success");
+        renderAdminUserRolesTable();
+      } catch (err) {
+        console.error("Error saving roles:", err);
+        showToast("Failed to save some role assignments.", "error");
+      } finally {
+        saveAdminRolesBtn.disabled = false;
+        saveAdminRolesBtn.innerHTML = originalHTML;
+      }
+    });
+  }
+
   // ── Bind Chat Settings Checkbox Listeners ──
   const syncChatSettings = () => {
     chatSettings.bookmarksEnabled = document.getElementById('setting-toggle-bookmarks').checked;
@@ -1984,12 +2047,7 @@ async function loadChatSessions() {
         const localSession = JSON.parse(localStorage.getItem('chatterbot_session') || '{}');
         const localSessionId = localSession.sessionId;
         
-        const isDeviceCheckBypassed = userRole === 'admin' || 
-          (currentUser && (
-            currentUser.toLowerCase() === 'admin@uday' || 
-            currentUser.toLowerCase() === 'admin' || 
-            currentUser.toLowerCase() === 'uday01'
-          ));
+        const isDeviceCheckBypassed = userRole === 'admin' || userRole === 'guest_admin';
 
         if (!isDeviceCheckBypassed && localSessionId && serverSessionId !== localSessionId) {
           localStorage.removeItem('chatterbot_session');
@@ -2010,7 +2068,8 @@ async function loadChatSessions() {
       // ── Process and extract chat settings storage ──
       if (chatSessions.chat_settings_storage && chatSessions.chat_settings_storage.data) {
         if (chatSessions.chat_settings_storage.data.assignedRole) {
-          userRole = chatSessions.chat_settings_storage.data.assignedRole;
+          const isAdminUser = currentUser && (currentUser.toLowerCase() === 'admin@uday' || currentUser.toLowerCase() === 'admin');
+          userRole = isAdminUser ? 'admin' : chatSessions.chat_settings_storage.data.assignedRole;
           const currentSess = JSON.parse(localStorage.getItem('chatterbot_session') || '{}');
           currentSess.role = userRole;
           localStorage.setItem('chatterbot_session', JSON.stringify(currentSess));

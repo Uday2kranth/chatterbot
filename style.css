@@ -2430,3 +2430,19 @@ body[data-theme="light"] .toggle-switch-container,
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+/* ── Hide Rogue Mermaid Error Elements Appended to Body ── */
+body > div[id^="dmermaid"],
+body > svg[id^="mermaid"],
+[id^="dmermaid"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}

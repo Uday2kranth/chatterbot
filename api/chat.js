@@ -240,7 +240,7 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
 2. DIRECT IMAGE EMBEDDING: If a verified direct image file URL is available, embed it using:
    ![Diagram Description](verified_image_url)
    🔗 [Click to Open Full-Resolution Diagram Image](verified_image_url)
-3. MERMAID FALLBACK: If no direct image file link is available, immediately fall back to generating a native top-to-bottom Mermaid.js diagram block (```mermaid\ngraph TD\n...```).`
+3. MERMAID FALLBACK: If no direct image file link is available, immediately fall back to generating a native top-to-bottom Mermaid.js diagram block (\`\`\`mermaid\ngraph TD\n...\`\`\`).`
         });
     }
 

@@ -6308,17 +6308,10 @@ function emailMessagePairAsImage(idx) {
   }
 }
 
-// ── Export Chat thread as PDF document ──
-function exportChatToPDF() {
-  if (!activeChatId || !chatSessions[activeChatId]) {
-    showToast('Please select or create an active chat session first.', 'error');
-    return;
-  }
-  
+async function exportChatToPDF() {
   const activeSession = chatSessions[activeChatId];
-  const messages = activeSession.messages || [];
-  if (messages.length === 0) {
-    showToast('Cannot export an empty conversation.', 'error');
+  if (!activeSession) {
+    showToast('No active session to export.', 'error');
     return;
   }
 
@@ -6328,6 +6321,8 @@ function exportChatToPDF() {
     return;
   }
 
+  showToast('Preparing 100% clean vector PDF document...', 'info');
+
   let htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -6335,7 +6330,6 @@ function exportChatToPDF() {
       <title>${activeSession.title || 'Chat Export'}</title>
       <!-- KaTeX styling for formulas -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
@@ -6353,7 +6347,7 @@ function exportChatToPDF() {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
         th { background: #f8fafc; }
-        .mermaid-diagram-card, .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
         @media print {
           body { padding: 0; }
           .no-print { display: none; }
@@ -6371,11 +6365,12 @@ function exportChatToPDF() {
   const messagesContainer = document.getElementById('messages-container');
   if (messagesContainer) {
     const msgEls = messagesContainer.querySelectorAll('.message');
-    msgEls.forEach(msgEl => {
+    for (const msgEl of msgEls) {
       const cloned = msgEl.cloneNode(true);
       cloned.querySelectorAll('.message-actions, .diagram-card-toolbar, .code-copy-btn').forEach(el => el.remove());
 
-      cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
+      const diagramCards = cloned.querySelectorAll('.mermaid-diagram-card');
+      for (const card of diagramCards) {
         const activeMode = card.getAttribute('data-active-mode') || 'full';
         let rawCode = card.getAttribute('data-raw-code');
         if (rawCode && (rawCode.includes('%0A') || rawCode.includes('%20') || rawCode.includes('%3A'))) {
@@ -6390,36 +6385,59 @@ function exportChatToPDF() {
         }
 
         if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
-          return;
+          continue;
         }
 
-        // Sanitize code before rendering in PDF window
-        rawCode = sanitizeRawMermaidSyntax(rawCode);
+        if (activeMode === 'text') {
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
+          continue;
+        }
 
+        // Stage 1: Check if live SVG exists in DOM without syntax error
         const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+        if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
+          continue;
+        }
 
-        if (activeMode === 'full') {
-          if (existingSvg) {
-            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
-          } else {
-            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(rawCode)}">${escapeHtml(rawCode)}</div>`;
+        // Stage 2: Pre-render vector in main window JS scope
+        const sanitizedCode = sanitizeRawMermaidSyntax(rawCode);
+        let renderedSvg = null;
+
+        if (window.mermaid) {
+          try {
+            const renderId = 'pdf-main-svg-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+            const { svg } = await window.mermaid.render(renderId, sanitizedCode);
+            if (svg && !svg.includes('Syntax error') && !svg.includes('dmermaid')) {
+              renderedSvg = svg;
+            }
+          } catch (err1) {}
+
+          // Stage 3: Try simplified linear fallback
+          if (!renderedSvg) {
+            try {
+              const simpleCode = formatMermaidToSimplifiedLinear(sanitizedCode);
+              const fbRenderId = 'pdf-main-fb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+              const { svg: fbSvg } = await window.mermaid.render(fbRenderId, simpleCode);
+              if (fbSvg && !fbSvg.includes('Syntax error') && !fbSvg.includes('dmermaid')) {
+                renderedSvg = fbSvg;
+              }
+            } catch (err2) {}
           }
-        } else if (activeMode === 'simple') {
-          const simpleSvg = card.querySelector('.mermaid-simple svg');
-          if (simpleSvg) {
-            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${simpleSvg.outerHTML}</div>`;
-          } else {
-            const simpleMermaidCode = formatMermaidToSimplifiedLinear(rawCode);
-            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(simpleMermaidCode)}">${escapeHtml(simpleMermaidCode)}</div>`;
-          }
-        } else if (activeMode === 'text') {
+        }
+
+        if (renderedSvg) {
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${renderedSvg}</div>`;
+        } else {
+          // Stage 4 Guaranteed Fallback: Render ASCII text schema
           card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
         }
-      });
+      }
 
       htmlContent += cloned.outerHTML;
-    });
+    }
   } else {
+    const messages = activeSession.messages || [];
     messages.forEach(msg => {
       const formattedBody = renderMarkdownWithMath(msg.content || '');
       htmlContent += `
@@ -6434,33 +6452,6 @@ function exportChatToPDF() {
   htmlContent += `
       </div>
       <script>
-        window.onload = async function() {
-          if (window.mermaid) {
-            try {
-              window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-            } catch(e){}
-
-            const mermaidEls = document.querySelectorAll('.mermaid');
-            for (let idx = 0; idx < mermaidEls.length; idx++) {
-              const el = mermaidEls[idx];
-              let rawCode = el.getAttribute('data-raw-code') || el.textContent || '';
-              if (rawCode.includes('%0A') || rawCode.includes('%20')) {
-                try { rawCode = decodeURIComponent(rawCode); } catch(e){}
-              }
-
-              const renderId = 'pdf-svg-' + Date.now() + '-' + idx;
-              try {
-                const { svg } = await window.mermaid.render(renderId, rawCode);
-                el.innerHTML = svg;
-              } catch (err1) {
-                console.warn('PDF Stage 1 render warning for diagram ' + idx + ', executing Stage 2 fallback:', err1);
-                try {
-                  const fbCode = rawCode.split('\\n').filter(function(l) { return !l.trim().startsWith('direction '); }).join('\\n');
-                  const fbRenderId = 'pdf-svg-fb-' + Date.now() + '-' + idx;
-                  const { svg: fbSvg } = await window.mermaid.render(fbRenderId, fbCode);
-                  el.innerHTML = fbSvg;
-                } catch (err2) {
-                  console.error('All PDF Mermaid rendering fallbacks failed:', err2);
                 }
               }
             }
@@ -6864,12 +6855,14 @@ function exportMessageToSlides(rawContent, msgIdx) {
   launchSlideViewer(slides, `Message Slides`);
 }
 
-function exportMessageToPDF(rawContent, msgIdx) {
+async function exportMessageToPDF(rawContent, msgIdx) {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     showToast('Pop-up blocked. Please allow popups to export PDFs.', 'error');
     return;
   }
+
+  showToast('Preparing 100% clean message PDF...', 'info');
 
   const messagesContainer = document.getElementById('messages-container');
   let targetContentHTML = '';
@@ -6879,7 +6872,8 @@ function exportMessageToPDF(rawContent, msgIdx) {
       const cloned = msgEl.cloneNode(true);
       cloned.querySelectorAll('.message-actions, .diagram-card-toolbar, .code-copy-btn').forEach(el => el.remove());
 
-      cloned.querySelectorAll('.mermaid-diagram-card').forEach(card => {
+      const diagramCards = cloned.querySelectorAll('.mermaid-diagram-card');
+      for (const card of diagramCards) {
         const activeMode = card.getAttribute('data-active-mode') || 'full';
         let rawCode = card.getAttribute('data-raw-code');
         if (rawCode && (rawCode.includes('%0A') || rawCode.includes('%20') || rawCode.includes('%3A'))) {
@@ -6894,32 +6888,54 @@ function exportMessageToPDF(rawContent, msgIdx) {
         }
 
         if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
-          return;
+          continue;
         }
 
-        // Sanitize code before rendering in PDF window
-        rawCode = sanitizeRawMermaidSyntax(rawCode);
+        if (activeMode === 'text') {
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
+          continue;
+        }
 
+        // Stage 1: Check if live SVG exists in DOM without syntax error
         const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+        if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
+          continue;
+        }
 
-        if (activeMode === 'full') {
-          if (existingSvg) {
-            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
-          } else {
-            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(rawCode)}">${escapeHtml(rawCode)}</div>`;
+        // Stage 2: Pre-render vector in main window JS scope
+        const sanitizedCode = sanitizeRawMermaidSyntax(rawCode);
+        let renderedSvg = null;
+
+        if (window.mermaid) {
+          try {
+            const renderId = 'pdf-msg-svg-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+            const { svg } = await window.mermaid.render(renderId, sanitizedCode);
+            if (svg && !svg.includes('Syntax error') && !svg.includes('dmermaid')) {
+              renderedSvg = svg;
+            }
+          } catch (err1) {}
+
+          // Stage 3: Try simplified linear fallback
+          if (!renderedSvg) {
+            try {
+              const simpleCode = formatMermaidToSimplifiedLinear(sanitizedCode);
+              const fbRenderId = 'pdf-msg-fb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+              const { svg: fbSvg } = await window.mermaid.render(fbRenderId, simpleCode);
+              if (fbSvg && !fbSvg.includes('Syntax error') && !fbSvg.includes('dmermaid')) {
+                renderedSvg = fbSvg;
+              }
+            } catch (err2) {}
           }
-        } else if (activeMode === 'simple') {
-          const simpleSvg = card.querySelector('.mermaid-simple svg');
-          if (simpleSvg) {
-            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${simpleSvg.outerHTML}</div>`;
-          } else {
-            const simpleMermaidCode = formatMermaidToSimplifiedLinear(rawCode);
-            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(simpleMermaidCode)}">${escapeHtml(simpleMermaidCode)}</div>`;
-          }
-        } else if (activeMode === 'text') {
+        }
+
+        if (renderedSvg) {
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${renderedSvg}</div>`;
+        } else {
+          // Stage 4 Guaranteed Fallback: Render ASCII text schema
           card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
         }
-      });
+      }
 
       targetContentHTML = cloned.innerHTML;
     }
@@ -6935,7 +6951,6 @@ function exportMessageToPDF(rawContent, msgIdx) {
     <head>
       <title>Message PDF Export</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
@@ -6949,7 +6964,7 @@ function exportMessageToPDF(rawContent, msgIdx) {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.9rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
         th { background: #f8fafc; color: #0f172a; }
-        .mermaid-diagram-card, .mermaid { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
         @media print {
           body { padding: 0; }
           .no-print { display: none; }
@@ -6963,33 +6978,6 @@ function exportMessageToPDF(rawContent, msgIdx) {
       </div>
       <div class="content">${targetContentHTML}</div>
       <script>
-        window.onload = async function() {
-          if (window.mermaid) {
-            try {
-              window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-            } catch(e){}
-
-            const mermaidEls = document.querySelectorAll('.mermaid');
-            for (let idx = 0; idx < mermaidEls.length; idx++) {
-              const el = mermaidEls[idx];
-              let rawCode = el.getAttribute('data-raw-code') || el.textContent || '';
-              if (rawCode.includes('%0A') || rawCode.includes('%20')) {
-                try { rawCode = decodeURIComponent(rawCode); } catch(e){}
-              }
-
-              const renderId = 'pdf-msg-svg-' + Date.now() + '-' + idx;
-              try {
-                const { svg } = await window.mermaid.render(renderId, rawCode);
-                el.innerHTML = svg;
-              } catch (err1) {
-                console.warn('PDF Stage 1 render warning for diagram ' + idx + ', executing Stage 2 fallback:', err1);
-                try {
-                  const fbCode = rawCode.split('\\n').filter(function(l) { return !l.trim().startsWith('direction '); }).join('\\n');
-                  const fbRenderId = 'pdf-msg-svg-fb-' + Date.now() + '-' + idx;
-                  const { svg: fbSvg } = await window.mermaid.render(fbRenderId, fbCode);
-                  el.innerHTML = fbSvg;
-                } catch (err2) {
-                  console.error('All PDF Mermaid rendering fallbacks failed:', err2);
                 }
               }
             }

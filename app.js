@@ -6396,12 +6396,24 @@ function exportChatToPDF() {
         // Sanitize code before rendering in PDF window
         rawCode = sanitizeRawMermaidSyntax(rawCode);
 
+        const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+
         if (activeMode === 'full') {
-          card.innerHTML = `<div class="mermaid">${rawCode}</div>`;
+          if (existingSvg) {
+            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
+          } else {
+            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(rawCode)}">${escapeHtml(rawCode)}</div>`;
+          }
         } else if (activeMode === 'simple') {
-          card.innerHTML = `<div class="mermaid">${formatMermaidToSimplifiedLinear(rawCode)}</div>`;
+          const simpleSvg = card.querySelector('.mermaid-simple svg');
+          if (simpleSvg) {
+            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${simpleSvg.outerHTML}</div>`;
+          } else {
+            const simpleMermaidCode = formatMermaidToSimplifiedLinear(rawCode);
+            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(simpleMermaidCode)}">${escapeHtml(simpleMermaidCode)}</div>`;
+          }
         } else if (activeMode === 'text') {
-          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${formatMermaidToAsciiSchema(rawCode)}</pre>`;
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
         }
       });
 
@@ -6888,12 +6900,24 @@ function exportMessageToPDF(rawContent, msgIdx) {
         // Sanitize code before rendering in PDF window
         rawCode = sanitizeRawMermaidSyntax(rawCode);
 
+        const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+
         if (activeMode === 'full') {
-          card.innerHTML = `<div class="mermaid">${rawCode}</div>`;
+          if (existingSvg) {
+            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
+          } else {
+            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(rawCode)}">${escapeHtml(rawCode)}</div>`;
+          }
         } else if (activeMode === 'simple') {
-          card.innerHTML = `<div class="mermaid">${formatMermaidToSimplifiedLinear(rawCode)}</div>`;
+          const simpleSvg = card.querySelector('.mermaid-simple svg');
+          if (simpleSvg) {
+            card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${simpleSvg.outerHTML}</div>`;
+          } else {
+            const simpleMermaidCode = formatMermaidToSimplifiedLinear(rawCode);
+            card.innerHTML = `<div class="mermaid" data-raw-code="${encodeURIComponent(simpleMermaidCode)}">${escapeHtml(simpleMermaidCode)}</div>`;
+          }
         } else if (activeMode === 'text') {
-          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${formatMermaidToAsciiSchema(rawCode)}</pre>`;
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
         }
       });
 

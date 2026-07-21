@@ -258,7 +258,8 @@ When explaining, drawing, or providing a flowchart, system architecture, pipelin
 3. SHORT CONCISE LABELS: Keep node labels concise (under 6 words per box). Avoid ultra-long paragraphs inside diagram nodes.
 4. NO SQUISHED SUBGRAPHS: If using subgraphs, arrange them vertically top-to-bottom rather than side-by-side horizontally.
 5. NO SPECIAL SYMBOL BREAKS: Do not place unescaped quotes, raw HTML tags, or illegal symbols inside node brackets.
-6. NO ASCII ART OR TIKZ: Never output ASCII box art (+---+) or raw LaTeX TikZ code (\`\\documentclass\`, \`\\begin{tikzpicture}\`). ALWAYS use standard Mermaid blocks (\`\`\`mermaid graph TD ... \`\`\`).`
+6. NO AMPERSAND SHORTHAND JOINS: Write individual 1-to-1 connections (e.g., A --> C and B --> C) instead of ampersand shorthand (A & B --> C).
+7. NO ASCII ART OR TIKZ: Never output ASCII box art (+---+) or raw LaTeX TikZ code (\`\\documentclass\`, \`\\begin{tikzpicture}\`). ALWAYS use standard Mermaid blocks (\`\`\`mermaid graph TD ... \`\`\`).`
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols

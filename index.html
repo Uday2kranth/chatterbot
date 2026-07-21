@@ -1715,20 +1715,26 @@
         
         <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
           <!-- Settings Navigation Tabs -->
-          <div class="settings-tabs" style="display:flex; gap:8px; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:4px;">
-            <button id="tab-chat-settings" class="tab-btn active" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
-              <i class="fa-solid fa-sliders"></i> Chat Customization
+          <div class="settings-tabs" style="display:flex; flex-wrap:wrap; gap:8px; border-bottom:1px solid var(--border-color); padding-bottom:12px; margin-bottom:4px;">
+            <button id="tab-general-settings" class="tab-btn active" style="padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+              <i class="fa-solid fa-sliders" style="color:var(--accent-primary);"></i> <span>1. General Preferences</span>
             </button>
-            <button id="tab-api-settings" class="tab-btn" style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
-              <i class="fa-solid fa-key"></i> API Configuration <i id="api-tab-lock-icon" class="fa-solid fa-lock" style="font-size:0.75rem; opacity:0.8;"></i>
+            <button id="tab-export-settings" class="tab-btn" style="padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+              <i class="fa-solid fa-file-export" style="color:var(--accent-secondary);"></i> <span>2. Export & Toolbar Controls</span>
+            </button>
+            <button id="tab-api-settings" class="tab-btn" style="padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+              <i class="fa-solid fa-key" style="color:#f59e0b;"></i> <span>3. API Provider Keys</span> <i id="api-tab-lock-icon" class="fa-solid fa-lock" style="font-size:0.75rem; opacity:0.8;"></i>
+            </button>
+            <button id="tab-admin-settings" class="tab-btn" style="display:none; padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+              <i class="fa-solid fa-user-gear" style="color:#818cf8;"></i> <span>4. Admin Role Control</span>
             </button>
           </div>
 
-          <!-- Chat Customization Panel -->
-          <div id="chat-settings-panel" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Section 1: General Preferences Panel -->
+          <div id="general-settings-panel" style="display: flex; flex-direction: column; gap: 16px;">
             <div class="settings-info-alert" style="margin-top: 0; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
               <i class="fa-solid fa-circle-info" style="color: var(--accent-primary);"></i>
-              <p style="margin: 0;">Customize the features and options shown in your main Chat window. These settings synchronize automatically across your devices.</p>
+              <p style="margin: 0;">Customize general AI persona features, chimes, and recipient email notifications for your chat sessions.</p>
             </div>
             
             <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px;">
@@ -1768,8 +1774,27 @@
                 </label>
               </div>
 
+              <!-- Recipient Email Configuration -->
+              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Email Export Recipients</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Configure recipient email address(es) for exporting conversation pair snapshots. Separate multiple emails with commas.</div>
+                </div>
+                <input type="text" id="settings-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none; margin-top:4px;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Export & Toolbar Controls Panel -->
+          <div id="export-settings-panel" style="display: none; flex-direction: column; gap: 16px;">
+            <div class="settings-info-alert" style="margin-top: 0; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-file-export" style="color: var(--accent-secondary);"></i>
+              <p style="margin: 0;">Configure document export formats and toggle individual message bubble action icons.</p>
+            </div>
+
+            <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px;">
               <!-- Export formats checkboxes -->
-              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; flex-direction:column; gap:12px;">
                 <div>
                   <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Active Chat Export Formats</div>
                   <div style="font-size:0.75rem; color:var(--text-muted);">Select which document format buttons are visible in the input toolbar.</div>
@@ -1790,35 +1815,13 @@
                 </div>
               </div>
 
-              <!-- Audio Notifications Settings -->
-              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
-                <div>
-                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Audio & Sound Notifications</div>
-                  <div style="font-size:0.75rem; color:var(--text-muted);">Play chime sound and announce "Your answer is ready!" when responses finish generating.</div>
-                </div>
-                <label style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--text-primary); cursor:pointer; margin-top:4px;">
-                  <input type="checkbox" id="setting-toggle-audio-ping" checked style="accent-color:var(--accent-primary);" />
-                  <i class="fa-solid fa-bell" style="color:var(--accent-primary);"></i>
-                  <span>Enable Audio Ping & Voice Chime ("Your answer is ready!")</span>
-                </label>
-              </div>
-
-              <!-- Recipient Email Configuration -->
-              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
-                <div>
-                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Email Export Recipients</div>
-                  <div style="font-size:0.75rem; color:var(--text-muted);">Configure recipient email address(es) for exporting conversation pair snapshots. Separate multiple emails with commas.</div>
-                </div>
-                <input type="text" id="settings-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none; margin-top:4px;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
-              </div>
-
               <!-- Message Bubble Actions Checkboxes -->
               <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:12px;">
                 <div>
-                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Message Bubble Actions</div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Message Bubble Action Buttons</div>
                   <div style="font-size:0.75rem; color:var(--text-muted);">Select which actions and details are visible below/beside message bubbles.</div>
                 </div>
-                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:4px;">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:4px;">
                   <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-primary); cursor:pointer;">
                     <input type="checkbox" id="setting-bubble-copy" checked style="accent-color:var(--accent-primary);" /> <i class="fa-regular fa-copy" style="width:16px; text-align:center; color:var(--accent-primary);"></i> Copy
                   </label>
@@ -1845,36 +1848,38 @@
                   </label>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- Admin Role Testing & Account Management (Admin Exclusive) -->
-              <div id="admin-role-management-section" style="border-top:1px solid var(--border-color); padding-top:16px; display:none; flex-direction:column; gap:14px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                  <div>
-                    <div style="font-weight:700; font-size:0.95rem; color:#818cf8; display:flex; align-items:center; gap:6px;">
-                      <i class="fa-solid fa-user-gear"></i> Account Role Management
-                    </div>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">Assign persistent roles (Student, Guest Student, Guest) for registered user accounts.</div>
+          <!-- Section 4: Admin Exclusive Account Role Control Panel -->
+          <div id="admin-settings-panel" style="display: none; flex-direction: column; gap: 16px;">
+            <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                  <div style="font-weight:700; font-size:0.95rem; color:#818cf8; display:flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-user-gear"></i> Account Role & Access Control
                   </div>
-                  <span class="badge" style="background:#6366f1; color:white; font-size:0.7rem; padding:3px 8px; border-radius:4px; font-weight:700;">ADMIN EXCLUSIVE</span>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Assign persistent access roles (Student, Guest Student, Guest) for registered user accounts.</div>
                 </div>
+                <span class="badge" style="background:#6366f1; color:white; font-size:0.7rem; padding:3px 8px; border-radius:4px; font-weight:700;">ADMIN EXCLUSIVE</span>
+              </div>
 
-                <!-- User Account Role Management Table -->
-                <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
-                  <div style="font-size:0.8rem; font-weight:700; color:var(--text-primary);">👥 User Account Role Assignments</div>
-                  <div style="max-height:220px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
-                    <table style="width:100%; border-collapse:collapse; font-size:0.82rem; color:var(--text-secondary);">
-                      <thead>
-                        <tr style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color); text-align:left; color:var(--text-muted);">
-                          <th style="padding:8px 12px;">Username</th>
-                          <th style="padding:8px 12px;">Assigned Role</th>
-                          <th style="padding:8px 12px; text-align:right;">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody id="admin-user-roles-table-body">
-                        <!-- Dynamically populated -->
-                      </tbody>
-                    </table>
-                  </div>
+              <!-- User Account Role Management Table -->
+              <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+                <div style="font-size:0.8rem; font-weight:700; color:var(--text-primary);">👥 Registered Account Assignments</div>
+                <div style="max-height:260px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
+                  <table style="width:100%; border-collapse:collapse; font-size:0.82rem; color:var(--text-secondary);">
+                    <thead>
+                      <tr style="background:var(--bg-tertiary); border-bottom:1px solid var(--border-color); text-align:left; color:var(--text-muted);">
+                        <th style="padding:8px 12px;">Username</th>
+                        <th style="padding:8px 12px;">Assigned Role</th>
+                        <th style="padding:8px 12px; text-align:right;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="admin-user-roles-table-body">
+                      <!-- Dynamically populated -->
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

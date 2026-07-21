@@ -1554,24 +1554,47 @@ function setupSettingsDrawer() {
   }
 
   // ── Tab Navigation Switching Logic ──
-  const tabChat = document.getElementById('tab-chat-settings');
+  const tabGeneral = document.getElementById('tab-general-settings');
+  const tabExport = document.getElementById('tab-export-settings');
   const tabApi = document.getElementById('tab-api-settings');
-  const panelChat = document.getElementById('chat-settings-panel');
+  const tabAdmin = document.getElementById('tab-admin-settings');
+
+  const panelGeneral = document.getElementById('general-settings-panel');
+  const panelExport = document.getElementById('export-settings-panel');
   const panelApi = document.getElementById('api-settings-panel');
+  const panelAdmin = document.getElementById('admin-settings-panel');
   const lockIcon = document.getElementById('api-tab-lock-icon');
 
   const switchSettingsTab = (tabName) => {
-    if (tabName === 'chat') {
-      if (tabChat) tabChat.classList.add('active');
-      if (tabApi) tabApi.classList.remove('active');
-      if (panelChat) panelChat.style.display = 'flex';
-      if (panelApi) panelApi.style.display = 'none';
+    const tabs = [tabGeneral, tabExport, tabApi, tabAdmin];
+    const panels = [panelGeneral, panelExport, panelApi, panelAdmin];
+
+    tabs.forEach(t => {
+      if (t) {
+        t.classList.remove('active');
+        t.style.background = 'transparent';
+        t.style.color = 'var(--text-secondary)';
+      }
+    });
+
+    panels.forEach(p => {
+      if (p) p.style.display = 'none';
+    });
+
+    if (tabName === 'general' || tabName === 'chat') {
+      if (tabGeneral) { tabGeneral.classList.add('active'); tabGeneral.style.background = 'var(--bg-tertiary)'; tabGeneral.style.color = 'var(--text-primary)'; }
+      if (panelGeneral) panelGeneral.style.display = 'flex';
+    } else if (tabName === 'export') {
+      if (tabExport) { tabExport.classList.add('active'); tabExport.style.background = 'var(--bg-tertiary)'; tabExport.style.color = 'var(--text-primary)'; }
+      if (panelExport) panelExport.style.display = 'flex';
     } else if (tabName === 'api') {
-      if (tabChat) tabChat.classList.remove('active');
-      if (tabApi) tabApi.classList.add('active');
-      if (panelChat) panelChat.style.display = 'none';
+      if (tabApi) { tabApi.classList.add('active'); tabApi.style.background = 'var(--bg-tertiary)'; tabApi.style.color = 'var(--text-primary)'; }
       if (panelApi) panelApi.style.display = 'flex';
       loadStoredAPIKeys();
+    } else if (tabName === 'admin') {
+      if (tabAdmin) { tabAdmin.classList.add('active'); tabAdmin.style.background = 'var(--bg-tertiary)'; tabAdmin.style.color = 'var(--text-primary)'; }
+      if (panelAdmin) panelAdmin.style.display = 'flex';
+      renderAdminUserRolesTable();
     }
   };
 
@@ -1583,17 +1606,21 @@ function setupSettingsDrawer() {
     });
   }
 
-  // Profile Click Event to request password validation
-  const passwordOverlay = document.getElementById('password-auth-overlay');
-  if (tabChat) {
-    tabChat.addEventListener('click', () => {
-      switchSettingsTab('chat');
-    });
+  // Section Tab Click Listeners
+  if (tabGeneral) {
+    tabGeneral.addEventListener('click', () => switchSettingsTab('general'));
+  }
+  if (tabExport) {
+    tabExport.addEventListener('click', () => switchSettingsTab('export'));
+  }
+  if (tabAdmin) {
+    tabAdmin.addEventListener('click', () => switchSettingsTab('admin'));
   }
 
   const confirmUnlockBtn = document.getElementById('confirm-unlock-btn');
   const cancelUnlockBtn = document.getElementById('cancel-unlock-btn');
   const unlockPasswordInput = document.getElementById('settings-unlock-password');
+  const passwordOverlay = document.getElementById('password-auth-overlay');
 
   if (tabApi) {
     tabApi.addEventListener('click', () => {
@@ -1621,7 +1648,7 @@ function setupSettingsDrawer() {
       }
 
       showMainAreaView('secure-settings');
-      switchSettingsTab('chat');
+      switchSettingsTab('general');
 
       // Load current checkbox states from memory
       document.getElementById('setting-toggle-bookmarks').checked = chatSettings.bookmarksEnabled;
@@ -1647,13 +1674,12 @@ function setupSettingsDrawer() {
       }
 
       // Display and populate Admin Role Management & Simulator section if user is Admin@uday
-      const adminSection = document.getElementById('admin-role-management-section');
-      if (adminSection) {
-        const isActualAdmin = currentUser === 'Admin@uday' || currentUser === 'admin' || userRole === 'admin';
-        adminSection.style.display = isActualAdmin ? 'flex' : 'none';
-        if (isActualAdmin) {
-          renderAdminUserRolesTable();
-        }
+      const isActualAdmin = currentUser === 'Admin@uday' || currentUser === 'admin' || userRole === 'admin';
+      if (tabAdmin) {
+        tabAdmin.style.display = isActualAdmin ? 'flex' : 'none';
+      }
+      if (isActualAdmin) {
+        renderAdminUserRolesTable();
       }
     });
   }

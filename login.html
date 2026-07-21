@@ -174,8 +174,15 @@
           };
           localStorage.setItem('chatterbot_session', JSON.stringify(sessionData));
 
-          // If not admin, register the active device session on the database server
-          if (data.role !== 'admin') {
+          // If not admin/Admin@uday/uday01, register the active device session on the database server
+          const isBypassed = data.role === 'admin' || 
+            (data.user && (
+              data.user.toLowerCase() === 'admin@uday' || 
+              data.user.toLowerCase() === 'admin' || 
+              data.user.toLowerCase() === 'uday01'
+            ));
+
+          if (!isBypassed) {
             try {
               await fetch('/api/sessions', {
                 method: 'POST',

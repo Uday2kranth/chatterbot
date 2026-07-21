@@ -1984,7 +1984,14 @@ async function loadChatSessions() {
         const localSession = JSON.parse(localStorage.getItem('chatterbot_session') || '{}');
         const localSessionId = localSession.sessionId;
         
-        if (userRole !== 'admin' && localSessionId && serverSessionId !== localSessionId) {
+        const isDeviceCheckBypassed = userRole === 'admin' || 
+          (currentUser && (
+            currentUser.toLowerCase() === 'admin@uday' || 
+            currentUser.toLowerCase() === 'admin' || 
+            currentUser.toLowerCase() === 'uday01'
+          ));
+
+        if (!isDeviceCheckBypassed && localSessionId && serverSessionId !== localSessionId) {
           localStorage.removeItem('chatterbot_session');
           alert('You have been logged out because this account was logged in on another device.');
           window.location.href = 'login.html';

@@ -3443,7 +3443,7 @@ function renderMessages(messages) {
     modelBadge.style.gap = '4px';
     modelBadge.style.fontWeight = '600';
 
-    const usedModelName = msg.modelUsed || activeSession.model || 'AI Model';
+    const usedModelName = msg.modelUsed || (typeof activeSession !== 'undefined' && activeSession && activeSession.model) || 'AI Model';
     modelBadge.innerHTML = `<i class="fa-solid fa-microchip" style="color:var(--accent-secondary);"></i> <span>${usedModelName}</span>`;
     actions.insertBefore(modelBadge, actions.firstChild);
 

@@ -6334,13 +6334,28 @@ function emailMessagePairAsImage(idx) {
   }
 }
 
+function sanitizeSvgForMobilePrint(svgHtml) {
+  if (!svgHtml) return '';
+  let cleaned = svgHtml;
+  if (cleaned.includes('style="')) {
+    cleaned = cleaned.replace(/style="([^"]*)"/gi, (match, p1) => {
+      let styles = p1.replace(/max-width:\s*[^;"]+;?/gi, '').replace(/width:\s*[^;"]+;?/gi, '');
+      return `style="${styles}; max-width: 100% !important; height: auto !important; display: inline-block;"`;
+    });
+  } else {
+    cleaned = cleaned.replace(/<svg\s+/gi, '<svg style="max-width: 100% !important; height: auto !important; display: inline-block;" ');
+  }
+  return cleaned;
+}
+
+// ── Export Active Chat Thread as high-fidelity PDF Document ──
 async function exportChatToPDF() {
-  const activeSession = chatSessions[activeChatId];
-  if (!activeSession) {
-    showToast('No active session to export.', 'error');
+  if (!activeChatId || !chatSessions[activeChatId]) {
+    showToast('Please select an active chat session first.', 'error');
     return;
   }
 
+  const activeSession = chatSessions[activeChatId];
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     showToast('Pop-up blocked. Please allow popups to export PDFs.', 'error');
@@ -6357,7 +6372,7 @@ async function exportChatToPDF() {
       <!-- KaTeX styling for formulas -->
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
       <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1e293b; line-height: 1.6; background: #ffffff; width: 100%; box-sizing: border-box; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
         .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
         .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
@@ -6366,17 +6381,22 @@ async function exportChatToPDF() {
         .role.user { color: #2563eb; }
         .role.assistant { color: #059669; }
         .content { font-size: 1rem; word-break: break-word; page-break-inside: auto; break-inside: auto; }
-        pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.9rem; }
-        code { font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+        pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.88rem; white-space: pre-wrap !important; word-break: break-word !important; }
+        code { font-family: monospace; font-size: 0.88rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; word-break: break-word !important; }
         pre code { background: transparent; padding: 0; }
         blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; word-break: break-word; }
         th { background: #f8fafc; }
-        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+        .mermaid-rendered svg, .mermaid svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+        .katex-display { max-width: 100% !important; overflow-x: auto; }
         @media print {
-          body { padding: 0; }
-          .no-print { display: none; }
+          @page { size: auto; margin: 10mm; }
+          html, body { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+          .no-print { display: none !important; }
+          .mermaid-rendered svg, .mermaid svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; }
+          pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
         }
       </style>
     </head>
@@ -6422,7 +6442,7 @@ async function exportChatToPDF() {
         // Stage 1: Check if live SVG exists in DOM without syntax error
         const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
         if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
           continue;
         }
 
@@ -6453,7 +6473,7 @@ async function exportChatToPDF() {
         }
 
         if (renderedSvg) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${renderedSvg}</div>`;
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(renderedSvg)}</div>`;
         } else {
           // Stage 4 Guaranteed Fallback: Render ASCII text schema
           card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
@@ -6925,7 +6945,7 @@ async function exportMessageToPDF(rawContent, msgIdx) {
         // Stage 1: Check if live SVG exists in DOM without syntax error
         const existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
         if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
           continue;
         }
 
@@ -6956,7 +6976,7 @@ async function exportMessageToPDF(rawContent, msgIdx) {
         }
 
         if (renderedSvg) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${renderedSvg}</div>`;
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(renderedSvg)}</div>`;
         } else {
           // Stage 4 Guaranteed Fallback: Render ASCII text schema
           card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
@@ -6978,22 +6998,27 @@ async function exportMessageToPDF(rawContent, msgIdx) {
       <title>Message PDF Export</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
       <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; background: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1e293b; line-height: 1.6; background: #ffffff; width: 100%; box-sizing: border-box; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
         .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
         .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
         .content { font-size: 1rem; word-break: break-word; page-break-inside: auto; break-inside: auto; }
-        pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.9rem; }
-        code { font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; }
+        pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.88rem; white-space: pre-wrap !important; word-break: break-word !important; }
+        code { font-family: monospace; font-size: 0.88rem; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; word-break: break-word !important; }
         pre code { background: transparent; padding: 0; }
         blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.9rem; }
-        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; word-break: break-word; }
         th { background: #f8fafc; color: #0f172a; }
-        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+        .mermaid-rendered svg, .mermaid svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+        .katex-display { max-width: 100% !important; overflow-x: auto; }
         @media print {
-          body { padding: 0; }
-          .no-print { display: none; }
+          @page { size: auto; margin: 10mm; }
+          html, body { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+          .no-print { display: none !important; }
+          .mermaid-rendered svg, .mermaid svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; }
+          pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
         }
       </style>
     </head>

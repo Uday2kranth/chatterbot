@@ -1773,15 +1773,6 @@
                   <span class="slider-round" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:#ccc; border-radius:24px; transition:0.4s;"></span>
                 </label>
               </div>
-
-              <!-- Recipient Email Configuration -->
-              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:8px;">
-                <div>
-                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Email Export Recipients</div>
-                  <div style="font-size:0.75rem; color:var(--text-muted);">Configure recipient email address(es) for exporting conversation pair snapshots. Separate multiple emails with commas.</div>
-                </div>
-                <input type="text" id="settings-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none; margin-top:4px;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
-              </div>
             </div>
           </div>
 
@@ -1789,12 +1780,21 @@
           <div id="export-settings-panel" style="display: none; flex-direction: column; gap: 16px;">
             <div class="settings-info-alert" style="margin-top: 0; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
               <i class="fa-solid fa-file-export" style="color: var(--accent-secondary);"></i>
-              <p style="margin: 0;">Configure document export formats and toggle individual message bubble action icons.</p>
+              <p style="margin: 0;">Configure document export formats, email recipients, and toggle individual message bubble action icons.</p>
             </div>
 
             <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:16px;">
+              <!-- Recipient Email Configuration -->
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div>
+                  <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Email Export Recipients</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Configure recipient email address(es) for exporting conversation pair snapshots. Separate multiple emails with commas.</div>
+                </div>
+                <input type="text" id="settings-email-input" class="api-input" style="padding: 10px; border-radius:8px; border: 1px solid var(--border-color); background:var(--bg-secondary); color:var(--text-primary); font-family:inherit; font-size:0.85rem; outline:none; margin-top:4px;" placeholder="e.g. student1@gmail.com, student2@gmail.com">
+              </div>
+
               <!-- Export formats checkboxes -->
-              <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="border-top:1px solid var(--border-color); padding-top:16px; display:flex; flex-direction:column; gap:12px;">
                 <div>
                   <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">Active Chat Export Formats</div>
                   <div style="font-size:0.75rem; color:var(--text-muted);">Select which document format buttons are visible in the input toolbar.</div>

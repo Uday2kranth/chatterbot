@@ -256,7 +256,25 @@ When explaining, drawing, or providing a flowchart, system architecture, pipelin
 5. NO SPECIAL SYMBOL BREAKS: Do not place unescaped quotes, raw HTML tags, or illegal symbols inside node brackets.
 6. NO AMPERSAND SHORTHAND JOINS: Write individual 1-to-1 connections (e.g., A --> C and B --> C) instead of ampersand shorthand (A & B --> C).
 7. NO ASCII ART OR TIKZ: Never output ASCII box art (+---+) or raw LaTeX TikZ code (\`\\documentclass\`, \`\\begin{tikzpicture}\`). ALWAYS use standard Mermaid blocks (\`\`\`mermaid graph TD ... \`\`\`).
-8. EVERY NODE MUST HAVE A LABEL: Never output raw node IDs like A --> B without defining their descriptive labels. Every single node ID referenced in a connection MUST be defined with descriptive label text inside quoted brackets (e.g., A["Descriptive Label Text"] or A["Descriptive Label"] --> B["Another Label"]).`
+8. EVERY NODE MUST HAVE A LABEL: Never output raw node IDs like A --> B without defining their descriptive labels. Every single node ID referenced in a connection MUST be defined with descriptive label text inside quoted brackets (e.g., A["Descriptive Label Text"] or A["Descriptive Label"] --> B["Another Label"]).
+9. PREVENT ULTRA-WIDE HORIZONTAL SPANS: Never link more than 4 sibling nodes side-by-side on a single horizontal row. If a category has more than 4 items, stack them into vertical columns or sub-levels so all nodes remain large, clear, and readable on mobile screens.
+10. VERTICAL STACKING FOR PARALLEL PIPELINES: When explaining multiple parallel routes, strategies, or architectures (e.g. Lexicon vs ML vs Transformers), stack the routes vertically one below another instead of spreading 3+ branches horizontally across the page.
+
+GOLD-STANDARD MERMAID FEW-SHOT EXAMPLE:
+\`\`\`mermaid
+graph TD
+    A["Clean Token Sequence"] --> B1["Lexicon Engine"]
+    A --> B2["Statistical ML Pipeline"]
+    A --> B3["Modern NLP Engine"]
+    
+    B1 --> C1["Dictionary Lookup"]
+    B2 --> C2["TF-IDF Vector Space"]
+    B3 --> C3["Transformer Token Embeddings"]
+
+    C1 --> D["Final Classification Output"]
+    C2 --> D
+    C3 --> D
+\`\`\``
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols
@@ -293,16 +311,12 @@ When explaining, drawing, or providing a flowchart, system architecture, pipelin
                 headers["X-Title"] = "ChatterBot Dashboard";
             }
 
-            // Build model candidates for Gemini to handle custom preview strings gracefully
+            // Build model candidates for Gemini to handle preview and fallback models gracefully
             let modelCandidates = [model];
             if (provider === "gemini") {
-                if (model === "gemini-3.5-flash" || model === "gemini-3.1-flash-lite" || model === "gemini-flash-latest") {
-                    modelCandidates.push("gemini-2.0-flash", "gemini-1.5-flash");
-                } else if (model === "gemini-3.1-pro-preview" || model === "gemini-pro-latest") {
-                    modelCandidates.push("gemini-1.5-pro", "gemini-2.0-flash");
-                } else if (model.includes("gemma")) {
-                    modelCandidates.push("gemini-2.0-flash", "gemini-1.5-flash");
-                } else if (!["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"].includes(model)) {
+                if (model === "gemini-3.6-flash" || model === "gemini-3.5-flash-lite") {
+                    modelCandidates.push("gemini-2.0-flash", "gemini-2.0-flash-lite");
+                } else if (!["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro"].includes(model)) {
                     modelCandidates.push("gemini-2.0-flash");
                 }
             }
@@ -374,9 +388,10 @@ When explaining, drawing, or providing a flowchart, system architecture, pipelin
             });
         }
 
-        // Return answer to client along with usage tokens
+        // Return answer to client along with modelUsed and usage tokens
         return res.status(200).json({ 
             content: aiAnswer,
+            modelUsed: targetModel,
             usage: responsePayload.usage || null
         });
 

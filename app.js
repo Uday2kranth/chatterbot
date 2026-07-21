@@ -2488,6 +2488,57 @@ function setupChatHandlers() {
   sendBtn.addEventListener('click', submitPrompt);
 }
 
+// Helper to sanitize raw Mermaid code (expands & ampersands, double-quotes node labels, cleans invalid syntax)
+function sanitizeRawMermaidSyntax(mermaidCode) {
+  if (!mermaidCode) return '';
+  let lines = mermaidCode.split('\n');
+  let sanitizedLines = [];
+
+  lines.forEach(line => {
+    let trimmed = line.trim();
+    if (!trimmed) return;
+
+    if (trimmed.startsWith('graph') || trimmed.startsWith('flowchart') || trimmed.startsWith('subgraph') || trimmed === 'end' || trimmed.startsWith('%%') || trimmed.startsWith('style') || trimmed.startsWith('classDef') || trimmed.startsWith('class ') || trimmed.startsWith('linkStyle')) {
+      sanitizedLines.push(trimmed);
+      return;
+    }
+
+    // Expand ampersand multi-target connections like "B & C & D & E --> F" into individual "B --> F", "C --> F", etc.
+    if (trimmed.includes('&') && (trimmed.includes('-->') || trimmed.includes('---'))) {
+      const arrowOp = trimmed.includes('-->') ? '-->' : '---';
+      const parts = trimmed.split(new RegExp(`${arrowOp}(?:\\|([^|]+)\\|)?`));
+      if (parts.length >= 2) {
+        const leftSide = parts[0].trim();
+        const rightSide = parts[parts.length - 1].trim();
+        const labelText = parts[1] ? `|${parts[1].trim()}|` : '';
+
+        const leftNodes = leftSide.split('&').map(n => n.trim());
+        const rightNodes = rightSide.split('&').map(n => n.trim());
+
+        leftNodes.forEach(lNode => {
+          rightNodes.forEach(rNode => {
+            let connStr = `${lNode} ${arrowOp}${labelText} ${rNode}`;
+            connStr = connStr.replace(/([a-zA-Z0-9_]+)\s*\[\s*([^"\]]+?)\s*\]/g, (m, nId, lbl) => `${nId}["${lbl.replace(/"/g, "'")}"]`);
+            sanitizedLines.push(`  ${connStr}`);
+          });
+        });
+        return;
+      }
+    }
+
+    // Wrap unquoted node labels in double quotes
+    let cleanLine = trimmed.replace(/([a-zA-Z0-9_]+)\s*\[\s*([^"\]]+?)\s*\]/g, (match, nId, label) => {
+      if (label.startsWith('"') && label.endsWith('"')) return match;
+      const cleanLabel = label.replace(/"/g, "'");
+      return `${nId}["${cleanLabel}"]`;
+    });
+
+    sanitizedLines.push(`  ${cleanLine}`);
+  });
+
+  return sanitizedLines.join('\n');
+}
+
 // Helper to format Mermaid code into a clean linear sequence
 function formatMermaidToSimplifiedLinear(mermaidCode) {
   if (!mermaidCode) return '';
@@ -2745,7 +2796,8 @@ function renderMarkdownWithMath(text) {
   html = html.replace(/<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/gi, (match, lang, code) => {
     const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
     if (lang === 'mermaid' || cleanCode.trim().startsWith('graph') || cleanCode.trim().startsWith('flowchart')) {
-      return `<div class="mermaid-diagram-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${cleanCode}</div></div>`;
+      const sanitized = sanitizeRawMermaidSyntax(cleanCode);
+      return `<div class="mermaid-diagram-card" data-raw-code="${encodeURIComponent(sanitized)}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${sanitized}</div></div>`;
     }
     
     // Auto-detect ASCII flowchart blocks in older messages and wrap into 3-mode diagram cards

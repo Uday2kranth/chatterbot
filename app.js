@@ -2503,7 +2503,7 @@ function sanitizeRawMermaidSyntax(mermaidCode) {
       return;
     }
 
-    // Expand ampersand multi-target connections like "B & C & D & E --> F" into individual "B --> F", "C --> F", etc.
+    // Expand ampersand multi-target connections like "S1 & S2 & S3 --> I1" BEFORE quoting node labels
     if (trimmed.includes('&') && (trimmed.includes('-->') || trimmed.includes('---'))) {
       const arrowOp = trimmed.includes('-->') ? '-->' : '---';
       const parts = trimmed.split(new RegExp(`${arrowOp}(?:\\|([^|]+)\\|)?`));
@@ -2512,24 +2512,26 @@ function sanitizeRawMermaidSyntax(mermaidCode) {
         const rightSide = parts[parts.length - 1].trim();
         const labelText = parts[1] ? `|${parts[1].trim()}|` : '';
 
-        const leftNodes = leftSide.split('&').map(n => n.trim());
-        const rightNodes = rightSide.split('&').map(n => n.trim());
+        if (!leftSide.includes('[') && !rightSide.includes('[')) {
+          const leftNodes = leftSide.split('&').map(n => n.trim());
+          const rightNodes = rightSide.split('&').map(n => n.trim());
 
-        leftNodes.forEach(lNode => {
-          rightNodes.forEach(rNode => {
-            let connStr = `${lNode} ${arrowOp}${labelText} ${rNode}`;
-            connStr = connStr.replace(/([a-zA-Z0-9_]+)\s*\[\s*([^"\]]+?)\s*\]/g, (m, nId, lbl) => `${nId}["${lbl.replace(/"/g, "'")}"]`);
-            sanitizedLines.push(`  ${connStr}`);
-          });
-        });
-        return;
+          if (leftNodes.length > 1 || rightNodes.length > 1) {
+            leftNodes.forEach(lNode => {
+              rightNodes.forEach(rNode => {
+                sanitizedLines.push(`  ${lNode} ${arrowOp}${labelText} ${rNode}`);
+              });
+            });
+            return;
+          }
+        }
       }
     }
 
-    // Wrap unquoted node labels in double quotes
-    let cleanLine = trimmed.replace(/([a-zA-Z0-9_]+)\s*\[\s*([^"\]]+?)\s*\]/g, (match, nId, label) => {
+    // Wrap unquoted node labels in double quotes, handling multiline text
+    let cleanLine = trimmed.replace(/\b(?!(?:subgraph|graph|flowchart|class|style)\b)([a-zA-Z0-9_]+)\s*\[\s*([^"\]]+?)\s*\]/g, (match, nId, label) => {
       if (label.startsWith('"') && label.endsWith('"')) return match;
-      const cleanLabel = label.replace(/"/g, "'");
+      const cleanLabel = label.replace(/"/g, "'").replace(/\r?\n/g, ' ').replace(/<br\s*\/?>/gi, ' ');
       return `${nId}["${cleanLabel}"]`;
     });
 
@@ -2539,13 +2541,14 @@ function sanitizeRawMermaidSyntax(mermaidCode) {
   return sanitizedLines.join('\n');
 }
 
-// Helper to format Mermaid code into a clean linear sequence
+// Helper to format Mermaid code into a clean linear sequence (2-Pass Extractor)
 function formatMermaidToSimplifiedLinear(mermaidCode) {
   if (!mermaidCode) return '';
   const lines = mermaidCode.split('\n');
   const nodeMap = {};
   const mainSequence = [];
 
+  // Pass 1: Extract all node labels into nodeMap
   lines.forEach(line => {
     let trimmed = line.trim();
     if (!trimmed || 
@@ -2571,8 +2574,23 @@ function formatMermaidToSimplifiedLinear(mermaidCode) {
         .replace(/\n/g, ' ');
       nodeMap[m[1]] = cleanLabel;
     }
+  });
 
-    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
+  // Pass 2: Extract sequential connection flow
+  lines.forEach(line => {
+    let trimmed = line.trim();
+    if (!trimmed || 
+        trimmed.startsWith('graph') || 
+        trimmed.startsWith('flowchart') || 
+        trimmed.startsWith('subgraph') || 
+        trimmed.startsWith('%%') || 
+        trimmed.startsWith('style') || 
+        trimmed.startsWith('classDef') || 
+        trimmed.startsWith('class ') || 
+        trimmed.startsWith('linkStyle') || 
+        trimmed === 'end') return;
+
+    const connMatch = trimmed.match(/([a-zA-Z0-9_]+)(?:\s*[\(\[\{]{1,2}[^\]\)\}]*[\)\]\}]{1,2})?\s*--+>(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)/);
     if (connMatch) {
       const from = connMatch[1];
       const to = connMatch[3];

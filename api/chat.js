@@ -296,6 +296,8 @@ graph TD
         let lastStatus = 400;
         let responsePayload = null;
 
+        let successfulModel = model;
+
         for (let i = 0; i < keys.length; i++) {
             const currentKey = keys[i];
             let fetchEndpoint = endpoint;
@@ -334,6 +336,7 @@ graph TD
 
                     if (response.ok) {
                         responsePayload = await response.json();
+                        successfulModel = targetModel;
                         break; // Success! Exit key & candidate loop.
                     }
 
@@ -391,7 +394,7 @@ graph TD
         // Return answer to client along with modelUsed and usage tokens
         return res.status(200).json({ 
             content: aiAnswer,
-            modelUsed: targetModel,
+            modelUsed: successfulModel,
             usage: responsePayload.usage || null
         });
 

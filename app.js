@@ -1337,11 +1337,61 @@ function setupSettingsDrawer() {
       const icon = btn.querySelector('i');
       if (input && input.type === 'password') {
         input.type = 'text';
-        icon.className = 'fa-solid fa-eye';
+        if (icon) icon.className = 'fa-solid fa-eye';
       } else if (input) {
         input.type = 'password';
-        icon.className = 'fa-solid fa-eye-slash';
+        if (icon) icon.className = 'fa-solid fa-eye-slash';
       }
+    });
+  });
+
+  // Individual Key Slot Clear / Delete Buttons
+  document.querySelectorAll('.clear-key-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (input) {
+        input.value = '';
+        showToast('Key cleared from slot.', 'info');
+      }
+    });
+  });
+
+  // Provider Level "Clear All Keys" Buttons
+  document.querySelectorAll('.provider-clear-all-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prefix = btn.getAttribute('data-provider-prefix');
+      if (!prefix) return;
+      const inputs = document.querySelectorAll(`[id^="${prefix}-key"]`);
+      inputs.forEach(input => { input.value = ''; });
+      showToast(`Cleared all keys for ${prefix.toUpperCase()}`, 'info');
+    });
+  });
+
+  // Provider Level "Show/Hide All Keys" Buttons
+  document.querySelectorAll('.provider-toggle-all-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prefix = btn.getAttribute('data-provider-prefix');
+      if (!prefix) return;
+      const inputs = document.querySelectorAll(`[id^="${prefix}-key"]`);
+      const icon = btn.querySelector('i');
+      const isShowing = btn.getAttribute('data-showing') === 'true';
+
+      inputs.forEach(input => {
+        input.type = isShowing ? 'password' : 'text';
+      });
+
+      btn.setAttribute('data-showing', isShowing ? 'false' : 'true');
+      btn.innerHTML = isShowing ? `<i class="fa-solid fa-eye"></i> Show All` : `<i class="fa-solid fa-eye-slash"></i> Mask All`;
+      
+      // Update individual eye icons to match
+      inputs.forEach(input => {
+        const individualBtn = document.querySelector(`.toggle-pwd-btn[data-target="${input.id}"]`);
+        if (individualBtn) {
+          const indIcon = individualBtn.querySelector('i');
+          if (indIcon) indIcon.className = isShowing ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        }
+      });
     });
   });
 
@@ -1484,39 +1534,44 @@ function setupSettingsDrawer() {
            if (keysObj.sambanova !== undefined) localStorage.setItem('chatterbot_key_sambanova', keysObj.sambanova || '');
            if (keysObj.nararouter !== undefined) localStorage.setItem('chatterbot_key_nararouter', keysObj.nararouter || '');
            if (keysObj.gemini !== undefined) {
-            if (Array.isArray(keysObj.gemini)) {
-              keysObj.gemini.forEach((key, idx) => {
-                localStorage.setItem(`chatterbot_key_gemini_${idx + 1}`, key || '');
-              });
-            } else {
-              localStorage.setItem('chatterbot_key_gemini', keysObj.gemini || '');
-              localStorage.setItem('chatterbot_key_gemini_1', keysObj.gemini || '');
-            }
-          }
-          if (keysObj.local_endpoint !== undefined) localStorage.setItem('chatterbot_local_endpoint', keysObj.local_endpoint || '');
-          if (keysObj.local_models !== undefined) localStorage.setItem('chatterbot_local_models', keysObj.local_models || '');
-          if (keysObj.local_key !== undefined) localStorage.setItem('chatterbot_local_key', keysObj.local_key || '');
-          
-          if (Array.isArray(keysObj.openrouter)) {
-            keysObj.openrouter.forEach((key, idx) => {
-              localStorage.setItem(`chatterbot_key_openrouter_${idx + 1}`, key || '');
-            });
-          }
-          if (Array.isArray(keysObj.nvidia)) {
-            keysObj.nvidia.forEach((key, idx) => {
-              localStorage.setItem(`chatterbot_key_nvidia_${idx + 1}`, key || '');
-            });
-          }
-          if (Array.isArray(keysObj.mistral)) {
-            keysObj.mistral.forEach((key, idx) => {
-              localStorage.setItem(`chatterbot_key_mistral_${idx + 1}`, key || '');
-            });
-          }
-          if (Array.isArray(keysObj.groq)) {
-            keysObj.groq.forEach((key, idx) => {
-              localStorage.setItem(`chatterbot_key_groq_${idx + 1}`, key || '');
-            });
-          }
+             for (let i = 1; i <= 7; i++) localStorage.setItem(`chatterbot_key_gemini_${i}`, '');
+             if (Array.isArray(keysObj.gemini)) {
+               keysObj.gemini.forEach((key, idx) => {
+                 if (idx < 7) localStorage.setItem(`chatterbot_key_gemini_${idx + 1}`, key || '');
+               });
+             } else {
+               localStorage.setItem('chatterbot_key_gemini', keysObj.gemini || '');
+               localStorage.setItem('chatterbot_key_gemini_1', keysObj.gemini || '');
+             }
+           }
+           if (keysObj.local_endpoint !== undefined) localStorage.setItem('chatterbot_local_endpoint', keysObj.local_endpoint || '');
+           if (keysObj.local_models !== undefined) localStorage.setItem('chatterbot_local_models', keysObj.local_models || '');
+           if (keysObj.local_key !== undefined) localStorage.setItem('chatterbot_local_key', keysObj.local_key || '');
+           
+           if (Array.isArray(keysObj.openrouter)) {
+             for (let i = 1; i <= 5; i++) localStorage.setItem(`chatterbot_key_openrouter_${i}`, '');
+             keysObj.openrouter.forEach((key, idx) => {
+               if (idx < 5) localStorage.setItem(`chatterbot_key_openrouter_${idx + 1}`, key || '');
+             });
+           }
+           if (Array.isArray(keysObj.nvidia)) {
+             for (let i = 1; i <= 5; i++) localStorage.setItem(`chatterbot_key_nvidia_${i}`, '');
+             keysObj.nvidia.forEach((key, idx) => {
+               if (idx < 5) localStorage.setItem(`chatterbot_key_nvidia_${idx + 1}`, key || '');
+             });
+           }
+           if (Array.isArray(keysObj.mistral)) {
+             for (let i = 1; i <= 3; i++) localStorage.setItem(`chatterbot_key_mistral_${i}`, '');
+             keysObj.mistral.forEach((key, idx) => {
+               if (idx < 3) localStorage.setItem(`chatterbot_key_mistral_${idx + 1}`, key || '');
+             });
+           }
+           if (Array.isArray(keysObj.groq)) {
+             for (let i = 1; i <= 3; i++) localStorage.setItem(`chatterbot_key_groq_${i}`, '');
+             keysObj.groq.forEach((key, idx) => {
+               if (idx < 3) localStorage.setItem(`chatterbot_key_groq_${idx + 1}`, key || '');
+             });
+           }
 
           // Reload inputs in the view
           loadStoredAPIKeys();
@@ -3444,7 +3499,7 @@ function renderMessages(messages) {
       modelBadge.style.gap = '4px';
       modelBadge.style.fontWeight = '600';
 
-      const rawModel = msg.modelUsed || (typeof activeChatId !== 'undefined' && chatSessions[activeChatId] ? chatSessions[activeChatId].model : '') || 'AI Assistant';
+      const rawModel = msg.modelUsed || msg.model || 'AI Response';
       modelBadge.innerHTML = `<i class="fa-solid fa-microchip" style="color:var(--accent-secondary);"></i> <span>${rawModel}</span>`;
       actions.insertBefore(modelBadge, actions.firstChild);
 
@@ -8016,3 +8071,154 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchCommunityBenchmarks();
 });
 
+// ── WHY MODEL 4 U Data & Render Handler ──
+const WHY_MODEL_4U_DATA = [
+  {
+    name: "Gemini 3.5 Flash-Lite",
+    provider: "Google Gemini",
+    category: "12marks",
+    tpm: "250,000 TPM",
+    vision: true,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "🔥 Best for 12-Mark Proofs",
+    desc: "250k Tokens Per Minute limit. Effortlessly generates 15k+ token 12-mark exam proofs, Euler & CRT mathematical derivations, and vertical Mermaid diagrams."
+  },
+  {
+    name: "Gemini 3.6 Flash",
+    provider: "Google Gemini",
+    category: "12marks",
+    tpm: "250,000 TPM",
+    vision: true,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "🔥 Best for 12-Mark Proofs & Web Search",
+    desc: "Ultra-fast flagship model. 250k TPM limit with native Web Grounding for direct URL diagram embedding."
+  },
+  {
+    name: "Mistral Large",
+    provider: "Mistral AI / NaraRouter",
+    category: "12marks",
+    tpm: "1,000,000 Context",
+    vision: false,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "🔥 Flagship 12-Mark Reasoning",
+    desc: "1 Million token context capacity. Outstanding step-by-step mathematical derivations and clean vertical flowcharts."
+  },
+  {
+    name: "SambaNova Llama 3.3 70B",
+    provider: "SambaNova Cloud",
+    category: "12marks",
+    tpm: "High Throughput",
+    vision: false,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "🔥 High-Speed 12-Mark Proofs",
+    desc: "Ultra-high speed 70B parameter engine. Generates full multi-page exam answers in under 3 seconds."
+  },
+  {
+    name: "Gemini 3.1 Flash-Lite",
+    provider: "Google Gemini",
+    category: "2marks",
+    tpm: "250,000 TPM",
+    vision: false,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "⚡ Best for 2-Mark Definitions",
+    desc: "Sub-second response latency. Delivers concise 2-mark definitions and key jargon summaries instantly."
+  },
+  {
+    name: "Groq GPT-OSS 20B",
+    provider: "Groq Console",
+    category: "2marks",
+    tpm: "8,000 TPM Limit ⚠️",
+    vision: false,
+    mermaid: false,
+    tpmWarning: true,
+    badge: "⚡ Fast 2-Mark Short Answer",
+    desc: "Lightning fast sub-second inference. Restricted to 8,000 TPM limit (best for 2-mark short questions; avoid for 12-mark proofs)."
+  },
+  {
+    name: "OpenRouter Free Automated Router",
+    provider: "OpenRouter",
+    category: "2marks",
+    tpm: "200 RPD Free Quota",
+    vision: true,
+    mermaid: true,
+    tpmWarning: false,
+    badge: "⚡ Free Automated 2-Mark Choice",
+    desc: "Auto-routes to active free models. Excellent for quick 2-mark definitions and study queries."
+  }
+];
+
+function renderWhyModel4UCards(category = '2marks') {
+  const container = document.getElementById('why-model-cards-container');
+  if (!container) return;
+
+  const filtered = WHY_MODEL_4U_DATA.filter(m => m.category === category || category === 'all');
+  
+  container.innerHTML = filtered.map(m => `
+    <div style="background:var(--bg-tertiary); border:1px solid ${m.tpmWarning ? 'var(--error-color)' : 'var(--border-color)'}; border-radius:14px; padding:18px; display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); transition:all 0.2s ease;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">${m.provider}</span>
+          <h4 style="margin:2px 0 0 0; font-size:1.05rem; color:var(--text-primary); font-weight:800;">${m.name}</h4>
+        </div>
+        <span style="font-size:0.72rem; padding:4px 8px; border-radius:20px; font-weight:700; background:${m.category === '12marks' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)'}; color:${m.category === '12marks' ? '#ef4444' : '#3b82f6'};">
+          ${m.badge}
+        </span>
+      </div>
+
+      <p style="margin:0; font-size:0.83rem; color:var(--text-secondary); line-height:1.45;">${m.desc}</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+        <span style="font-size:0.75rem; padding:3px 8px; border-radius:6px; background:var(--bg-secondary); border:1px solid var(--border-color); color:${m.tpmWarning ? 'var(--error-color)' : 'var(--accent-primary)'}; font-weight:600;">
+          <i class="fa-solid fa-bolt"></i> ${m.tpm}
+        </span>
+        ${m.mermaid ? `<span style="font-size:0.75rem; padding:3px 8px; border-radius:6px; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--accent-secondary); font-weight:600;"><i class="fa-solid fa-diagram-project"></i> Mermaid Diagrams</span>` : ''}
+        ${m.vision ? `<span style="font-size:0.75rem; padding:3px 8px; border-radius:6px; background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--accent-secondary); font-weight:600;"><i class="fa-solid fa-eye"></i> Vision / OCR</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Bind Why Model 4 U Listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const whyModelBtn = document.getElementById('why-model-4u-btn');
+  const whyModelModal = document.getElementById('why-model-4u-modal');
+  const closeWhyModelBtn = document.getElementById('close-why-model-4u-btn');
+  const tab2Marks = document.getElementById('why-model-tab-2marks');
+  const tab12Marks = document.getElementById('why-model-tab-12marks');
+
+  if (whyModelBtn && whyModelModal) {
+    whyModelBtn.addEventListener('click', () => {
+      whyModelModal.style.display = 'flex';
+      renderWhyModel4UCards('2marks');
+    });
+  }
+
+  if (closeWhyModelBtn && whyModelModal) {
+    closeWhyModelBtn.addEventListener('click', () => {
+      whyModelModal.style.display = 'none';
+    });
+  }
+
+  if (tab2Marks && tab12Marks) {
+    tab2Marks.addEventListener('click', () => {
+      tab2Marks.style.background = 'var(--accent-primary)';
+      tab2Marks.style.color = 'white';
+      tab12Marks.style.background = 'transparent';
+      tab12Marks.style.color = 'var(--text-secondary)';
+      renderWhyModel4UCards('2marks');
+    });
+
+    tab12Marks.addEventListener('click', () => {
+      tab12Marks.style.background = 'var(--accent-primary)';
+      tab12Marks.style.color = 'white';
+      tab2Marks.style.background = 'transparent';
+      tab2Marks.style.color = 'var(--text-secondary)';
+      renderWhyModel4UCards('12marks');
+    });
+  }
+});

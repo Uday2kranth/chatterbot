@@ -6415,16 +6415,40 @@ function exportChatToPDF() {
   htmlContent += `
       </div>
       <script>
-        window.onload = function() {
+        window.onload = async function() {
           if (window.mermaid) {
             try {
-              window.mermaid.initialize({ startOnLoad: true, theme: 'default' });
-              window.mermaid.run();
+              window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
             } catch(e){}
+
+            const mermaidEls = document.querySelectorAll('.mermaid');
+            for (let idx = 0; idx < mermaidEls.length; idx++) {
+              const el = mermaidEls[idx];
+              let rawCode = el.getAttribute('data-raw-code') || el.textContent || '';
+              if (rawCode.includes('%0A') || rawCode.includes('%20')) {
+                try { rawCode = decodeURIComponent(rawCode); } catch(e){}
+              }
+
+              const renderId = 'pdf-svg-' + Date.now() + '-' + idx;
+              try {
+                const { svg } = await window.mermaid.render(renderId, rawCode);
+                el.innerHTML = svg;
+              } catch (err1) {
+                console.warn('PDF Stage 1 render warning for diagram ' + idx + ', executing Stage 2 fallback:', err1);
+                try {
+                  const fbCode = rawCode.split('\\n').filter(function(l) { return !l.trim().startsWith('direction '); }).join('\\n');
+                  const fbRenderId = 'pdf-svg-fb-' + Date.now() + '-' + idx;
+                  const { svg: fbSvg } = await window.mermaid.render(fbRenderId, fbCode);
+                  el.innerHTML = fbSvg;
+                } catch (err2) {
+                  console.error('All PDF Mermaid rendering fallbacks failed:', err2);
+                }
+              }
+            }
           }
           setTimeout(function() {
             window.print();
-          }, 700);
+          }, 800);
         }
       </script>
     </body>
@@ -6908,16 +6932,40 @@ function exportMessageToPDF(rawContent, msgIdx) {
       </div>
       <div class="content">${targetContentHTML}</div>
       <script>
-        window.onload = function() {
+        window.onload = async function() {
           if (window.mermaid) {
             try {
-              window.mermaid.initialize({ startOnLoad: true, theme: 'default' });
-              window.mermaid.run();
+              window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
             } catch(e){}
+
+            const mermaidEls = document.querySelectorAll('.mermaid');
+            for (let idx = 0; idx < mermaidEls.length; idx++) {
+              const el = mermaidEls[idx];
+              let rawCode = el.getAttribute('data-raw-code') || el.textContent || '';
+              if (rawCode.includes('%0A') || rawCode.includes('%20')) {
+                try { rawCode = decodeURIComponent(rawCode); } catch(e){}
+              }
+
+              const renderId = 'pdf-msg-svg-' + Date.now() + '-' + idx;
+              try {
+                const { svg } = await window.mermaid.render(renderId, rawCode);
+                el.innerHTML = svg;
+              } catch (err1) {
+                console.warn('PDF Stage 1 render warning for diagram ' + idx + ', executing Stage 2 fallback:', err1);
+                try {
+                  const fbCode = rawCode.split('\\n').filter(function(l) { return !l.trim().startsWith('direction '); }).join('\\n');
+                  const fbRenderId = 'pdf-msg-svg-fb-' + Date.now() + '-' + idx;
+                  const { svg: fbSvg } = await window.mermaid.render(fbRenderId, fbCode);
+                  el.innerHTML = fbSvg;
+                } catch (err2) {
+                  console.error('All PDF Mermaid rendering fallbacks failed:', err2);
+                }
+              }
+            }
           }
           setTimeout(function() {
             window.print();
-          }, 700);
+          }, 800);
         };
       </script>
     </body>

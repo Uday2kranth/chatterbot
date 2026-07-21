@@ -3328,11 +3328,11 @@ function renderMessages(messages) {
     container.appendChild(msgElement);
   });
 
-  // Trigger Mermaid.js vector diagram rendering with adaptive Light/Dark theme contrast
+  // Trigger Mermaid.js vector diagram rendering with adaptive Light/Dark theme contrast and per-diagram fallback isolation
   setTimeout(() => {
     if (window.mermaid) {
+      const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
       try {
-        const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
         window.mermaid.initialize({
           startOnLoad: false,
           theme: isDarkMode ? 'dark' : 'default',
@@ -3345,10 +3345,36 @@ function renderMessages(messages) {
             clusterBorder: isDarkMode ? '#334155' : '#cbd5e1'
           }
         });
-        window.mermaid.run({ querySelector: '.mermaid' });
-      } catch (e) {
-        console.warn('Mermaid rendering warning:', e);
-      }
+      } catch (e) {}
+
+      // Render each full vector diagram independently to prevent one broken diagram from blocking others
+      document.querySelectorAll('.mermaid-full, .mermaid:not(.mermaid-simple)').forEach(async (el, idx) => {
+        if (el.getAttribute('data-rendered') === 'true') return;
+        let rawCode = el.getAttribute('data-raw-code') || el.textContent || '';
+        if (rawCode.includes('%0A') || rawCode.includes('%20')) {
+          try { rawCode = decodeURIComponent(rawCode); } catch(e){}
+        }
+
+        const sanitizedCode = sanitizeRawMermaidSyntax(rawCode);
+        const renderId = `mermaid-svg-full-${Date.now()}-${idx}`;
+
+        try {
+          const { svg } = await window.mermaid.render(renderId, sanitizedCode);
+          el.innerHTML = svg;
+          el.setAttribute('data-rendered', 'true');
+        } catch (err1) {
+          console.warn(`Mermaid render failed for diagram ${idx}, applying Stage 2 linear fallback:`, err1);
+          try {
+            const fallbackCode = formatMermaidToSimplifiedLinear(sanitizedCode);
+            const fbRenderId = `mermaid-svg-fb-${Date.now()}-${idx}`;
+            const { svg: fbSvg } = await window.mermaid.render(fbRenderId, fallbackCode);
+            el.innerHTML = fbSvg;
+            el.setAttribute('data-rendered', 'true');
+          } catch (err2) {
+            console.error('All Mermaid fallbacks failed:', err2);
+          }
+        }
+      });
     }
 
     // Attach Interactive 3-Mode Diagram View Toggle Toolbar
@@ -3359,7 +3385,11 @@ function renderMessages(messages) {
       if (!mermaidElement) return;
 
       mermaidElement.classList.add('mermaid-full');
-      const rawCode = card.getAttribute('data-raw-code') || mermaidElement.getAttribute('data-raw-code') || mermaidElement.textContent;
+      let rawCode = card.getAttribute('data-raw-code') || mermaidElement.getAttribute('data-raw-code') || mermaidElement.textContent;
+      if (rawCode.includes('%0A') || rawCode.includes('%20')) {
+        try { rawCode = decodeURIComponent(rawCode); } catch(e){}
+      }
+
       if (!card.getAttribute('data-raw-code')) {
         card.setAttribute('data-raw-code', rawCode);
       }
@@ -3426,7 +3456,7 @@ function renderMessages(messages) {
 
       let simpleRendered = false;
 
-      const setMode = (mode) => {
+      const setMode = async (mode) => {
         card.setAttribute('data-active-mode', mode);
         btnFull.classList.toggle('active', mode === 'full');
         btnSimple.classList.toggle('active', mode === 'simple');
@@ -3442,9 +3472,14 @@ function renderMessages(messages) {
           titleLabel.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>Clean Linear Flow</span>`;
           if (!simpleRendered && window.mermaid) {
             try {
-              window.mermaid.run({ nodes: [simpleContainer] });
+              const renderIdSimple = `mermaid-svg-simple-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+              const { svg: simpleSvg } = await window.mermaid.render(renderIdSimple, simpleMermaidCode);
+              simpleContainer.innerHTML = simpleSvg;
               simpleRendered = true;
-            } catch(e){}
+            } catch(e) {
+              console.warn('Clean linear rendering warning, using fallback text:', e);
+              simpleContainer.innerHTML = `<pre style="font-family:monospace; font-size:0.85rem; padding:12px; background:var(--bg-secondary); border-radius:6px;">${simpleMermaidCode}</pre>`;
+            }
           }
         } else {
           titleLabel.innerHTML = `<i class="fa-solid fa-code"></i> <span>ASCII Text Schema</span>`;

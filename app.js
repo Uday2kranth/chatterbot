@@ -2498,6 +2498,9 @@ function sanitizeRawMermaidSyntax(mermaidCode) {
     let trimmed = line.trim();
     if (!trimmed) return;
 
+    // Strip direction statements (e.g. direction TB, direction LR) inside subgraphs as they crash Mermaid 10.9.6
+    if (trimmed.startsWith('direction ')) return;
+
     if (trimmed.startsWith('graph') || trimmed.startsWith('flowchart') || trimmed.startsWith('subgraph') || trimmed === 'end' || trimmed.startsWith('%%') || trimmed.startsWith('style') || trimmed.startsWith('classDef') || trimmed.startsWith('class ') || trimmed.startsWith('linkStyle')) {
       sanitizedLines.push(trimmed);
       return;

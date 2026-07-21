@@ -236,15 +236,11 @@ STRICT CITATION & FORMATTING DIRECTIVES:
 ${imageContext}
 
 STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
-1. DO NOT draw ASCII text art or text-arrow schemas inside raw code blocks.
-2. You MUST embed verified image URLs using Markdown syntax AND provide a direct clickable source link right under the image:
+1. CITATIONS VS DIAGRAM IMAGES: Text citations (e.g. [1] [Article Title](url)) are allowed in answers and references. However, inside image tags ![Diagram Description](image_url), ONLY use direct image file URLs (.png, .jpg, .jpeg, .webp, .svg). NEVER place a general webpage HTML URL inside an image tag ![...](url).
+2. DIRECT IMAGE EMBEDDING: If a verified direct image file URL is available, embed it using:
    ![Diagram Description](verified_image_url)
    🔗 [Click to Open Full-Resolution Diagram Image](verified_image_url)
-3. For architectural flowcharts, trees, or process models, output a native Mermaid.js diagram block:
-\`\`\`mermaid
-graph TD
-  A[Layer / Stage 1] --> B[Layer / Stage 2]
-\`\`\``
+3. MERMAID FALLBACK: If no direct image file link is available, immediately fall back to generating a native top-to-bottom Mermaid.js diagram block (```mermaid\ngraph TD\n...```).`
         });
     }
 

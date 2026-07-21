@@ -2083,15 +2083,22 @@ async function loadChatSessions() {
   const savedActiveId = localStorage.getItem(`chatterbot_active_chat_${currentUser}`);
   
   const sessionIds = Object.keys(chatSessions).filter(id => id !== 'api_keys_storage' && id !== 'token_tracker_storage' && id !== 'chat_settings_storage');
+  
   if (paramSessionId && chatSessions[paramSessionId]) {
     loadChatSession(paramSessionId, false);
-  } else if (savedActiveId && chatSessions[savedActiveId]) {
-    loadChatSession(savedActiveId, false);
-  } else if (sessionIds.length > 0) {
-    sessionIds.sort((a, b) => chatSessions[b].timestamp - chatSessions[a].timestamp);
-    loadChatSession(sessionIds[0], false);
   } else {
-    createNewChatSession("Study Session 1", true);
+    if (paramSessionId && !chatSessions[paramSessionId]) {
+      // Clean invalid session ID from URL to prevent page loading stalls
+      try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e){}
+    }
+    if (savedActiveId && chatSessions[savedActiveId]) {
+      loadChatSession(savedActiveId, false);
+    } else if (sessionIds.length > 0) {
+      sessionIds.sort((a, b) => (chatSessions[b].timestamp || 0) - (chatSessions[a].timestamp || 0));
+      loadChatSession(sessionIds[0], false);
+    } else {
+      createNewChatSession("Study Session 1", true);
+    }
   }
 
   // Restore active sub-view across page refresh

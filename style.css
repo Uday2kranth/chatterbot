@@ -2431,18 +2431,38 @@ body[data-theme="light"] .toggle-switch-container,
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* ── Hide Rogue Mermaid Error Elements Appended to Body ── */
+/* ── Hide Rogue Mermaid Error Elements Appended to Body (Allows getBBox layout calculations) ── */
 body > div[id^="dmermaid"],
-body > svg[id^="mermaid"],
-[id^="dmermaid"] {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  width: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
+body > svg[id^="mermaid"] {
   position: absolute !important;
   left: -9999px !important;
   top: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 800px !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+/* ── Responsive adjustments for Diagram Card Toolbar on Mobile ── */
+@media (max-width: 768px) {
+  .diagram-card-toolbar {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 8px !important;
+  }
+  
+  .ios-glass-btn-group {
+    width: 100% !important;
+    justify-content: space-around !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .ios-glass-btn {
+    padding: 6px 8px !important;
+    font-size: 0.72rem !important;
+    justify-content: center !important;
+    flex: 1 !important;
+  }
 }

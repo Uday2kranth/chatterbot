@@ -5338,13 +5338,13 @@ function renderPromptsLibrary() {
       if (currentMscFilter === 'aakash') return p.id.includes('aakash') || p.contributor === 'Akash' || p.category === 'aakash';
       if (currentMscFilter === 'msc_core') return p.id.includes('msc_core') || p.category === 'msc_core';
       
-      // Subject filtering
-      if (currentMscFilter === 'cn') return p.id.includes('cn_') || p.id.includes('network');
-      if (currentMscFilter === 'cns') return p.id.includes('crypto');
-      if (currentMscFilter === 'dbms') return p.id.includes('datamining') || p.id.includes('dbms');
-      if (currentMscFilter === 'os') return p.id.includes('os') || p.id.includes('nlp');
-      if (currentMscFilter === 'dsa') return p.id.includes('dsa') || p.id.includes('algo');
-      if (currentMscFilter === 'ml') return p.id.includes('vision') || p.id.includes('ml');
+      // Subject paper filtering
+      if (currentMscFilter === 'crypto') return p.id.includes('crypto');
+      if (currentMscFilter === 'datamining') return p.id.includes('datamining');
+      if (currentMscFilter === 'sentiment') return p.id.includes('sentiment');
+      if (currentMscFilter === 'vision') return p.id.includes('vision');
+      if (currentMscFilter === 'webmining') return p.id.includes('webmining');
+      if (currentMscFilter === 'scalable') return p.id.includes('scalable');
       
       return true;
     }

@@ -5266,8 +5266,8 @@ function renderPromptsLibrary() {
   const mscSelect = document.getElementById('msc-prompts-select');
 
   // Role Protection: Guest role users are restricted from accessing MSc Data Science Exam Prep & Special Collections
-  const userRole = (typeof currentUser !== 'undefined' && currentUser) ? (userRoles[currentUser] || 'guest') : 'guest';
-  const isGuestUser = userRole === 'guest';
+  const activeRole = (typeof userRole !== 'undefined' && userRole) ? userRole : 'guest';
+  const isGuestUser = activeRole === 'guest';
 
   if (isGuestUser) {
     if (tabMsc) tabMsc.style.display = 'none';

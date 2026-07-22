@@ -6262,6 +6262,28 @@ function showCustomContextMenu(x, y, sessionId, sessionTitle) {
   }, 0);
 }
 
+// Helper to generate dynamic, safe filenames from question/response starting text
+function getExportTitleFromMsg(rawContent, msgIdx) {
+  let sourceText = '';
+  const container = document.getElementById('messages-container');
+  if (container && msgIdx !== undefined && msgIdx > 0) {
+    const userEl = container.querySelector(`[data-index="${msgIdx - 1}"]`);
+    if (userEl) {
+      const contentEl = userEl.querySelector('.message-content, .user-message-content, .content');
+      sourceText = contentEl ? contentEl.textContent : userEl.textContent;
+    }
+  }
+  if (!sourceText) sourceText = rawContent || '';
+  
+  // Clean role prefixes if concatenated (e.g. User, Assistant)
+  sourceText = sourceText.replace(/^(User|Assistant|👤|🤖)\s*/gi, '');
+  
+  let cleaned = sourceText.replace(/[\#\*\_\`\~\>\[\]\(\)]/g, '').replace(/\s+/g, ' ').trim();
+  let snippet = cleaned.substring(0, 42).trim();
+  let safeTitle = snippet.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_');
+  return safeTitle || 'ChatterBot_Export';
+}
+
 // ── Export User Question + AI Response Pair to PNG Image ──
 function exportMessagePairToImage(idx) {
   const container = document.getElementById('messages-container');
@@ -6284,14 +6306,14 @@ function exportMessagePairToImage(idx) {
   const bubbleUser = styles.getPropertyValue('--bubble-user').trim() || '#121216';
   const bubbleAi = styles.getPropertyValue('--bubble-ai').trim() || '#0a0a0c';
 
-  // Create an offscreen wrapper styled precisely like the chat window
+  // Create an offscreen wrapper styled precisely like widescreen desktop paper layout (880px wide)
   const exportArea = document.createElement('div');
   exportArea.className = 'image-export-wrapper';
   exportArea.style.position = 'fixed';
   exportArea.style.top = '-9999px';
   exportArea.style.left = '-9999px';
-  exportArea.style.width = '680px';
-  exportArea.style.padding = '30px 24px';
+  exportArea.style.width = '880px';
+  exportArea.style.padding = '32px 28px';
   exportArea.style.background = bgPrimary; // use explicit computed solid color
   exportArea.style.color = textPrimary;
   exportArea.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -6367,7 +6389,7 @@ function exportMessagePairToImage(idx) {
 
   document.body.appendChild(exportArea);
 
-  showToast('Generating response image...', 'info');
+  showToast('Generating widescreen response image...', 'info');
 
   // Generate canvas with html2canvas
   if (window.html2canvas) {
@@ -6385,27 +6407,39 @@ function exportMessagePairToImage(idx) {
           clonedExportArea.style.top = '0';
           clonedExportArea.style.left = '0';
           clonedExportArea.style.margin = '0';
+          clonedExportArea.style.width = '880px';
         }
         
-        // Force all messages in the clone to have full opacity and disable fade-in animations/transitions
-        // to prevent html2canvas from capturing them mid-animation (which makes the text faint/whitish)
+        // Widen all cloned messages to stretch 100% across the 880px export canvas (matching PDF layout)
         const clonedMessages = clonedDoc.querySelectorAll('.message');
         clonedMessages.forEach(msg => {
           msg.style.opacity = '1';
           msg.style.transform = 'none';
           msg.style.animation = 'none';
           msg.style.transition = 'none';
+          msg.style.width = '100%';
+          msg.style.maxWidth = '100%';
+          msg.style.margin = '0 0 16px 0';
+          msg.style.boxSizing = 'border-box';
+        });
+        
+        const clonedBubbles = clonedDoc.querySelectorAll('.message-content, .user-message-content, .assistant-message-content');
+        clonedBubbles.forEach(b => {
+          b.style.width = '100%';
+          b.style.maxWidth = '100%';
+          b.style.boxSizing = 'border-box';
         });
       }
     }).then(canvas => {
+      const dynamicFilename = `${getExportTitleFromMsg(aiEl ? aiEl.textContent : '', idx)}.png`;
       const link = document.createElement('a');
-      link.download = `ChatterBot_${Date.now()}.png`;
+      link.download = dynamicFilename;
       link.href = canvas.toDataURL('image/png');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       exportArea.remove();
-      showToast('Image downloaded successfully!', 'success');
+      showToast(`Image downloaded as "${dynamicFilename}"!`, 'success');
     }).catch(err => {
       console.error('html2canvas error:', err);
       exportArea.remove();
@@ -6540,8 +6574,8 @@ function emailMessagePairAsImage(idx) {
   exportArea.style.position = 'fixed';
   exportArea.style.top = '-9999px';
   exportArea.style.left = '-9999px';
-  exportArea.style.width = '680px';
-  exportArea.style.padding = '30px 24px';
+  exportArea.style.width = '880px';
+  exportArea.style.padding = '32px 28px';
   exportArea.style.background = bgPrimary;
   exportArea.style.color = textPrimary;
   exportArea.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -6626,6 +6660,7 @@ function emailMessagePairAsImage(idx) {
           clonedExportArea.style.top = '0';
           clonedExportArea.style.left = '0';
           clonedExportArea.style.margin = '0';
+          clonedExportArea.style.width = '880px';
         }
         const clonedMessages = clonedDoc.querySelectorAll('.message');
         clonedMessages.forEach(msg => {
@@ -6633,6 +6668,16 @@ function emailMessagePairAsImage(idx) {
           msg.style.transform = 'none';
           msg.style.animation = 'none';
           msg.style.transition = 'none';
+          msg.style.width = '100%';
+          msg.style.maxWidth = '100%';
+          msg.style.margin = '0 0 16px 0';
+          msg.style.boxSizing = 'border-box';
+        });
+        const clonedBubbles = clonedDoc.querySelectorAll('.message-content, .user-message-content, .assistant-message-content');
+        clonedBubbles.forEach(b => {
+          b.style.width = '100%';
+          b.style.maxWidth = '100%';
+          b.style.boxSizing = 'border-box';
         });
       }
     }).then(canvas => {
@@ -7359,16 +7404,19 @@ async function exportMessageToPDF(rawContent, msgIdx) {
     targetContentHTML = renderMarkdownWithMath(rawContent);
   }
 
+  const dynamicDocTitle = getExportTitleFromMsg(rawContent, msgIdx);
+  const displayDocTitle = dynamicDocTitle.replace(/_/g, ' ');
+
   let htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Message PDF Export</title>
+      <title>${dynamicDocTitle}</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #1e293b; line-height: 1.6; background: #ffffff; width: 100%; box-sizing: border-box; }
         .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; }
-        .title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #0f172a; }
+        .title { font-size: 1.6rem; font-weight: 700; margin: 0; color: #0f172a; }
         .meta { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
         .content { font-size: 1rem; word-break: break-word; page-break-inside: auto; break-inside: auto; }
         pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: monospace; font-size: 0.88rem; white-space: pre-wrap !important; word-break: break-word !important; }
@@ -7392,8 +7440,8 @@ async function exportMessageToPDF(rawContent, msgIdx) {
     </head>
     <body>
       <div class="header">
-        <h1 class="title">Message Export</h1>
-        <div class="meta">Exported on ${new Date().toLocaleString()}</div>
+        <h1 class="title">${displayDocTitle}</h1>
+        <div class="meta">Exported on ${new Date().toLocaleString()} | User: ${currentUser}</div>
       </div>
       <div class="content">${targetContentHTML}</div>
       <script>

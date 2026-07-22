@@ -68,6 +68,8 @@ DATABASE_MIGRATION_GUIDE.md
 MODEL_VERIFICATION_CHECKLIST.md
 future_prospect_features.md
 FUTURE_FEATURE_ROADMAP.md
+MONGODB_ADMIN_GUIDE.md
+MONGODB_CHAT_INSPECTION_GUIDE.md
 most import chat/
 
 # Package dependencies and platform-specific lockfiles

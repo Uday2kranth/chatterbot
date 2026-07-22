@@ -59,6 +59,8 @@ vercel_deployment_guide.md
 future_security_update.md
 chatterbot_api_keys_Admin@uday.json
 update_keys.json
+MONGODB_ADMIN_GUIDE.md
+MONGODB_CHAT_INSPECTION_GUIDE.md
 design_preview/
 
 # Dependencies and lockfiles

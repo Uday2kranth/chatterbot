@@ -1472,7 +1472,7 @@
 
       <!-- View 4: Prompts Library View -->
       <div id="prompts-library-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); flex-wrap:wrap; gap:12px;">
           <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
             <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent-primary);"></i>
             <span>Curated Prompts Library</span>
@@ -1486,9 +1486,43 @@
             </button>
           </div>
         </div>
+
+        <!-- Prompts Library Top Navigation Tabs & Filter Bar -->
+        <div style="padding: 12px 24px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+          <!-- 2 Main Top Section Tabs -->
+          <div style="display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 4px;">
+            <button type="button" id="prompts-tab-msc" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <i class="fa-solid fa-graduation-cap"></i> 🎓 MSc Data Science Exam Prep &amp; Collections
+            </button>
+            <button type="button" id="prompts-tab-generic" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <i class="fa-solid fa-book-open"></i> 📖 Generic Study Helpful Prompts
+            </button>
+          </div>
+
+          <!-- MSc Data Science Category Filter Dropdown (Visible on MSc Tab) -->
+          <div id="msc-filter-container" style="display: flex; align-items: center; gap: 8px;">
+            <label for="msc-prompts-select" style="font-size: 0.78rem; font-weight: 700; color: var(--accent-primary);">CATEGORY:</label>
+            <select id="msc-prompts-select" class="custom-select" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem; font-weight: 600; outline: none; cursor: pointer;">
+              <option value="all">🌐 All MSc Data Science Prompts</option>
+              <option value="2marks">⚡ 2-Mark Short Answer Prompts</option>
+              <option value="12marks">🔥 12-Mark Deep Exam Proof Prompts</option>
+              <option value="fullgold">🏆 Full Gold / Exam Master Prompts</option>
+              <option value="cn">📘 Computer Networks (CN)</option>
+              <option value="cns">📘 Cryptography &amp; Network Security (CNS)</option>
+              <option value="dbms">📘 Database Management Systems (DBMS)</option>
+              <option value="os">📘 Operating Systems (OS)</option>
+              <option value="dsa">📘 Data Structures &amp; Algorithms (DSA)</option>
+              <option value="ml">📘 Machine Learning / Data Science (ML/DS)</option>
+              <option value="balaraju">🌟 Balaraju Special Prompts</option>
+              <option value="aakash">🌟 Aakash Special Prompts</option>
+              <option value="msc_core">🎓 MSc Data Science Core Prompts</option>
+            </select>
+          </div>
+        </div>
+
         <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
           <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin: 0 0 4px 0;">
-            Select a curated template to guide the active chat session's AI context. You can check the raw instructions text, copy prompts to clipboard, or create your own custom study/coding directives.
+            Select a curated template to guide the active chat session's AI context. Prompts format answers dynamically with evaluator keyword bolding, LaTeX math derivations, and Key Keyword Glossaries.
           </p>
 
           <!-- Add Custom Prompt Form container (Hidden by default, toggled via Add Prompt button) -->

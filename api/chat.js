@@ -244,49 +244,33 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
         });
     }
 
-    // Global Diagram System Directive: Enforce clean, perfectly-scaled vertical Mermaid.js diagrams
+    // Global Diagram & Exam Structuring System Directives
     apiMessages.unshift({
         role: "system",
-        content: `MANDATORY DIAGRAM & FLOWCHART LAYOUT DIRECTIVES:
-When explaining, drawing, or providing a flowchart, system architecture, pipeline, decision tree, or process diagram:
-1. MANDATORY DIRECTION: ALWAYS use top-to-bottom vertical direction \`graph TD\`. NEVER use horizontal direction \`graph LR\` or \`graph RL\` (horizontal graphs shrink & squish on screens).
-2. QUOTED LABELS: ALL node text MUST be wrapped in double quotes inside brackets (e.g., A["Clean Label Text"]).
-3. SHORT CONCISE LABELS: Keep node labels concise (under 6 words per box). Avoid ultra-long paragraphs inside diagram nodes.
-4. NO SQUISHED SUBGRAPHS: If using subgraphs, arrange them vertically top-to-bottom rather than side-by-side horizontally.
-5. NO SPECIAL SYMBOL BREAKS: Do not place unescaped quotes, raw HTML tags, or illegal symbols inside node brackets.
-6. NO AMPERSAND SHORTHAND JOINS: Write individual 1-to-1 connections (e.g., A --> C and B --> C) instead of ampersand shorthand (A & B --> C).
-7. NO ASCII ART OR TIKZ: Never output ASCII box art (+---+) or raw LaTeX TikZ code (\`\\documentclass\`, \`\\begin{tikzpicture}\`). ALWAYS use standard Mermaid blocks (\`\`\`mermaid graph TD ... \`\`\`).
-8. EVERY NODE MUST HAVE A LABEL: Never output raw node IDs like A --> B without defining their descriptive labels. Every single node ID referenced in a connection MUST be defined with descriptive label text inside quoted brackets (e.g., A["Descriptive Label Text"] or A["Descriptive Label"] --> B["Another Label"]).
-9. PREVENT ULTRA-WIDE HORIZONTAL SPANS: Never link more than 4 sibling nodes side-by-side on a single horizontal row. If a category has more than 4 items, stack them into vertical columns or sub-levels so all nodes remain large, clear, and readable on mobile screens.
-10. VERTICAL STACKING FOR PARALLEL PIPELINES: When explaining multiple parallel routes, strategies, or architectures (e.g. Lexicon vs ML vs Transformers), stack the routes vertically one below another instead of spreading 3+ branches horizontally across the page.
-
-GOLD-STANDARD MERMAID FEW-SHOT EXAMPLE:
-\`\`\`mermaid
-graph TD
-    A["Clean Token Sequence"] --> B1["Lexicon Engine"]
-    A --> B2["Statistical ML Pipeline"]
-    A --> B3["Modern NLP Engine"]
-    
-    B1 --> C1["Dictionary Lookup"]
-    B2 --> C2["TF-IDF Vector Space"]
-    B3 --> C3["Transformer Token Embeddings"]
-
-    C1 --> D["Final Classification Output"]
-    C2 --> D
-    C3 --> D
-\`\`\``
+        content: `SMART DIAGRAM TRIGGERING & EXAM VALUATION DIRECTIVES:
+1. GREETINGS & SHORT QUERIES: NEVER output diagrams or flowcharts for greetings ("Hi", "Hello"), brief definitions, or basic questions.
+2. DIAGRAM TRIGGER CONDITIONS: Generate a vertical Mermaid \`graph TD\` diagram ONLY IF:
+   a) The user explicitly asks for a diagram or flowchart (e.g., "draw a flowchart", "explain with diagram").
+   b) The query involves a complex 12-mark multi-step architecture or protocol pipeline (e.g., RSA key generation, OSI layers, AES rounds) where visual representation compresses fluff while maximizing exam marks.
+3. MANDATORY MERMAID FORMAT: ALWAYS use top-to-bottom direction \`graph TD\`. Wrap node text in double quotes inside brackets (e.g., A["Clean Label"]). Keep labels under 6 words.
+4. DIRECT ANSWER PROTOCOL: Do not write conversational intro fluff (e.g., "Sure, I can help you with that..."). Begin immediately on Line 1 with the technical definition or requested introduction.
+5. EVALUATOR KEYWORD BOLDING: Automatically bold all core technical terms, variables, and protocol phases (e.g., **Euler's Totient φ(n)**, **SYN-ACK Handshake**).
+6. RESPONSIVE COMPARISON SWITCHER:
+   - Comparing 2 Topics: Format as a clean 2-Column Markdown Table.
+   - Comparing 3+ Topics: Format as Stacked Side-Headings (\`### Topic 1\`, \`### Topic 2\`) to prevent mobile table clipping.
+7. KEY TERMS GLOSSARY SECTION: At the end of every structured exam response, include a \`### 🔑 Key Exam Keywords Glossary\` section providing a 1-line crisp definition for each bolded key term.`
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols
     apiMessages.unshift({
         role: "system",
-        content: "Always format mathematical notations, variables with subscripts (like M_1), powers (like x^2), calculations, and equations using standard LaTeX enclosed in single dollar signs $ for inline math (e.g. $M_1$) or double dollar signs $$ for block math. Do not write raw formulas without LaTeX tags."
+        content: "Always format mathematical notations, variables with subscripts (like M_1), powers (like x^2), calculations, and equations using standard LaTeX enclosed in single dollar signs $ for inline math (e.g. $M_1$) or double dollar signs $$ for block math. Box final numeric results using $$\\bbox[6px,border:2px solid #06b6d4]{\\text{Final Result} = X}$$."
     });
 
     // Final Mandatory System Directive: Override any prompt templates that request TikZ code or horizontal LR graphs
     apiMessages.push({
         role: "system",
-        content: "CRITICAL MANDATORY OVERRIDE: ALWAYS output all diagrams exclusively as top-to-bottom vertical Mermaid.js code blocks (```mermaid\\ngraph TD\\n...\\n```). NEVER use graph LR or raw TikZ. This rule supersedes all prompt templates."
+        content: "CRITICAL MANDATORY OVERRIDE: ALWAYS output all diagrams exclusively as top-to-bottom vertical Mermaid.js code blocks (```mermaid\\ngraph TD\\n...\\n```). NEVER use graph LR or raw TikZ. Only output diagrams when value-adding or requested."
     });
 
     try {

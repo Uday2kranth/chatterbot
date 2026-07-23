@@ -3082,26 +3082,32 @@ function renderMarkdownWithMath(text) {
     return `<img ${newAttrs} />`;
   });
 
-  // 6. Convert Mermaid & ASCII text diagram code blocks into renderable Mermaid diagram cards
+  // 6. Convert Diagram code blocks (Mermaid, PlantUML, Graphviz, BlockDiag, Nomnoml, Erd, etc.) into Kroki diagram cards
   html = html.replace(/<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/gi, (match, lang, code) => {
-    const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-    if (lang === 'mermaid' || cleanCode.trim().startsWith('graph') || cleanCode.trim().startsWith('flowchart')) {
+    const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
+    const l = (lang || '').toLowerCase().replace(/^kroki-/, '');
+    const diagramTypes = ['mermaid', 'plantuml', 'graphviz', 'dot', 'blockdiag', 'seqdiag', 'actdiag', 'nwdiag', 'c4', 'c4plantuml', 'erd', 'nomnoml', 'svgbob', 'vegalite', 'vega', 'excalidraw', 'wavedrom', 'bytefield', 'ditaa', 'bpmn'];
+
+    const isDiagram = diagramTypes.includes(l) || cleanCode.startsWith('graph') || cleanCode.startsWith('flowchart') || cleanCode.startsWith('@startuml') || cleanCode.startsWith('digraph');
+
+    if (isDiagram) {
+      const diagramType = diagramTypes.includes(l) ? l : (cleanCode.startsWith('@startuml') ? 'plantuml' : (cleanCode.startsWith('digraph') ? 'graphviz' : 'mermaid'));
       const sanitized = sanitizeRawMermaidSyntax(cleanCode);
-      return `<div class="mermaid-diagram-card" data-raw-code="${encodeURIComponent(sanitized)}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${sanitized}</div></div>`;
+      return `<div class="mermaid-diagram-card kroki-diagram-card" data-kroki-type="${diagramType}" data-raw-code="${encodeURIComponent(sanitized)}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${sanitized}</div></div>`;
     }
     
     // Auto-detect ASCII flowchart blocks in older messages and wrap into 3-mode diagram cards
     if ((cleanCode.includes('[') && cleanCode.includes(']')) && (cleanCode.includes('│') || cleanCode.includes('▼') || cleanCode.includes('->') || cleanCode.includes('-->') || cleanCode.includes('|'))) {
       const asciiLines = cleanCode.split('\n');
       const nodes = [];
-      asciiLines.forEach(l => {
-        const bracket = l.match(/\[\s*([^\]]+)\s*\]/);
-        const inputMatch = l.match(/^(?:Input|Output)\s*:?\s*(.*)/i);
+      asciiLines.forEach(lLine => {
+        const bracket = lLine.match(/\[\s*([^\]]+)\s*\]/);
+        const inputMatch = lLine.match(/^(?:Input|Output)\s*:?\s*(.*)/i);
         if (bracket) {
           const lbl = bracket[1].trim().replace(/"/g, "'");
           if (!nodes.some(n => n === lbl)) nodes.push(lbl);
         } else if (inputMatch && inputMatch[1]) {
-          const lbl = l.trim().replace(/"/g, "'");
+          const lbl = lLine.trim().replace(/"/g, "'");
           if (!nodes.some(n => n === lbl)) nodes.push(lbl);
         }
       });
@@ -3113,13 +3119,111 @@ function renderMarkdownWithMath(text) {
         for (let i = 0; i < nodes.length - 1; i++) {
           convertedMermaid += `  n_ascii_${i} --> n_ascii_${i+1}\n`;
         }
-        return `<div class="mermaid-diagram-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${convertedMermaid}</div></div>`;
+        return `<div class="mermaid-diagram-card kroki-diagram-card" data-kroki-type="mermaid" data-raw-code="${encodeURIComponent(convertedMermaid)}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${convertedMermaid}</div></div>`;
       }
     }
     return match;
   });
 
   return html;
+}
+
+// Universal Kroki Diagram Engine Post-Processor
+async function processKrokiDiagramCards(container) {
+  const root = container || document;
+  const cards = root.querySelectorAll('.mermaid-diagram-card, .kroki-diagram-card');
+  if (!cards || cards.length === 0) return;
+
+  cards.forEach(async (card) => {
+    if (card.getAttribute('data-kroki-rendered') === 'true') return;
+
+    const rawType = card.getAttribute('data-kroki-type') || 'mermaid';
+    const type = rawType.toLowerCase().replace(/^kroki-/, '');
+    const mermaidEl = card.querySelector('.mermaid');
+
+    let rawCode = card.getAttribute('data-raw-code') || (mermaidEl ? mermaidEl.getAttribute('data-raw-code') || mermaidEl.textContent : card.textContent) || '';
+    if (rawCode.includes('%0A') || rawCode.includes('%20')) {
+      try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
+    }
+    rawCode = rawCode.trim();
+    if (!rawCode) return;
+
+    card.setAttribute('data-raw-code', rawCode);
+
+    // Primary target container for vector SVG
+    let svgViewport = card.querySelector('.kroki-svg-viewport');
+    if (!svgViewport) {
+      svgViewport = document.createElement('div');
+      svgViewport.className = 'kroki-svg-viewport';
+      svgViewport.style.cssText = 'display:flex; justify-content:center; align-items:center; min-height:100px; overflow-x:auto; padding:8px 0; width:100%;';
+      if (mermaidEl) {
+        card.replaceChild(svgViewport, mermaidEl);
+      } else {
+        card.appendChild(svgViewport);
+      }
+    }
+
+    svgViewport.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-spinner fa-spin" style="color:var(--accent-primary);"></i> Rendering Kroki Vector Graphic (${type})...</div>`;
+
+    // Fetch Kroki SVG
+    let svgContent = '';
+    try {
+      // 1. Try serverless backend proxy endpoint (/api/kroki)
+      const res = await fetch('/api/kroki', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: type, format: 'svg', source: rawCode })
+      });
+      if (res.ok) {
+        svgContent = await res.text();
+      }
+    } catch (e) {
+      console.warn(`Proxy fetch /api/kroki failed for ${type}, trying direct Kroki fallback:`, e);
+    }
+
+    // 2. Direct Kroki.io API fallback if proxy didn't return SVG
+    if (!svgContent || !svgContent.includes('<svg')) {
+      try {
+        const directType = type === 'dot' ? 'graphviz' : type;
+        const directRes = await fetch(`https://kroki.io/${directType}/svg`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          body: rawCode
+        });
+        if (directRes.ok) {
+          svgContent = await directRes.text();
+        }
+      } catch (errFallback) {
+        console.error('Direct Kroki fetch error:', errFallback);
+      }
+    }
+
+    if (svgContent && svgContent.includes('<svg')) {
+      svgViewport.innerHTML = svgContent;
+      card.setAttribute('data-kroki-rendered', 'true');
+      const svgEl = svgViewport.querySelector('svg');
+      if (svgEl) {
+        svgEl.style.maxWidth = '100%';
+        svgEl.style.height = 'auto';
+        svgEl.style.display = 'block';
+        svgEl.style.margin = '0 auto';
+        svgEl.removeAttribute('height'); // allow responsive scaling
+      }
+    } else if (window.mermaid && (type === 'mermaid' || type === 'flowchart')) {
+      // 3. Browser Mermaid fallback if Kroki backend was unreachable
+      try {
+        const sanitizedCode = sanitizeRawMermaidSyntax(rawCode);
+        const fbRenderId = `mermaid-kroki-fb-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+        const { svg: fbSvg } = await window.mermaid.render(fbRenderId, sanitizedCode);
+        svgViewport.innerHTML = fbSvg;
+        card.setAttribute('data-kroki-rendered', 'true');
+      } catch (clientMermaidErr) {
+        svgViewport.innerHTML = `<pre style="margin:0; font-family:monospace; font-size:0.8rem; background:var(--bg-secondary); padding:12px; border-radius:6px; color:var(--text-primary); overflow-x:auto;">${rawCode}</pre>`;
+      }
+    } else {
+      svgViewport.innerHTML = `<pre style="margin:0; font-family:monospace; font-size:0.8rem; background:var(--bg-secondary); padding:12px; border-radius:6px; color:var(--text-primary); overflow-x:auto;">${rawCode}</pre>`;
+    }
+  });
 }
 
 // Render Messages
@@ -3630,8 +3734,10 @@ function renderMessages(messages) {
     container.appendChild(msgElement);
   });
 
-  // Trigger Mermaid.js vector diagram rendering with adaptive Light/Dark theme contrast and per-diagram fallback isolation
+  // Trigger Kroki & Mermaid vector diagram rendering
   setTimeout(() => {
+    processKrokiDiagramCards(container);
+
     if (window.mermaid) {
       const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
       try {

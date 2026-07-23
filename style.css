@@ -2163,8 +2163,9 @@ details.guide-details .guide-content {
   transform: translateX(14px);
 }
 
-/* Custom contrast overrides for Mermaid diagrams in Light (Emerald Green) & Dark (Royal Purple) themes */
-.mermaid-diagram-card {
+/* Custom contrast overrides for Mermaid & Kroki diagrams in Light & Dark themes */
+.mermaid-diagram-card,
+.kroki-diagram-card {
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-color) !important;
   border-radius: 14px;

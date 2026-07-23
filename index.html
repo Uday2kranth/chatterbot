@@ -187,9 +187,9 @@
           <i class="fa-solid fa-book-open-reader" style="color:var(--accent-primary);"></i>
           <span>Exam Prep &amp; Syllabus</span>
         </button>
-        <button class="new-chat-btn" id="arena-lab-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-primary);" title="Dedicated AI Lab, Prompt Arena, Library & Bookmarks Studio">
-          <i class="fa-solid fa-flask-vial" style="color:var(--accent-primary);"></i>
-          <span>AI Lab &amp; Knowledge Studio</span>
+        <button class="new-chat-btn" id="arena-lab-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-primary);" title="Prompt Library, Bookmarked Notes & Dual AI Model Arena Studio">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent-primary);"></i>
+          <span>Prompt, Bookmarks &amp; AI Studio</span>
         </button>
         <button class="new-chat-btn" id="tools-hub-btn" style="margin:0; width:100%; border-color:var(--accent-primary); background:var(--bg-tertiary); color:var(--text-primary); font-weight:700;" title="Unified Tools, Benchmarks, API Guide & Token Tracker Hub">
           <i class="fa-solid fa-toolbox" style="color:var(--accent-primary);"></i>
@@ -1523,23 +1523,29 @@
         </div>
       </div>
 
-      <!-- View 6: Dedicated Arena Lab -->
+      <!-- View 6: Dedicated Arena Lab & Prompts Studio -->
       <div id="arena-lab-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-primary);">
         <!-- Top Control Header -->
         <div style="padding: 12px 24px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <i class="fa-solid fa-scale-balanced" style="font-size: 1.3rem; color: var(--accent-primary);"></i>
-              <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">⚔️ Arena Lab</h2>
+              <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.3rem; color: var(--accent-primary);"></i>
+              <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">✨ Prompt, Bookmarks &amp; AI Studio</h2>
             </div>
             
             <!-- Arena Lab Sub-Navigation Mode Bar -->
-            <div style="display: flex; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 3px; gap: 4px;">
+            <div style="display: flex; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 3px; gap: 4px; flex-wrap: wrap;">
               <button id="arena-tab-model" class="custom-select" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 6px; border: none; background: var(--accent-primary); color: white; cursor: pointer;">
-                🤖 Model Arena Lab
+                🤖 Model Arena
               </button>
               <button id="arena-tab-prompt" class="custom-select" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer;">
-                ✨ Prompt Arena Lab
+                ✨ Prompt Arena
+              </button>
+              <button id="arena-tab-prompts-lib" class="custom-select" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer;">
+                ✨ Prompts Library
+              </button>
+              <button id="arena-tab-bookmarks" class="custom-select" style="padding: 4px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer;">
+                🔖 Bookmarked Notes
               </button>
             </div>
           </div>
@@ -1580,149 +1586,156 @@
           </div>
         </div>
 
-        <!-- Turn Count Banner -->
-        <div id="arena-turn-banner" style="padding: 6px 24px; background: var(--accent-glow-subtle); border-bottom: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
-          <span>💬 Comparative Session Memory: <strong id="arena-turn-count">0 / 5 Turns</strong></span>
-          <span style="font-size:0.72rem; color:var(--text-muted);">Max 5 turns per comparison test</span>
-        </div>
+        <!-- Split 2-Column Arena Lab Workspace -->
+        <div id="arena-lab-workspace" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+          <!-- Turn Count Banner -->
+          <div id="arena-turn-banner" style="padding: 6px 24px; background: var(--accent-glow-subtle); border-bottom: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center;">
+            <span>💬 Comparative Session Memory: <strong id="arena-turn-count">0 / 5 Turns</strong></span>
+            <span style="font-size:0.72rem; color:var(--text-muted);">Max 5 turns per comparison test</span>
+          </div>
 
-        <!-- Split 2-Column Main Workspace -->
-        <div style="display: flex; flex: 1; min-height: 0; gap: 16px; padding: 16px 24px; overflow-y: auto;">
-          <!-- Left Panel: Column A -->
-          <div class="arena-lab-column" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; min-width: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-            <!-- Column Header Controls -->
-            <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span id="arena-col-a-title" style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-robot"></i> MODEL A / COLUMN A</span>
-                <span id="arena-col-a-badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 600;">Active</span>
-              </div>
-              
-              <!-- Model Arena Controls (Col A) -->
-              <div id="arena-col-a-model-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <select id="arena-col-a-provider" class="custom-select" style="flex: 1; min-width: 130px; font-size: 0.8rem; padding: 5px 8px;">
-                  <!-- Dynamically synchronized -->
-                </select>
-                <select id="arena-col-a-model" class="custom-select" style="flex: 2; min-width: 170px; font-size: 0.8rem; padding: 5px 8px;">
-                  <!-- Dynamically populated -->
-                </select>
+          <!-- Split 2-Column Main Workspace -->
+          <div style="display: flex; flex: 1; min-height: 0; gap: 16px; padding: 16px 24px; overflow-y: auto;">
+            <!-- Left Panel: Column A -->
+            <div class="arena-lab-column" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; min-width: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+              <!-- Column Header Controls -->
+              <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <span id="arena-col-a-title" style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-robot"></i> MODEL A / COLUMN A</span>
+                  <span id="arena-col-a-badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 600;">Active</span>
+                </div>
+                
+                <!-- Model Arena Controls (Col A) -->
+                <div id="arena-col-a-model-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <select id="arena-col-a-provider" class="custom-select" style="flex: 1; min-width: 130px; font-size: 0.8rem; padding: 5px 8px;">
+                    <!-- Dynamically synchronized -->
+                  </select>
+                  <select id="arena-col-a-model" class="custom-select" style="flex: 2; min-width: 170px; font-size: 0.8rem; padding: 5px 8px;">
+                    <!-- Dynamically populated -->
+                  </select>
+                </div>
+
+                <!-- Prompt Arena Controls (Col A) -->
+                <div id="arena-col-a-template-select-group" style="display: none; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary);">PROMPT TEMPLATE A:</label>
+                  <select id="arena-col-a-template" class="custom-select" style="font-size: 0.8rem; padding: 5px 8px;">
+                    <!-- Populated dynamically via app.js -->
+                  </select>
+                </div>
               </div>
 
-              <!-- Prompt Arena Controls (Col A) -->
-              <div id="arena-col-a-template-select-group" style="display: none; flex-direction: column; gap: 4px;">
-                <label style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary);">PROMPT TEMPLATE A:</label>
-                <select id="arena-col-a-template" class="custom-select" style="font-size: 0.8rem; padding: 5px 8px;">
-                  <!-- Populated dynamically via app.js -->
-                </select>
+              <!-- Messages Output Scroll Container -->
+              <div id="arena-col-a-output" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
+                <!-- Empty state placeholder -->
+                <div id="arena-col-a-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                  <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Column A Standby</div>
+                  <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
+                </div>
+              </div>
+
+              <!-- Column A Bottom Toolbar -->
+              <div id="arena-col-a-toolbar" style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px;">
+                <div style="display: flex; gap: 4px;">
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-a-copy" title="Copy Column A Output"><i class="fa-regular fa-copy"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-a-pdf" title="Export Column A to PDF"><i class="fa-solid fa-file-pdf"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-a-word" title="Export Column A to Word"><i class="fa-solid fa-file-word"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-a-image" title="Export Column A to Image"><i class="fa-regular fa-image"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-a-email" title="Email Column A"><i class="fa-regular fa-envelope"></i></button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-up" title="Thumbs Up (Like Column A)"><i class="fa-regular fa-thumbs-up"></i></button>
+                  <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-down" title="Thumbs Down (Dislike Column A)"><i class="fa-regular fa-thumbs-down"></i></button>
+                </div>
+
+                <!-- Independent Column A Input Bar -->
+                <form id="arena-col-a-form" style="display: flex; gap: 6px; margin-top: 8px; width: 100%;">
+                  <input type="text" id="arena-col-a-input" placeholder="Ask Model A individually..." style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; outline: none;" />
+                  <button type="submit" id="arena-col-a-send" style="padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-paper-plane"></i> <span>Send A</span>
+                  </button>
+                </form>
               </div>
             </div>
 
-            <!-- Messages Output Scroll Container -->
-            <div id="arena-col-a-output" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
-              <!-- Empty state placeholder -->
-              <div id="arena-col-a-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
-                <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
-                <div style="font-weight: 600; font-size: 0.9rem;">Column A Standby</div>
-                <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
-              </div>
-            </div>
+            <!-- Right Panel: Column B -->
+            <div class="arena-lab-column" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; min-width: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+              <!-- Column Header Controls -->
+              <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <span id="arena-col-b-title" style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B</span>
+                  <span id="arena-col-b-badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 600;">Active</span>
+                </div>
 
-            <!-- Column A Bottom Toolbar -->
-            <div id="arena-col-a-toolbar" style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px;">
-              <div style="display: flex; gap: 4px;">
-                <button class="msg-action-btn arena-action-btn" id="arena-col-a-copy" title="Copy Column A Output"><i class="fa-regular fa-copy"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-a-pdf" title="Export Column A to PDF"><i class="fa-solid fa-file-pdf"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-a-word" title="Export Column A to Word"><i class="fa-solid fa-file-word"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-a-image" title="Export Column A to Image"><i class="fa-regular fa-image"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-a-email" title="Email Column A"><i class="fa-regular fa-envelope"></i></button>
-              </div>
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-up" title="Thumbs Up (Like Column A)"><i class="fa-regular fa-thumbs-up"></i></button>
-                <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-down" title="Thumbs Down (Dislike Column A)"><i class="fa-regular fa-thumbs-down"></i></button>
+                <!-- Model Arena Controls (Col B) -->
+                <div id="arena-col-b-model-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <select id="arena-col-b-provider" class="custom-select" style="flex: 1; min-width: 130px; font-size: 0.8rem; padding: 5px 8px;">
+                    <!-- Dynamically synchronized -->
+                  </select>
+                  <select id="arena-col-b-model" class="custom-select" style="flex: 2; min-width: 170px; font-size: 0.8rem; padding: 5px 8px;">
+                    <!-- Dynamically populated -->
+                  </select>
+                </div>
+
+                <!-- Prompt Arena Controls (Col B) -->
+                <div id="arena-col-b-template-select-group" style="display: none; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary);">PROMPT TEMPLATE B:</label>
+                  <select id="arena-col-b-template" class="custom-select" style="font-size: 0.8rem; padding: 5px 8px;">
+                    <!-- Populated dynamically via app.js -->
+                  </select>
+                </div>
               </div>
 
-              <!-- Independent Column A Input Bar -->
-              <form id="arena-col-a-form" style="display: flex; gap: 6px; margin-top: 8px; width: 100%;">
-                <input type="text" id="arena-col-a-input" placeholder="Ask Model A individually..." style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; outline: none;" />
-                <button type="submit" id="arena-col-a-send" style="padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                  <i class="fa-solid fa-paper-plane"></i> <span>Send A</span>
-                </button>
-              </form>
+              <!-- Messages Output Scroll Container -->
+              <div id="arena-col-b-output" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
+                <!-- Empty state placeholder -->
+                <div id="arena-col-b-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                  <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Model B Standby</div>
+                  <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
+                </div>
+              </div>
+
+              <!-- Column B Bottom Toolbar -->
+              <div id="arena-col-b-toolbar" style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px;">
+                <div style="display: flex; gap: 4px;">
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-b-copy" title="Copy Column B Output"><i class="fa-regular fa-copy"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-b-pdf" title="Export Column B to PDF"><i class="fa-solid fa-file-pdf"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-b-word" title="Export Column B to Word"><i class="fa-solid fa-file-word"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-b-image" title="Export Column B to Image"><i class="fa-regular fa-image"></i></button>
+                  <button class="msg-action-btn arena-action-btn" id="arena-col-b-email" title="Email Column B"><i class="fa-regular fa-envelope"></i></button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <button class="msg-action-btn arena-vote-btn" id="arena-col-b-vote-up" title="Thumbs Up (Like Model B)"><i class="fa-regular fa-thumbs-up"></i></button>
+                  <button class="msg-action-btn arena-vote-btn" id="arena-col-b-vote-down" title="Thumbs Down (Dislike Model B)"><i class="fa-regular fa-thumbs-down"></i></button>
+                </div>
+
+                <!-- Independent Column B Input Bar -->
+                <form id="arena-col-b-form" style="display: flex; gap: 6px; margin-top: 8px; width: 100%;">
+                  <input type="text" id="arena-col-b-input" placeholder="Ask Model B individually..." style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; outline: none;" />
+                  <button type="submit" id="arena-col-b-send" style="padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-paper-plane"></i> <span>Send B</span>
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
 
-          <!-- Right Panel: Column B -->
-          <div class="arena-lab-column" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; min-width: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-            <!-- Column Header Controls -->
-            <div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span id="arena-col-b-title" style="font-weight: 700; font-size: 0.85rem; color: var(--accent-primary);"><i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B</span>
-                <span id="arena-col-b-badge" style="font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 600;">Active</span>
-              </div>
-
-              <!-- Model Arena Controls (Col B) -->
-              <div id="arena-col-b-model-select-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <select id="arena-col-b-provider" class="custom-select" style="flex: 1; min-width: 130px; font-size: 0.8rem; padding: 5px 8px;">
-                  <!-- Dynamically synchronized -->
-                </select>
-                <select id="arena-col-b-model" class="custom-select" style="flex: 2; min-width: 170px; font-size: 0.8rem; padding: 5px 8px;">
-                  <!-- Dynamically populated -->
-                </select>
-              </div>
-
-              <!-- Prompt Arena Controls (Col B) -->
-              <div id="arena-col-b-template-select-group" style="display: none; flex-direction: column; gap: 4px;">
-                <label style="font-size: 0.72rem; font-weight: 700; color: var(--accent-primary);">PROMPT TEMPLATE B:</label>
-                <select id="arena-col-b-template" class="custom-select" style="font-size: 0.8rem; padding: 5px 8px;">
-                  <!-- Populated dynamically via app.js -->
-                </select>
-              </div>
-            </div>
-
-            <!-- Messages Output Scroll Container -->
-            <div id="arena-col-b-output" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
-              <!-- Empty state placeholder -->
-              <div id="arena-col-b-empty" style="margin: auto; text-align: center; color: var(--text-muted); padding: 40px 20px;">
-                <i class="fa-solid fa-flask" style="font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4;"></i>
-                <div style="font-weight: 600; font-size: 0.9rem;">Model B Standby</div>
-                <div style="font-size: 0.78rem; margin-top: 4px;">Enter a prompt below to run comparison</div>
-              </div>
-            </div>
-
-            <!-- Column B Bottom Toolbar -->
-            <div id="arena-col-b-toolbar" style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px;">
-              <div style="display: flex; gap: 4px;">
-                <button class="msg-action-btn arena-action-btn" id="arena-col-b-copy" title="Copy Column B Output"><i class="fa-regular fa-copy"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-b-pdf" title="Export Column B to PDF"><i class="fa-solid fa-file-pdf"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-b-word" title="Export Column B to Word"><i class="fa-solid fa-file-word"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-b-image" title="Export Column B to Image"><i class="fa-regular fa-image"></i></button>
-                <button class="msg-action-btn arena-action-btn" id="arena-col-b-email" title="Email Column B"><i class="fa-regular fa-envelope"></i></button>
-              </div>
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <button class="msg-action-btn arena-vote-btn" id="arena-col-b-vote-up" title="Thumbs Up (Like Model B)"><i class="fa-regular fa-thumbs-up"></i></button>
-                <button class="msg-action-btn arena-vote-btn" id="arena-col-b-vote-down" title="Thumbs Down (Dislike Model B)"><i class="fa-regular fa-thumbs-down"></i></button>
-              </div>
-
-              <!-- Independent Column B Input Bar -->
-              <form id="arena-col-b-form" style="display: flex; gap: 6px; margin-top: 8px; width: 100%;">
-                <input type="text" id="arena-col-b-input" placeholder="Ask Model B individually..." style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; outline: none;" />
-                <button type="submit" id="arena-col-b-send" style="padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                  <i class="fa-solid fa-paper-plane"></i> <span>Send B</span>
-                </button>
-              </form>
-            </div>
+          <!-- Arena Lab Bottom Prompt Input Bar -->
+          <div style="padding: 12px 24px 16px 24px; border-top: 1px solid var(--border-color); background: var(--bg-secondary);">
+            <form id="arena-lab-form" style="display: flex; gap: 10px; align-items: center;">
+              <input type="text" id="arena-lab-input" placeholder="Type prompt to compare Model A vs Model B..." style="flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.9rem; outline: none;">
+              <button type="submit" id="arena-lab-send-btn" style="padding: 12px 20px; border-radius: 10px; border: none; background: var(--accent-primary); color: white; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Compare</span>
+              </button>
+            </form>
           </div>
         </div>
 
-        <!-- Arena Lab Bottom Prompt Input Bar -->
-        <div style="padding: 12px 24px 16px 24px; border-top: 1px solid var(--border-color); background: var(--bg-secondary);">
-          <form id="arena-lab-form" style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" id="arena-lab-input" placeholder="Type prompt to compare Model A vs Model B..." style="flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.9rem; outline: none;">
-            <button type="submit" id="arena-lab-send-btn" style="padding: 12px 20px; border-radius: 10px; border: none; background: var(--accent-primary); color: white; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-              <i class="fa-solid fa-paper-plane"></i>
-              <span>Compare</span>
-            </button>
-          </form>
-        </div>
+        <!-- Dynamic Subview Containers for Prompts Library & Bookmarks -->
+        <div id="arena-prompts-container" style="display: none; flex: 1; min-height: 0; overflow-y: auto;"></div>
+        <div id="arena-bookmarks-container" style="display: none; flex: 1; min-height: 0; overflow-y: auto;"></div>
       </div>
 
       <!-- View 7: Why Model 4 U Page View -->

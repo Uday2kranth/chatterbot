@@ -7811,11 +7811,13 @@ function setupArenaLabView() {
   // Sub-Navigation Mode Buttons Handler
   const tabModelBtn = document.getElementById('arena-tab-model');
   const tabPromptBtn = document.getElementById('arena-tab-prompt');
+  const tabPromptsLibBtn = document.getElementById('arena-tab-prompts-lib');
+  const tabBookmarksBtn = document.getElementById('arena-tab-bookmarks');
 
-  if (tabModelBtn && tabPromptBtn) {
-    tabModelBtn.addEventListener('click', () => setArenaLabMode('model'));
-    tabPromptBtn.addEventListener('click', () => setArenaLabMode('prompt'));
-  }
+  if (tabModelBtn) tabModelBtn.addEventListener('click', () => setArenaLabMode('model'));
+  if (tabPromptBtn) tabPromptBtn.addEventListener('click', () => setArenaLabMode('prompt'));
+  if (tabPromptsLibBtn) tabPromptsLibBtn.addEventListener('click', () => setArenaLabMode('prompts-lib'));
+  if (tabBookmarksBtn) tabBookmarksBtn.addEventListener('click', () => setArenaLabMode('bookmarks'));
 
   // Clear Session Handler
   const clearSessionBtn = document.getElementById('arena-clear-session-btn');
@@ -7980,6 +7982,13 @@ function setArenaLabMode(mode) {
   currentArenaMode = mode;
   const tabModelBtn = document.getElementById('arena-tab-model');
   const tabPromptBtn = document.getElementById('arena-tab-prompt');
+  const tabPromptsLibBtn = document.getElementById('arena-tab-prompts-lib');
+  const tabBookmarksBtn = document.getElementById('arena-tab-bookmarks');
+
+  const workspaceEl = document.getElementById('arena-lab-workspace');
+  const promptsContainer = document.getElementById('arena-prompts-container');
+  const bookmarksContainer = document.getElementById('arena-bookmarks-container');
+  const modeControlsContainer = document.getElementById('arena-model-mode-template-group')?.parentElement;
 
   const modelTemplateGroup = document.getElementById('arena-model-mode-template-group');
   const promptModelGroup = document.getElementById('arena-prompt-mode-model-group');
@@ -7993,48 +8002,94 @@ function setArenaLabMode(mode) {
   const colATitle = document.getElementById('arena-col-a-title');
   const colBTitle = document.getElementById('arena-col-b-title');
 
-  if (mode === 'model') {
-    if (tabModelBtn) {
-      tabModelBtn.style.background = 'var(--accent-primary)';
-      tabModelBtn.style.color = 'white';
+  [tabModelBtn, tabPromptBtn, tabPromptsLibBtn, tabBookmarksBtn].forEach(btn => {
+    if (btn) {
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--text-secondary)';
     }
-    if (tabPromptBtn) {
-      tabPromptBtn.style.background = 'transparent';
-      tabPromptBtn.style.color = 'var(--text-secondary)';
+  });
+
+  if (mode === 'model' || mode === 'prompt') {
+    if (workspaceEl) workspaceEl.style.display = 'flex';
+    if (promptsContainer) promptsContainer.style.display = 'none';
+    if (bookmarksContainer) bookmarksContainer.style.display = 'none';
+    if (modeControlsContainer) modeControlsContainer.style.display = 'flex';
+
+    if (mode === 'model') {
+      if (tabModelBtn) {
+        tabModelBtn.style.background = 'var(--accent-primary)';
+        tabModelBtn.style.color = 'white';
+      }
+      if (modelTemplateGroup) modelTemplateGroup.style.display = 'flex';
+      if (promptModelGroup) promptModelGroup.style.display = 'none';
+
+      if (colAModelGroup) colAModelGroup.style.display = 'flex';
+      if (colATemplateGroup) colATemplateGroup.style.display = 'none';
+
+      if (colBModelGroup) colBModelGroup.style.display = 'flex';
+      if (colBTemplateGroup) colBTemplateGroup.style.display = 'none';
+
+      if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-robot"></i> MODEL A / COLUMN A';
+      if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B';
+    } else {
+      if (tabPromptBtn) {
+        tabPromptBtn.style.background = 'var(--accent-primary)';
+        tabPromptBtn.style.color = 'white';
+      }
+      if (modelTemplateGroup) modelTemplateGroup.style.display = 'none';
+      if (promptModelGroup) promptModelGroup.style.display = 'flex';
+
+      if (colAModelGroup) colAModelGroup.style.display = 'none';
+      if (colATemplateGroup) colATemplateGroup.style.display = 'flex';
+
+      if (colBModelGroup) colBModelGroup.style.display = 'none';
+      if (colBTemplateGroup) colBTemplateGroup.style.display = 'flex';
+
+      if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE A';
+      if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE B';
     }
-
-    if (modelTemplateGroup) modelTemplateGroup.style.display = 'flex';
-    if (promptModelGroup) promptModelGroup.style.display = 'none';
-
-    if (colAModelGroup) colAModelGroup.style.display = 'flex';
-    if (colATemplateGroup) colATemplateGroup.style.display = 'none';
-
-    if (colBModelGroup) colBModelGroup.style.display = 'flex';
-    if (colBTemplateGroup) colBTemplateGroup.style.display = 'none';
-
-    if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-robot"></i> MODEL A / COLUMN A';
-    if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B';
-  } else {
-    if (tabPromptBtn) {
-      tabPromptBtn.style.background = 'var(--accent-primary)';
-      tabPromptBtn.style.color = 'white';
+  } else if (mode === 'prompts-lib') {
+    if (tabPromptsLibBtn) {
+      tabPromptsLibBtn.style.background = 'var(--accent-primary)';
+      tabPromptsLibBtn.style.color = 'white';
     }
-    if (tabModelBtn) {
-      tabModelBtn.style.background = 'transparent';
-      tabModelBtn.style.color = 'var(--text-secondary)';
+    if (workspaceEl) workspaceEl.style.display = 'none';
+    if (bookmarksContainer) bookmarksContainer.style.display = 'none';
+    if (modeControlsContainer) modeControlsContainer.style.display = 'none';
+    if (promptsContainer) {
+      promptsContainer.style.display = 'flex';
+      const promptsView = document.getElementById('prompts-library-view');
+      if (promptsView) {
+        if (!promptsContainer.contains(promptsView)) {
+          promptsContainer.appendChild(promptsView);
+        }
+        promptsView.style.display = 'flex';
+        promptsView.style.flex = '1';
+        promptsView.style.minHeight = '0';
+      }
+      if (typeof renderPromptsLibrary === 'function') renderPromptsLibrary();
     }
-
-    if (modelTemplateGroup) modelTemplateGroup.style.display = 'none';
-    if (promptModelGroup) promptModelGroup.style.display = 'flex';
-
-    if (colAModelGroup) colAModelGroup.style.display = 'none';
-    if (colATemplateGroup) colATemplateGroup.style.display = 'flex';
-
-    if (colBModelGroup) colBModelGroup.style.display = 'none';
-    if (colBTemplateGroup) colBTemplateGroup.style.display = 'flex';
-
-    if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE A';
-    if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE B';
+  } else if (mode === 'bookmarks') {
+    if (tabBookmarksBtn) {
+      tabBookmarksBtn.style.background = 'var(--accent-primary)';
+      tabBookmarksBtn.style.color = 'white';
+    }
+    if (workspaceEl) workspaceEl.style.display = 'none';
+    if (promptsContainer) promptsContainer.style.display = 'none';
+    if (modeControlsContainer) modeControlsContainer.style.display = 'none';
+    if (bookmarksContainer) {
+      bookmarksContainer.style.display = 'flex';
+      const bookmarksView = document.getElementById('bookmarks-view');
+      if (bookmarksView) {
+        if (!bookmarksContainer.contains(bookmarksView)) {
+          bookmarksContainer.appendChild(bookmarksView);
+        }
+        bookmarksView.style.display = 'flex';
+        bookmarksView.style.flex = '1';
+        bookmarksView.style.minHeight = '0';
+      }
+      if (typeof renderBookmarksView === 'function') renderBookmarksView();
+    }
   }
 }
 

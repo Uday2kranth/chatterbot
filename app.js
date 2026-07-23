@@ -7922,6 +7922,32 @@ function setupArenaLabView() {
   }
 }
 
+function retryArenaColumn(col) {
+  const isA = col.toUpperCase() === 'A';
+  const history = isA ? arenaLabTurnHistoryA : arenaLabTurnHistoryB;
+  if (!history || history.length < 2) {
+    showToast('No turn available to retry.', 'info');
+    return;
+  }
+  history.pop(); // Remove assistant turn
+  const lastUserMsg = history[history.length - 1];
+  const userPrompt = lastUserMsg ? lastUserMsg.content : '';
+
+  if (userPrompt) {
+    runArenaLabSingleColumn(col, userPrompt);
+  }
+}
+
+function editArenaPrompt(col, promptText) {
+  const isA = col.toUpperCase() === 'A';
+  const inputEl = document.getElementById(isA ? 'arena-col-a-input' : 'arena-col-b-input') || document.getElementById('arena-lab-input');
+  if (inputEl) {
+    inputEl.value = promptText;
+    inputEl.focus();
+    showToast(`Loaded prompt into Column ${col.toUpperCase()} input for editing!`, 'info');
+  }
+}
+
 async function runArenaLabSingleColumn(col, userPrompt) {
   if (!userPrompt || !userPrompt.trim()) return;
   const colLetter = col.toUpperCase();
@@ -7934,10 +7960,14 @@ async function runArenaLabSingleColumn(col, userPrompt) {
   const model = document.getElementById(isA ? 'arena-col-a-model' : 'arena-col-b-model').value;
   const history = isA ? arenaLabTurnHistoryA : arenaLabTurnHistoryB;
 
+  const safePromptEsc = escapeHtml(userPrompt).replace(/'/g, "\\'");
   const userMsgHtml = `
-    <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem;">
-      <strong style="color: var(--accent-primary);"><i class="fa-solid fa-user"></i> You (Column ${colLetter}):</strong>
-      <div style="margin-top: 4px; color: var(--text-primary);">${escapeHtml(userPrompt)}</div>
+    <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <strong style="color: var(--accent-primary);"><i class="fa-solid fa-user"></i> You (Column ${colLetter}):</strong>
+        <div style="margin-top: 4px; color: var(--text-primary);">${escapeHtml(userPrompt)}</div>
+      </div>
+      <button onclick="editArenaPrompt('${colLetter}', '${safePromptEsc}')" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px;" title="Edit Prompt"><i class="fa-solid fa-pen-to-square"></i></button>
     </div>
   `;
   targetOutput.insertAdjacentHTML('beforeend', userMsgHtml);
@@ -7956,8 +7986,9 @@ async function runArenaLabSingleColumn(col, userPrompt) {
     if (card) {
       card.outerHTML = `
         <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
-            <i class="fa-solid fa-robot"></i> ${escapeHtml(model)} (${escapeHtml(prov.toUpperCase())})
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa-solid fa-robot"></i> ${escapeHtml(model)} (${escapeHtml(prov.toUpperCase())})</span>
+            <button onclick="retryArenaColumn('${colLetter}')" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px 6px; font-size: 0.75rem;" title="Retry Response"><i class="fa-solid fa-rotate-right"></i> Retry</button>
           </div>
           <div class="arena-content-body">${renderMarkdownWithMath(text)}</div>
         </div>

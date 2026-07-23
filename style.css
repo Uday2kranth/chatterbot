@@ -2511,4 +2511,37 @@ body > svg[id^="mermaid"] {
   .toast.show {
     transform: translateY(0) !important;
   }
+
+  /* ── Arena Studio Mobile Layout Optimizations ── */
+  .desktop-only {
+    display: none !important;
+  }
+
+  .arena-header-banner-title {
+    display: none !important; /* Hides decorative title banner on mobile to save 150px+ vertical viewport space */
+  }
+
+  .arena-subnav-bar {
+    width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .arena-subnav-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #arena-lab-view .arena-lab-column {
+    padding: 10px !important;
+  }
+
+  #arena-col-a-title, #arena-col-b-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.76rem !important;
+  }
 }

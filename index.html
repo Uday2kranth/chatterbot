@@ -1764,29 +1764,27 @@
 
       <!-- View 10: Unified Tools & Benchmarks Hub View -->
       <div id="tools-hub-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); flex-wrap:wrap; gap:12px;">
-          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-            <i class="fa-solid fa-toolbox" style="color:var(--accent-primary);"></i>
-            <span>Tools &amp; Benchmarks Hub</span>
-          </h2>
-          <button class="drawer-btn secondary" id="close-tools-hub-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
-            <i class="fa-solid fa-xmark"></i> <span>Close Hub</span>
-          </button>
-        </div>
+        <!-- Top Streamlined Control Header Bar -->
+        <div style="padding: 10px 20px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+          <!-- Left: Horizontal Scrollable Tabs Bar -->
+          <div class="tools-subnav-bar" style="display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 2px; gap: 2px; overflow-x: auto; max-width: 100%; white-space: nowrap;">
+            <button type="button" id="tools-tab-whymodel" class="custom-select tools-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <i class="fa-solid fa-microchip"></i> <span>⚡ <span class="desktop-only">Why </span>Model 4 U</span>
+            </button>
+            <button type="button" id="tools-tab-benchmark" class="custom-select tools-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <i class="fa-solid fa-chart-simple"></i> <span>📊 Benchmarks<span class="desktop-only"> &amp; Capabilities</span></span>
+            </button>
+            <button type="button" id="tools-tab-apiguide" class="custom-select tools-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <i class="fa-solid fa-key"></i> <span>🔑 API Guide<span class="desktop-only"> &amp; Credentials</span></span>
+            </button>
+            <button type="button" id="tools-tab-tokentracker" class="custom-select tools-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <i class="fa-solid fa-chart-pie"></i> <span>📈 Token Tracker<span class="desktop-only"> &amp; Analytics</span></span>
+            </button>
+          </div>
 
-        <!-- Top Navigation Tabs Bar -->
-        <div style="padding: 12px 24px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-          <button type="button" id="tools-tab-whymodel" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-            <i class="fa-solid fa-microchip"></i> ⚡ Why Model 4 U
-          </button>
-          <button type="button" id="tools-tab-benchmark" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-            <i class="fa-solid fa-chart-simple"></i> 📊 Model Benchmarks
-          </button>
-          <button type="button" id="tools-tab-apiguide" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-            <i class="fa-solid fa-key"></i> 🔑 API Guide &amp; Credentials
-          </button>
-          <button type="button" id="tools-tab-tokentracker" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-            <i class="fa-solid fa-chart-pie"></i> 📈 Token Tracker &amp; Analytics
+          <!-- Right: Close Hub Button -->
+          <button class="drawer-btn secondary" id="close-tools-hub-btn" style="padding:5px 12px; font-size:0.78rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s; display:flex; align-items:center; gap:6px; font-weight:600;">
+            <i class="fa-solid fa-xmark"></i> <span>Close<span class="desktop-only"> Hub</span></span>
           </button>
         </div>
 

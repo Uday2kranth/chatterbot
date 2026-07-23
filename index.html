@@ -178,7 +178,7 @@
       </div>
 
       <!-- Start New Chat / Prompts Library Session -->
-      <div class="sidebar-actions-top" style="display:flex; flex-direction:column; gap:4px; padding: 12px 20px 4px 20px;">
+      <div class="sidebar-actions-top" style="display:flex; flex-direction:column; gap:6px; padding: 12px 20px 4px 20px;">
         <button class="new-chat-btn" id="new-chat-btn" style="margin:0; width:100%;">
           <i class="fa-solid fa-plus"></i>
           <span>New Chat Session</span>
@@ -187,45 +187,26 @@
           <i class="fa-solid fa-book-open-reader" style="color:var(--accent-primary);"></i>
           <span>Exam Prep &amp; Syllabus</span>
         </button>
-        <button class="new-chat-btn" id="prompts-library-btn" style="margin:0; width:100%; border-color:var(--accent-secondary); color:var(--accent-secondary);">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span>Prompts Library</span>
+        <button class="new-chat-btn" id="arena-lab-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-primary);" title="Dedicated AI Lab, Prompt Arena, Library & Bookmarks Studio">
+          <i class="fa-solid fa-flask-vial" style="color:var(--accent-primary);"></i>
+          <span>AI Lab &amp; Knowledge Studio</span>
         </button>
-
-        <!-- More Button (visible initially) -->
-        <button class="new-chat-btn" id="more-features-expand-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Show More Features">
-          <i class="fa-solid fa-square-plus" style="color:var(--accent-primary);"></i>
-          <span>More</span>
+        <button class="new-chat-btn" id="tools-hub-btn" style="margin:0; width:100%; border-color:var(--accent-primary); background:var(--bg-tertiary); color:var(--text-primary); font-weight:700;" title="Unified Tools, Benchmarks, API Guide & Token Tracker Hub">
+          <i class="fa-solid fa-toolbox" style="color:var(--accent-primary);"></i>
+          <span>Tools &amp; Benchmarks Hub</span>
         </button>
-
-        <!-- Hidden container for extra features -->
-        <div id="more-features-container" style="display:none; flex-direction:column; gap:4px; margin-top:4px; width:100%;">
-          <button class="new-chat-btn" id="arena-lab-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-primary);" title="Dedicated Side-by-Side Dual AI Model &amp; Prompt Comparison Lab">
-            <i class="fa-solid fa-scale-balanced" style="color:var(--accent-primary);"></i>
-            <span>Model Arena Lab</span>
-          </button>
-          <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-secondary); color:var(--accent-secondary);" title="View Bookmarked Notes &amp; Formulas">
-            <i class="fa-solid fa-bookmark" style="color:var(--accent-secondary);"></i>
-            <span>Bookmarked Notes</span>
-          </button>
-          <button class="new-chat-btn" id="tools-hub-btn" style="margin:0; width:100%; border-color:var(--accent-primary); background:var(--bg-tertiary); color:var(--text-primary); font-weight:700;" title="Unified Tools, Benchmarks, API Guide &amp; Token Tracker Hub">
-            <i class="fa-solid fa-toolbox" style="color:var(--accent-primary);"></i>
-            <span>Tools &amp; Benchmarks Hub</span>
-          </button>
-
-          <!-- Less Button (appears below extra features) -->
-          <button class="new-chat-btn" id="more-features-collapse-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Hide Extra Features">
-            <i class="fa-solid fa-square-minus" style="color:var(--accent-primary);"></i>
-            <span>Less</span>
-          </button>
-        </div>
 
         <!-- Legacy hidden compatibility targets -->
         <div style="display:none;">
+          <button id="prompts-library-btn"></button>
+          <button id="bookmarks-btn"></button>
           <button id="why-model-4u-btn"></button>
           <button id="model-guide-btn"></button>
           <button id="api-guide-btn"></button>
           <button id="token-tracker-btn"></button>
+          <button id="more-features-expand-btn"></button>
+          <button id="more-features-collapse-btn"></button>
+          <div id="more-features-container"></div>
         </div>
       </div>
 
@@ -1658,6 +1639,14 @@
                 <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-up" title="Thumbs Up (Like Column A)"><i class="fa-regular fa-thumbs-up"></i></button>
                 <button class="msg-action-btn arena-vote-btn" id="arena-col-a-vote-down" title="Thumbs Down (Dislike Column A)"><i class="fa-regular fa-thumbs-down"></i></button>
               </div>
+
+              <!-- Independent Column A Input Bar -->
+              <form id="arena-col-a-form" style="display: flex; gap: 6px; margin-top: 8px; width: 100%;">
+                <input type="text" id="arena-col-a-input" placeholder="Ask Model A individually..." style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; outline: none;" />
+                <button type="submit" id="arena-col-a-send" style="padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                  <i class="fa-solid fa-paper-plane"></i> <span>Send A</span>
+                </button>
+              </form>
             </div>
           </div>
 
@@ -1712,6 +1701,14 @@
                 <button class="msg-action-btn arena-vote-btn" id="arena-col-b-vote-up" title="Thumbs Up (Like Model B)"><i class="fa-regular fa-thumbs-up"></i></button>
                 <button class="msg-action-btn arena-vote-btn" id="arena-col-b-vote-down" title="Thumbs Down (Dislike Model B)"><i class="fa-regular fa-thumbs-down"></i></button>
               </div>
+
+              <!-- Independent Column B Input Bar -->
+              <form id="arena-col-b-form" style="display: flex; gap: 6px; margin-top: 8px; width: 100%;">
+                <input type="text" id="arena-col-b-input" placeholder="Ask Model B individually..." style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; outline: none;" />
+                <button type="submit" id="arena-col-b-send" style="padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                  <i class="fa-solid fa-paper-plane"></i> <span>Send B</span>
+                </button>
+              </form>
             </div>
           </div>
         </div>

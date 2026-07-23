@@ -7874,6 +7874,32 @@ function setupArenaLabView() {
     });
   }
 
+  const formA = document.getElementById('arena-col-a-form');
+  if (formA) {
+    formA.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inputA = document.getElementById('arena-col-a-input');
+      const val = inputA ? inputA.value.trim() : '';
+      if (val) {
+        inputA.value = '';
+        await runArenaLabSingleColumn('A', val);
+      }
+    });
+  }
+
+  const formB = document.getElementById('arena-col-b-form');
+  if (formB) {
+    formB.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inputB = document.getElementById('arena-col-b-input');
+      const val = inputB ? inputB.value.trim() : '';
+      if (val) {
+        inputB.value = '';
+        await runArenaLabSingleColumn('B', val);
+      }
+    });
+  }
+
   // Column Action Handlers (Copy, PDF, Word, Image, Email)
   setupArenaColumnActions('a');
   setupArenaColumnActions('b');
@@ -7891,6 +7917,62 @@ function setupArenaLabView() {
   const refreshBenchmarksBtn = document.getElementById('refresh-benchmarks-btn');
   if (refreshBenchmarksBtn) {
     refreshBenchmarksBtn.addEventListener('click', fetchCommunityBenchmarks);
+  }
+}
+
+async function runArenaLabSingleColumn(col, userPrompt) {
+  if (!userPrompt || !userPrompt.trim()) return;
+  const colLetter = col.toUpperCase();
+  const isA = colLetter === 'A';
+  const targetOutput = document.getElementById(isA ? 'arena-col-a-output' : 'arena-col-b-output');
+  const targetEmpty = document.getElementById(isA ? 'arena-col-a-empty' : 'arena-col-b-empty');
+  if (targetEmpty) targetEmpty.remove();
+
+  const prov = document.getElementById(isA ? 'arena-col-a-provider' : 'arena-col-b-provider').value;
+  const model = document.getElementById(isA ? 'arena-col-a-model' : 'arena-col-b-model').value;
+  const history = isA ? arenaLabTurnHistoryA : arenaLabTurnHistoryB;
+
+  const userMsgHtml = `
+    <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem;">
+      <strong style="color: var(--accent-primary);"><i class="fa-solid fa-user"></i> You (Column ${colLetter}):</strong>
+      <div style="margin-top: 4px; color: var(--text-primary);">${escapeHtml(userPrompt)}</div>
+    </div>
+  `;
+  targetOutput.insertAdjacentHTML('beforeend', userMsgHtml);
+
+  const loadingCardId = `arena-single-${colLetter}-${Date.now()}`;
+  targetOutput.insertAdjacentHTML('beforeend', `
+    <div id="${loadingCardId}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-primary);"></i>
+      <span>Generating Column ${colLetter} with ${escapeHtml(model)}...</span>
+    </div>
+  `);
+
+  try {
+    const text = await fetchAIResponse(prov, model, userPrompt, history);
+    const card = document.getElementById(loadingCardId);
+    if (card) {
+      card.outerHTML = `
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 0.88rem; color: var(--text-primary); line-height: 1.6;">
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 6px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+            <i class="fa-solid fa-robot"></i> ${escapeHtml(model)} (${escapeHtml(prov.toUpperCase())})
+          </div>
+          <div class="arena-content-body">${renderMarkdownWithMath(text)}</div>
+        </div>
+      `;
+    }
+    history.push({ role: 'user', content: userPrompt });
+    history.push({ role: 'assistant', content: text });
+    playCompletionAudioNotification();
+  } catch (err) {
+    const card = document.getElementById(loadingCardId);
+    if (card) {
+      card.outerHTML = `
+        <div style="background: var(--bg-secondary); border: 1px solid var(--error-color); border-radius: 10px; padding: 12px; font-size: 0.85rem; color: var(--error-color);">
+          <strong>⚠️ Column ${colLetter} Rate Limit / Error:</strong> ${escapeHtml(err.message || 'Failed to fetch response.')}
+        </div>
+      `;
+    }
   }
 }
 
@@ -8112,9 +8194,9 @@ async function runArenaLabComparison(userPrompt) {
   try {
     let resA, resB;
     if (provA === provB) {
-      // Stagger dispatch by 350ms when querying same provider to prevent rate-limit 429 errors
+      // Stagger dispatch by 600ms when querying same provider to prevent rate-limit 429 errors
       const taskA = fetchAIResponse(provA, modelA, promptA, arenaLabTurnHistoryA);
-      await new Promise(r => setTimeout(r, 350));
+      await new Promise(r => setTimeout(r, 600));
       const taskB = fetchAIResponse(provB, modelB, promptB, arenaLabTurnHistoryB);
 
       const results = await Promise.allSettled([taskA, taskB]);

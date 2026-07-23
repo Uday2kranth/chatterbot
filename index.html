@@ -1556,18 +1556,25 @@
             </div>
           </div>
 
-          <!-- Right: Session Actions Group -->
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <!-- Export Combined PDF Button -->
-            <button id="arena-export-combined-pdf" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.75rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--accent-secondary); padding:4px 10px; cursor:pointer;" title="Export Both Columns Side-by-Side to PDF">
-              <i class="fa-solid fa-file-pdf" style="color:var(--accent-secondary);"></i>
-              <span class="desktop-only">Export Combined PDF</span>
-            </button>
+          <!-- Right: Session Actions Group & Red Circular Close Button -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div id="arena-session-actions-group" style="display: flex; align-items: center; gap: 6px;">
+              <!-- Export Combined PDF Button -->
+              <button id="arena-export-combined-pdf" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.75rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--accent-secondary); padding:4px 10px; cursor:pointer;" title="Export Both Columns Side-by-Side to PDF">
+                <i class="fa-solid fa-file-pdf" style="color:var(--accent-secondary);"></i>
+                <span class="desktop-only">Export Combined PDF</span>
+              </button>
 
-            <!-- Clear Session Button -->
-            <button id="arena-clear-session-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.75rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--error-color); padding:4px 10px; cursor:pointer;" title="Clear Arena Test Session">
-              <i class="fa-solid fa-broom"></i>
-              <span class="desktop-only">Clear Session</span>
+              <!-- Clear Session Button -->
+              <button id="arena-clear-session-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.75rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--error-color); padding:4px 10px; cursor:pointer;" title="Clear Arena Test Session">
+                <i class="fa-solid fa-broom"></i>
+                <span class="desktop-only">Clear Session</span>
+              </button>
+            </div>
+
+            <!-- Red Circular Close Button (Returns User to Chat View) -->
+            <button id="close-arena-lab-btn" style="width: 28px; height: 28px; border-radius: 50%; background: #ef4444; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; transition: transform 0.2s, background-color 0.2s;" title="Close & Return to Active Chat">
+              <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
         </div>
@@ -2372,15 +2379,6 @@
 
       <!-- View 6: Bookmarks View -->
       <div id="bookmarks-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
-          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-            <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
-            <span>Bookmarked Notes & Formulas</span>
-          </h2>
-          <button class="drawer-btn secondary" id="close-bookmarks-view-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
-            <i class="fa-solid fa-xmark"></i> <span>Close Bookmarks</span>
-          </button>
-        </div>
         
         <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
           <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.45; margin:0;">

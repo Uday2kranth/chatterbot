@@ -7826,6 +7826,14 @@ function setupArenaLabView() {
   if (tabPromptsLibBtn) tabPromptsLibBtn.addEventListener('click', () => setArenaLabMode('prompts-lib'));
   if (tabBookmarksBtn) tabBookmarksBtn.addEventListener('click', () => setArenaLabMode('bookmarks'));
 
+  // Universal Close Button Handler (Returns user to active chat)
+  const closeArenaLabBtn = document.getElementById('close-arena-lab-btn');
+  if (closeArenaLabBtn) {
+    closeArenaLabBtn.addEventListener('click', () => {
+      showMainAreaView('chat');
+    });
+  }
+
   // Clear Session Handler
   const clearSessionBtn = document.getElementById('arena-clear-session-btn');
   if (clearSessionBtn) {
@@ -8040,6 +8048,8 @@ function setArenaLabMode(mode) {
   const colATitle = document.getElementById('arena-col-a-title');
   const colBTitle = document.getElementById('arena-col-b-title');
 
+  const arenaSessionActionsGroup = document.getElementById('arena-session-actions-group');
+
   [tabModelBtn, tabPromptBtn, tabPromptsLibBtn, tabBookmarksBtn].forEach(btn => {
     if (btn) {
       btn.style.background = 'transparent';
@@ -8052,6 +8062,7 @@ function setArenaLabMode(mode) {
     if (promptsContainer) promptsContainer.style.display = 'none';
     if (bookmarksContainer) bookmarksContainer.style.display = 'none';
     if (modeControlsContainer) modeControlsContainer.style.display = 'flex';
+    if (arenaSessionActionsGroup) arenaSessionActionsGroup.style.display = 'flex';
 
     if (mode === 'model') {
       if (tabModelBtn) {
@@ -8106,6 +8117,7 @@ function setArenaLabMode(mode) {
     if (workspaceEl) workspaceEl.style.display = 'none';
     if (bookmarksContainer) bookmarksContainer.style.display = 'none';
     if (modeControlsContainer) modeControlsContainer.style.display = 'none';
+    if (arenaSessionActionsGroup) arenaSessionActionsGroup.style.display = 'none';
     if (promptsContainer) {
       promptsContainer.style.display = 'flex';
       const promptsView = document.getElementById('prompts-library-view');
@@ -8127,6 +8139,7 @@ function setArenaLabMode(mode) {
     if (workspaceEl) workspaceEl.style.display = 'none';
     if (promptsContainer) promptsContainer.style.display = 'none';
     if (modeControlsContainer) modeControlsContainer.style.display = 'none';
+    if (arenaSessionActionsGroup) arenaSessionActionsGroup.style.display = 'none';
     if (bookmarksContainer) {
       bookmarksContainer.style.display = 'flex';
       const bookmarksView = document.getElementById('bookmarks-view');

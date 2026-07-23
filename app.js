@@ -8060,8 +8060,14 @@ function setArenaLabMode(mode) {
       if (colBModelGroup) colBModelGroup.style.display = 'flex';
       if (colBTemplateGroup) colBTemplateGroup.style.display = 'none';
 
-      if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-robot"></i> MODEL A / COLUMN A';
-      if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B';
+      if (colATitle) {
+        colATitle.innerHTML = '<i class="fa-solid fa-robot"></i> MODEL A / COLUMN A';
+        colATitle.style.fontSize = '0.85rem';
+      }
+      if (colBTitle) {
+        colBTitle.innerHTML = '<i class="fa-solid fa-bolt"></i> MODEL B / COLUMN B';
+        colBTitle.style.fontSize = '0.85rem';
+      }
     } else {
       if (tabPromptBtn) {
         tabPromptBtn.style.background = 'var(--accent-primary)';
@@ -8076,8 +8082,14 @@ function setArenaLabMode(mode) {
       if (colBModelGroup) colBModelGroup.style.display = 'none';
       if (colBTemplateGroup) colBTemplateGroup.style.display = 'flex';
 
-      if (colATitle) colATitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE A';
-      if (colBTitle) colBTitle.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> PROMPT TEMPLATE B';
+      if (colATitle) {
+        colATitle.textContent = 'PROMPT TEMPLATE A:';
+        colATitle.style.fontSize = '0.75rem';
+      }
+      if (colBTitle) {
+        colBTitle.textContent = 'PROMPT TEMPLATE B:';
+        colBTitle.style.fontSize = '0.75rem';
+      }
     }
   } else if (mode === 'prompts-lib') {
     if (tabPromptsLibBtn) {

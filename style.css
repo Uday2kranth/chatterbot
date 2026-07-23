@@ -2521,25 +2521,29 @@ body > svg[id^="mermaid"] {
     display: none !important; /* Hides decorative title banner on mobile to save 150px+ vertical viewport space */
   }
 
-  .arena-subnav-bar {
+  .arena-subnav-bar,
+  .prompts-subnav-bar {
     width: 100% !important;
     display: flex !important;
     justify-content: space-between !important;
     gap: 3px !important;
     padding: 3px !important;
     overflow-x: auto !important;
+    flex-wrap: nowrap !important;
   }
 
-  .arena-subnav-tab-btn {
+  .arena-subnav-tab-btn,
+  .prompts-subnav-tab-btn {
     padding: 6px 4px !important;
-    font-size: 0.7rem !important;
+    font-size: 0.68rem !important;
     flex: 1 !important;
     text-align: center !important;
     white-space: nowrap !important;
     justify-content: center !important;
   }
 
-  .arena-subnav-bar::-webkit-scrollbar {
+  .arena-subnav-bar::-webkit-scrollbar,
+  .prompts-subnav-bar::-webkit-scrollbar {
     display: none !important;
   }
 

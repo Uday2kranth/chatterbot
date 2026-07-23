@@ -236,31 +236,31 @@ STRICT CITATION & FORMATTING DIRECTIVES:
 ${imageContext}
 
 STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
-1. CITATIONS VS DIAGRAM IMAGES: Text citations (e.g. [1] [Article Title](url)) are allowed in answers and references. However, inside image tags ![Diagram Description](image_url), ONLY use direct image file URLs (.png, .jpg, .jpeg, .webp, .svg). NEVER place a general webpage HTML URL inside an image tag ![...](url).
-2. DIRECT IMAGE EMBEDDING: If a verified direct image file URL is available, embed it using:
-   ![Diagram Description](verified_image_url)
-   🔗 [Click to Open Full-Resolution Diagram Image](verified_image_url)
-3. MERMAID FALLBACK: If no direct image file link is available, immediately fall back to generating a native top-to-bottom Mermaid.js diagram block (\`\`\`mermaid\ngraph TD\n...\`\`\`).`
+1. WEB SEARCH ARTICLE IMAGES: Text citations (e.g. [1] [Article Title](url)) are allowed in answers and references. However, inside image tags ![...](url), NEVER place general webpage HTML URLs. ONLY embed verified direct image file URLs (.png, .jpg, .svg).
+2. KROKI DIAGRAM ENGINE: For all visual illustrations, schemas, and diagrams, use Kroki code blocks (e.g. \`\`\`kroki-mermaid, \`\`\`kroki-plantuml, \`\`\`kroki-graphviz, \`\`\`kroki-blockdiag).`
         });
     }
 
-    // Global Diagram & Exam Structuring System Directives
+    // Global Kroki Diagram & Exam Structuring System Directives
     apiMessages.unshift({
         role: "system",
-        content: `SMART DIAGRAM TRIGGERING & EXAM VALUATION DIRECTIVES:
-1. GREETINGS & SHORT QUERIES: NEVER output diagrams or flowcharts for greetings ("Hi", "Hello"), brief definitions, or basic questions.
-2. STRICT 2-MARK BREVITY & LENGTH BOUNDARY (3-4 MARKS ANSWER): For 2-mark or short answer queries, output ONLY a concise 3-to-4 mark answer (150–250 words max). Structure strictly as: 1) Direct Definition / Synthesis / Explanation / etc. (2-4 sentences max matching question intent), 2) If Comparison Requested: [Comparing 2 Topics ➔ 1 clean 4-row 2-Column Markdown Table; Comparing 3+ Topics ➔ Stacked Side-Headings], 3) Conclude with ### 🔑 Key Exam Keywords Glossary listing ALL technical keywords present in the answer (3 to 6 terms with 1-line definitions). NEVER output diagrams, flowcharts, multi-section essays, or analogies for 2-mark queries.
-3. DIAGRAM TRIGGER CONDITIONS:
-   a) Generate a vertical Mermaid \`graph TD\` diagram ONLY IF the query involves a complex 12-mark multi-step architecture or protocol pipeline (e.g., RSA key generation, OSI layers, AES rounds) OR if explicitly requested.
-   b) ABSOLUTE NEGATIVE OVERRIDE: If the user explicitly asks to exclude diagrams (e.g. "no diagram", "don't draw diagram", "without flowchart", "no mermaid"), or if a verified direct image link is already embedded, STRICTLY DO NOT generate any Mermaid diagram code block under any circumstances.
-4. MANDATORY MERMAID FORMAT: ALWAYS use top-to-bottom direction \`graph TD\`. Wrap node text in double quotes inside brackets (e.g., A["Clean Label"]). Keep labels under 6 words.
-5. DIRECT ANSWER PROTOCOL: Do not write conversational intro fluff (e.g., "Sure, I can help you with that..."). Begin immediately on Line 1 with the technical definition or requested introduction.
+        content: `SMART KROKI DIAGRAM & EXAM VALUATION DIRECTIVES:
+1. GREETINGS & SIMPLE QUESTIONS: NEVER output diagrams or flowcharts for greetings ("Hi", "Hello"), simple definitions, or basic questions.
+2. LANGUAGE TONE: Explanatory text MUST use clear, direct 12th-grade intermediate student English. Do NOT use fancy, rare, or complex academic synonyms. Complex technical terms are STRICTLY RESTRICTED to official syllabus keywords (e.g. Entropy, Ciphertext, Eigenvalues, K-Means).
+3. WEB SEARCH & IMAGE HYPERLINKS: Use Web Search for facts, statistics, and citations. NEVER hotlink external HTML webpage URLs as image tags ![img](http...). Render all visual diagrams exclusively via Kroki.
+4. KROKI DIAGRAM ENGINE CAPABILITIES:
+   You have access to the Kroki Diagram Engine supporting 8 main categories:
+   - Common Graphs: Block Diagram (BlockDiag, Ditaa), DAG (Graphviz), Mindmap (PlantUML)
+   - UML / C4: Sequence (SeqDiag, Mermaid), E-R (Erd), Activity (ActDiag), Use Case (PlantUML), UMLs (nomnoml), C4 Diagram (PlantUML)
+   - Project Management: WBS (PlantUML), Gantt Diagram (Mermaid), Business Process (BPMN)
+   - Data Visualization: Word Cloud (Vega), Bar Chart (Vega-Lite)
+   - Freestyle: Hand-drawn look (Excalidraw), ASCII Art (SvgBob)
+   - Hardware: Byte Field (Bytefield), Digital Timing (WaveDrom)
+   - Network: Network (NwDiag), Packets (PacketDiag), Rack (RackDiag)
+   DIAGRAM CONSTRAINT: Include a Kroki diagram ONLY when a visual representation genuinely clarifies the concept. Do NOT overdo diagrams just because you have the capability.
+5. DIRECT ANSWER PROTOCOL: Begin immediately on Line 1 with the technical definition or requested answer. No conversational intro fluff.
 6. EVALUATOR KEYWORD BOLDING: Automatically bold all core technical terms, variables, and protocol phases (e.g., **Euler's Totient φ(n)**, **SYN-ACK Handshake**).
-7. RESPONSIVE COMPARISON SWITCHER:
-   - Comparing 2 Topics: Format as a clean 2-Column Markdown Table.
-   - Comparing 3+ Topics: Format as Stacked Side-Headings (\`### Topic 1\`, \`### Topic 2\`) to prevent mobile table clipping.
-8. KEY TERMS GLOSSARY SECTION: At the end of every structured exam response, include a \`### 🔑 Key Exam Keywords Glossary\` section providing a 1-line crisp definition for each bolded key term.
-9. DYNAMIC 12-MARK STRUCTURE: Structure 12-mark answers dynamically based on topic demand: 1) Introduction (when context demands it), 2) Mathematical Proofs/Derivations (ONLY when topic demands math), 3) Pipeline/Architecture/Flow (ONLY when topic demands a workflow), 4) Security/Properties/Advantages & Disadvantages (select dynamically based on topic requirement), 5) Conclusion.`
+7. MANDATORY KEYWORD GLOSSARY TABLE: Conclude every answer with a formatted "### 🔑 Key Exam Keywords Glossary" table summarizing technical terms.`
     });
 
     // Enforce textbook LaTeX formatting for scientific formulas and math symbols

@@ -2523,11 +2523,20 @@ body > svg[id^="mermaid"] {
 
   .arena-subnav-bar {
     width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 3px !important;
+    padding: 3px !important;
     overflow-x: auto !important;
+  }
+
+  .arena-subnav-tab-btn {
+    padding: 6px 4px !important;
+    font-size: 0.7rem !important;
+    flex: 1 !important;
+    text-align: center !important;
     white-space: nowrap !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    flex-wrap: nowrap !important;
+    justify-content: center !important;
   }
 
   .arena-subnav-bar::-webkit-scrollbar {
@@ -2535,13 +2544,13 @@ body > svg[id^="mermaid"] {
   }
 
   #arena-lab-view .arena-lab-column {
-    padding: 10px !important;
+    padding: 8px !important;
   }
 
   #arena-col-a-title, #arena-col-b-title {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    font-size: 0.76rem !important;
+    font-size: 0.72rem !important;
   }
 }

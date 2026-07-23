@@ -185,20 +185,13 @@
         </button>
         <button class="new-chat-btn" id="exam-prep-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Exam Prep, Syllabus & Question Banks">
           <i class="fa-solid fa-book-open-reader" style="color:var(--accent-primary);"></i>
-          <span>Exam Prep & Syllabus</span>
+          <span>Exam Prep &amp; Syllabus</span>
         </button>
         <button class="new-chat-btn" id="prompts-library-btn" style="margin:0; width:100%; border-color:var(--accent-secondary); color:var(--accent-secondary);">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>Prompts Library</span>
         </button>
-        <button class="new-chat-btn" id="why-model-4u-btn" style="margin:0; width:100%; border-color:var(--accent-secondary); color:var(--accent-secondary);" title="Interactive 2-Mark vs 12-Mark Model Selection Matrix">
-          <i class="fa-solid fa-microchip" style="color:var(--accent-secondary);"></i>
-          <span>Why Model 4 U</span>
-        </button>
-        <button class="new-chat-btn" id="arena-lab-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-primary);" title="Dedicated Side-by-Side Dual AI Model & Prompt Comparison Lab">
-          <i class="fa-solid fa-scale-balanced" style="color:var(--accent-primary);"></i>
-          <span>Model Arena Lab</span>
-        </button>
+
         <!-- More Button (visible initially) -->
         <button class="new-chat-btn" id="more-features-expand-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Show More Features">
           <i class="fa-solid fa-square-plus" style="color:var(--accent-primary);"></i>
@@ -207,28 +200,32 @@
 
         <!-- Hidden container for extra features -->
         <div id="more-features-container" style="display:none; flex-direction:column; gap:4px; margin-top:4px; width:100%;">
-          <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Bookmarked Notes & Formulas">
-            <i class="fa-solid fa-bookmark" style="color:var(--accent-primary);"></i>
+          <button class="new-chat-btn" id="arena-lab-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-primary);" title="Dedicated Side-by-Side Dual AI Model &amp; Prompt Comparison Lab">
+            <i class="fa-solid fa-scale-balanced" style="color:var(--accent-primary);"></i>
+            <span>Model Arena Lab</span>
+          </button>
+          <button class="new-chat-btn" id="bookmarks-btn" style="margin:0; width:100%; border-color:var(--accent-secondary); color:var(--accent-secondary);" title="View Bookmarked Notes &amp; Formulas">
+            <i class="fa-solid fa-bookmark" style="color:var(--accent-secondary);"></i>
             <span>Bookmarked Notes</span>
           </button>
-          <button class="new-chat-btn" id="model-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Model Capabilities Benchmark">
-            <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
-            <span>Model Benchmark</span>
-          </button>
-          <button class="new-chat-btn" id="api-guide-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified API Key Generation Guide">
-            <i class="fa-solid fa-key" style="color:var(--accent-primary);"></i>
-            <span>API Guide</span>
-          </button>
-          <button class="new-chat-btn" id="token-tracker-btn" style="margin:0; width:100%; border-color:var(--accent-primary); color:var(--accent-secondary);" title="View Unified Token Tracker">
-            <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
-            <span>Token Tracker</span>
+          <button class="new-chat-btn" id="tools-hub-btn" style="margin:0; width:100%; border-color:var(--accent-primary); background:var(--bg-tertiary); color:var(--text-primary); font-weight:700;" title="Unified Tools, Benchmarks, API Guide &amp; Token Tracker Hub">
+            <i class="fa-solid fa-toolbox" style="color:var(--accent-primary);"></i>
+            <span>Tools &amp; Benchmarks Hub</span>
           </button>
 
-          <!-- Less Button (appears below Token Tracker) -->
+          <!-- Less Button (appears below extra features) -->
           <button class="new-chat-btn" id="more-features-collapse-btn" style="margin:4px 0 0 0; width:100%; border-color:var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary);" title="Hide Extra Features">
             <i class="fa-solid fa-square-minus" style="color:var(--accent-primary);"></i>
             <span>Less</span>
           </button>
+        </div>
+
+        <!-- Legacy hidden compatibility targets -->
+        <div style="display:none;">
+          <button id="why-model-4u-btn"></button>
+          <button id="model-guide-btn"></button>
+          <button id="api-guide-btn"></button>
+          <button id="token-tracker-btn"></button>
         </div>
       </div>
 
@@ -462,17 +459,8 @@
       </div>
 
       <!-- View 2: Model Capabilities Guide View -->
-      <div id="model-guide-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
-          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-            <i class="fa-solid fa-graduation-cap" style="color:var(--accent-primary);"></i>
-            <span>Model Capabilities Guide</span>
-          </h2>
-          <button class="drawer-btn secondary" id="close-model-guide-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition:opacity 0.2s;">
-            <i class="fa-solid fa-xmark"></i> <span>Close Guide</span>
-          </button>
-        </div>
-        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+      <div id="model-guide-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary); overflow-y: auto;">
+        <div style="padding: 24px; display:flex; flex-direction:column; gap:20px;">
           <!-- 🏆 Community Model & Role Benchmark Leaderboard -->
           <div style="background: var(--bg-tertiary); border: 1px solid var(--accent-primary); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
@@ -1109,17 +1097,8 @@
       </div>
 
       <!-- View 6: API Keys Generation Guide View -->
-      <div id="api-guide-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
-          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-            <i class="fa-solid fa-key" style="color:var(--accent-secondary);"></i>
-            <span>API Keys Generation Guide</span>
-          </h2>
-          <button class="drawer-btn secondary" id="close-api-guide-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition:opacity 0.2s;">
-            <i class="fa-solid fa-xmark"></i> <span>Close Guide</span>
-          </button>
-        </div>
-        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
+      <div id="api-guide-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary); overflow-y: auto;">
+        <div style="padding: 24px; display:flex; flex-direction:column; gap:20px;">
           <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin: 0;">
             Welcome! This guide is designed specifically for complete beginners who want to set up API keys for various AI model providers. All you need to follow these steps is a <strong>Google Account</strong> or a <strong>GitHub Account</strong>.
           </p>
@@ -1407,22 +1386,14 @@
 
 
       <!-- View 3: Token Tracker View -->
-      <div id="token-tracker-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary);">
-          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-            <i class="fa-solid fa-chart-pie" style="color:var(--accent-primary);"></i>
-            <span>Unified Token Tracker</span>
-          </h2>
-          <div style="display:flex; align-items:center; gap:10px;">
+      <div id="token-tracker-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary); overflow-y: auto;">
+        <div style="padding: 24px; display:flex; flex-direction:column; gap:20px;">
+          <!-- Top Action Bar -->
+          <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom: -8px;">
             <button class="drawer-btn secondary" id="reset-tracker-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:transparent; border:1px solid var(--error-color); color:var(--error-color); transition:opacity 0.2s;">
               <i class="fa-solid fa-rotate-left"></i> <span>Reset Stats</span>
             </button>
-            <button class="drawer-btn secondary" id="close-token-tracker-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition:opacity 0.2s;">
-              <i class="fa-solid fa-xmark"></i> <span>Close Tracker</span>
-            </button>
           </div>
-        </div>
-        <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">
           <!-- Summary Stats Cards -->
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:12px;">
             <div style="background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:12px; padding:14px; text-align:center;">
@@ -1787,6 +1758,40 @@
           <div id="why-model-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
             <!-- Populated dynamically via JS -->
           </div>
+        </div>
+      </div>
+
+      <!-- View 10: Unified Tools & Benchmarks Hub View -->
+      <div id="tools-hub-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
+        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); flex-wrap:wrap; gap:12px;">
+          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+            <i class="fa-solid fa-toolbox" style="color:var(--accent-primary);"></i>
+            <span>Tools &amp; Benchmarks Hub</span>
+          </h2>
+          <button class="drawer-btn secondary" id="close-tools-hub-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
+            <i class="fa-solid fa-xmark"></i> <span>Close Hub</span>
+          </button>
+        </div>
+
+        <!-- Top Navigation Tabs Bar -->
+        <div style="padding: 12px 24px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+          <button type="button" id="tools-tab-whymodel" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <i class="fa-solid fa-microchip"></i> ⚡ Why Model 4 U
+          </button>
+          <button type="button" id="tools-tab-benchmark" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <i class="fa-solid fa-chart-simple"></i> 📊 Model Benchmarks
+          </button>
+          <button type="button" id="tools-tab-apiguide" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <i class="fa-solid fa-key"></i> 🔑 API Guide &amp; Credentials
+          </button>
+          <button type="button" id="tools-tab-tokentracker" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <i class="fa-solid fa-chart-pie"></i> 📈 Token Tracker &amp; Analytics
+          </button>
+        </div>
+
+        <!-- Dynamic Content Body Container -->
+        <div id="tools-hub-content-container" style="padding: 0; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+          <!-- Dynamically populated / switched via app.js -->
         </div>
       </div>
 
@@ -2491,7 +2496,6 @@
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:6px;">
         <button type="button" id="confirm-unlock-btn" style="padding:10px 18px; border-radius:8px; background:var(--accent-primary); border:none; color:white; font-size:0.85rem; font-weight:700; cursor:pointer;">Unlock Settings</button>
       </div>
-    </div>
   </div>
 
   <!-- Release Announcement Modal Overlay -->

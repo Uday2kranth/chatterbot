@@ -927,6 +927,20 @@ function setupSidebarAndPrompts() {
     showMainAreaView('prompts-library');
   });
 
+  // 2b. Open Tools & Benchmarks Hub
+  const toolsHubBtn = document.getElementById('tools-hub-btn');
+  const closeToolsHubBtn = document.getElementById('close-tools-hub-btn');
+  if (toolsHubBtn) {
+    toolsHubBtn.addEventListener('click', () => {
+      showMainAreaView('tools-hub');
+    });
+  }
+  if (closeToolsHubBtn) {
+    closeToolsHubBtn.addEventListener('click', () => {
+      showMainAreaView('chat');
+    });
+  }
+
   // 3. Close prompts sub-view
   if (closePromptsBtn) {
     closePromptsBtn.addEventListener('click', () => {
@@ -5507,6 +5521,7 @@ function showMainAreaView(viewName) {
   const examPrepView = document.getElementById('exam-prep-view');
   const arenaLabView = document.getElementById('arena-lab-view');
   const whyModel4UView = document.getElementById('why-model-4u-view');
+  const toolsHubView = document.getElementById('tools-hub-view');
   
   if (!activeChatView) return;
 
@@ -5528,23 +5543,31 @@ function showMainAreaView(viewName) {
   if (examPrepView) examPrepView.style.display = 'none';
   if (arenaLabView) arenaLabView.style.display = 'none';
   if (whyModel4UView) whyModel4UView.style.display = 'none';
+  if (toolsHubView) toolsHubView.style.display = 'none';
   
   if (viewName === 'chat') {
     activeChatView.style.display = 'flex';
     updateHeaderLabels();
+  } else if (viewName === 'tools-hub' || viewName === 'why-model-4u') {
+    if (toolsHubView) toolsHubView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'TOOLS HUB';
+    document.getElementById('active-model-label').textContent = 'Unified Tools, Benchmarks, API Guide & Token Tracker';
+    renderToolsHubView('whymodel');
   } else if (viewName === 'model-guide') {
-    if (modelGuideView) modelGuideView.style.display = 'flex';
-    document.getElementById('active-provider-label').textContent = 'CHATTER_BOT';
+    if (toolsHubView) toolsHubView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'TOOLS HUB';
     document.getElementById('active-model-label').textContent = 'Model Capabilities Guide';
+    renderToolsHubView('benchmark');
   } else if (viewName === 'api-guide') {
-    if (apiGuideView) apiGuideView.style.display = 'flex';
-    document.getElementById('active-provider-label').textContent = 'API GUIDE';
+    if (toolsHubView) toolsHubView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'TOOLS HUB';
     document.getElementById('active-model-label').textContent = 'API Keys Generation Guide';
+    renderToolsHubView('apiguide');
   } else if (viewName === 'token-tracker') {
-    if (tokenTrackerView) tokenTrackerView.style.display = 'flex';
-    document.getElementById('active-provider-label').textContent = 'STATISTICS';
+    if (toolsHubView) toolsHubView.style.display = 'flex';
+    document.getElementById('active-provider-label').textContent = 'TOOLS HUB';
     document.getElementById('active-model-label').textContent = 'Unified Token Tracker';
-    renderTokenTracker();
+    renderToolsHubView('tokentracker');
   } else if (viewName === 'prompts-library') {
     if (promptsLibraryView) promptsLibraryView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'PROMPTS';
@@ -5570,11 +5593,6 @@ function showMainAreaView(viewName) {
     document.getElementById('active-model-label').textContent = 'Side-by-Side Dual AI Model & Prompt Engineering Canvas';
     initArenaLabDropdowns();
     populateArenaTemplateSelects();
-  } else if (viewName === 'why-model-4u') {
-    if (whyModel4UView) whyModel4UView.style.display = 'flex';
-    document.getElementById('active-provider-label').textContent = 'EXAM MATRIX';
-    document.getElementById('active-model-label').textContent = 'Why Model 4 U';
-    renderWhyModel4UCards('2marks');
   }
 
   // Auto-close mobile sidebar drawer when switching rooms/subviews
@@ -5584,6 +5602,89 @@ function showMainAreaView(viewName) {
     if (sidebar) sidebar.classList.remove('open');
     const backdrop = document.getElementById('mobile-sidebar-backdrop');
     if (backdrop) backdrop.style.display = 'none';
+  }
+}
+
+// ── Consolidated Tools & Benchmarks Hub Router ──
+let currentToolsHubTab = 'whymodel';
+
+function renderToolsHubView(tabName) {
+  if (tabName) currentToolsHubTab = tabName;
+
+  const tabWhyModel = document.getElementById('tools-tab-whymodel');
+  const tabBenchmark = document.getElementById('tools-tab-benchmark');
+  const tabApiGuide = document.getElementById('tools-tab-apiguide');
+  const tabTokenTracker = document.getElementById('tools-tab-tokentracker');
+
+  const updateTabStyles = () => {
+    if (tabWhyModel) {
+      tabWhyModel.style.background = currentToolsHubTab === 'whymodel' ? 'var(--accent-primary)' : 'transparent';
+      tabWhyModel.style.color = currentToolsHubTab === 'whymodel' ? 'white' : 'var(--text-secondary)';
+    }
+    if (tabBenchmark) {
+      tabBenchmark.style.background = currentToolsHubTab === 'benchmark' ? 'var(--accent-primary)' : 'transparent';
+      tabBenchmark.style.color = currentToolsHubTab === 'benchmark' ? 'white' : 'var(--text-secondary)';
+    }
+    if (tabApiGuide) {
+      tabApiGuide.style.background = currentToolsHubTab === 'apiguide' ? 'var(--accent-primary)' : 'transparent';
+      tabApiGuide.style.color = currentToolsHubTab === 'apiguide' ? 'white' : 'var(--text-secondary)';
+    }
+    if (tabTokenTracker) {
+      tabTokenTracker.style.background = currentToolsHubTab === 'tokentracker' ? 'var(--accent-primary)' : 'transparent';
+      tabTokenTracker.style.color = currentToolsHubTab === 'tokentracker' ? 'white' : 'var(--text-secondary)';
+    }
+  };
+
+  updateTabStyles();
+
+  if (tabWhyModel) tabWhyModel.onclick = () => renderToolsHubView('whymodel');
+  if (tabBenchmark) tabBenchmark.onclick = () => renderToolsHubView('benchmark');
+  if (tabApiGuide) tabApiGuide.onclick = () => renderToolsHubView('apiguide');
+  if (tabTokenTracker) tabTokenTracker.onclick = () => renderToolsHubView('tokentracker');
+
+  const whyModelView = document.getElementById('why-model-4u-view');
+  const modelGuideView = document.getElementById('model-guide-view');
+  const apiGuideView = document.getElementById('api-guide-view');
+  const tokenTrackerView = document.getElementById('token-tracker-view');
+  const container = document.getElementById('tools-hub-content-container');
+
+  if (whyModelView) whyModelView.style.display = 'none';
+  if (modelGuideView) modelGuideView.style.display = 'none';
+  if (apiGuideView) apiGuideView.style.display = 'none';
+  if (tokenTrackerView) tokenTrackerView.style.display = 'none';
+
+  if (currentToolsHubTab === 'whymodel' && whyModelView) {
+    if (container && !container.contains(whyModelView)) container.appendChild(whyModelView);
+    whyModelView.style.display = 'flex';
+    whyModelView.style.flex = '1';
+    whyModelView.style.minHeight = '0';
+    if (typeof renderWhyModel4UCards === 'function') {
+      renderWhyModel4UCards('2marks');
+    }
+  } else if (currentToolsHubTab === 'benchmark' && modelGuideView) {
+    if (container && !container.contains(modelGuideView)) container.appendChild(modelGuideView);
+    modelGuideView.style.display = 'flex';
+    modelGuideView.style.flex = '1';
+    modelGuideView.style.minHeight = '0';
+  } else if (currentToolsHubTab === 'apiguide' && apiGuideView) {
+    if (container && !container.contains(apiGuideView)) container.appendChild(apiGuideView);
+    apiGuideView.style.display = 'flex';
+    apiGuideView.style.flex = '1';
+    apiGuideView.style.minHeight = '0';
+  } else if (currentToolsHubTab === 'tokentracker' && tokenTrackerView) {
+    if (container && !container.contains(tokenTrackerView)) container.appendChild(tokenTrackerView);
+    tokenTrackerView.style.display = 'flex';
+    tokenTrackerView.style.flex = '1';
+    tokenTrackerView.style.minHeight = '0';
+    if (typeof loadTokenTrackerFromStorage === 'function') {
+      loadTokenTrackerFromStorage();
+    }
+    if (typeof loadTokenTrackerFromServer === 'function') {
+      loadTokenTrackerFromServer().then(() => {
+        if (typeof renderTokenTracker === 'function') renderTokenTracker();
+      });
+    }
+    if (typeof renderTokenTracker === 'function') renderTokenTracker();
   }
 }
 
@@ -5687,7 +5788,13 @@ function renderPromptsLibrary() {
       return p.category === 'generic' || !p.isMsc;
     } else if (currentPromptsTab === 'supply') {
       // Supply Tab: strictly show Cryptography & Network Security (MDS-401) and supply prompts
-      return p.id.includes('crypto') || p.badge === 'MDS-401' || p.category === 'supply';
+      const isSupplyItem = p.id.includes('crypto') || p.badge === 'MDS-401' || p.category === 'supply';
+      if (!isSupplyItem) return false;
+      if (currentMscFilter === 'all' || currentMscFilter === 'supply') return true;
+      if (currentMscFilter === '2marks') return p.id.includes('2marks') || p.category === '2marks';
+      if (currentMscFilter === '12marks') return p.id.includes('12marks') || p.category === '12marks';
+      if (currentMscFilter === 'fullgold') return p.id.includes('fools_gold') || p.category === 'fullgold';
+      return true;
     } else {
       // MSc Tab
       if (!p.isMsc) return false;

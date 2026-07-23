@@ -1424,40 +1424,25 @@
 
       <!-- View 4: Prompts Library View -->
       <div id="prompts-library-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-secondary);">
-        <div style="border-bottom: 1px solid var(--border-color); padding: 16px 24px; display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); flex-wrap:wrap; gap:12px;">
-          <h2 style="margin:0; font-size:1.15rem; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
-            <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent-primary);"></i>
-            <span>Curated Prompts Library</span>
-          </h2>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <button class="drawer-btn primary" id="add-prompt-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--accent-primary); color:white; border:none; display:flex; align-items:center; gap:6px; font-weight:600; transition: opacity 0.2s;">
-              <i class="fa-solid fa-plus"></i> <span>Add Prompt</span>
+        <!-- Prompts Library Top Controls Header Bar -->
+        <div style="padding: 10px 20px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+          <!-- Left: Main Section Tabs -->
+          <div class="prompts-subnav-bar" style="display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 2px; gap: 2px; flex-wrap: wrap;">
+            <button type="button" id="prompts-tab-msc" class="custom-select prompts-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <i class="fa-solid fa-graduation-cap"></i> <span>🎓 MSc Data Science<span class="desktop-only"> Exam Prep</span></span>
             </button>
-            <button class="drawer-btn secondary" id="close-prompts-btn" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; cursor:pointer; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); transition: opacity 0.2s;">
-              <i class="fa-solid fa-xmark"></i> <span>Close Library</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Prompts Library Top Navigation Tabs & Filter Bar -->
-        <div style="padding: 12px 24px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
-          <!-- 3 Main Top Section Tabs -->
-          <div class="prompts-subnav-bar" style="display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 4px; flex-wrap: wrap; width: 100%;">
-            <button type="button" id="prompts-tab-msc" class="custom-select prompts-subnav-tab-btn" style="padding: 6px 10px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-              <i class="fa-solid fa-graduation-cap"></i> <span>🎓 MSc Data Science<span class="desktop-only"> Exam Prep &amp; Collections</span></span>
-            </button>
-            <button type="button" id="prompts-tab-supply" class="custom-select prompts-subnav-tab-btn" style="padding: 6px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+            <button type="button" id="prompts-tab-supply" class="custom-select prompts-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
               <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> <span>🚨 Backlog<span class="desktop-only"> Collection</span></span>
             </button>
-            <button type="button" id="prompts-tab-generic" class="custom-select prompts-subnav-tab-btn" style="padding: 6px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-              <i class="fa-solid fa-book-open"></i> <span>📖 Generic<span class="desktop-only"> Study Helpful Prompts</span></span>
+            <button type="button" id="prompts-tab-generic" class="custom-select prompts-subnav-tab-btn" style="padding: 5px 10px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <i class="fa-solid fa-book-open"></i> <span>📖 Generic<span class="desktop-only"> Study Prompts</span></span>
             </button>
           </div>
 
-          <!-- MSc Data Science Category Filter Dropdown (Visible on MSc Tab) -->
-          <div id="msc-filter-container" style="display: flex; align-items: center; gap: 8px;">
-            <label for="msc-prompts-select" style="font-size: 0.78rem; font-weight: 700; color: var(--accent-primary);">CATEGORY:</label>
-            <select id="msc-prompts-select" class="custom-select" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem; font-weight: 600; outline: none; cursor: pointer;">
+          <!-- Center: Category Filter Dropdown -->
+          <div id="msc-filter-container" style="display: flex; align-items: center; gap: 6px;">
+            <label for="msc-prompts-select" style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary);">CATEGORY:</label>
+            <select id="msc-prompts-select" class="custom-select" style="padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.78rem; font-weight: 600; outline: none; cursor: pointer; max-width: 260px;">
               <option value="all">🌐 All MSc Data Science Prompts</option>
               <option value="supply">🚨 Supply &amp; Backlog Collection (Cryptography &amp; Network Security)</option>
               <option value="2marks">⚡ 2-Mark Short Answer Prompts</option>
@@ -1474,6 +1459,11 @@
               <option value="msc_core">🎓 MSc Data Science Core Prompts</option>
             </select>
           </div>
+
+          <!-- Right: Add Custom Prompt Button -->
+          <button class="drawer-btn primary" id="add-prompt-btn" style="padding: 5px 12px; font-size: 0.78rem; border-radius: 8px; cursor: pointer; background: var(--accent-primary); color: white; border: none; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: opacity 0.2s;">
+            <i class="fa-solid fa-plus"></i> <span>Add Prompt</span>
+          </button>
         </div>
 
         <div style="padding: 24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:20px;">

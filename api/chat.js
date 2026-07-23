@@ -245,8 +245,8 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
     apiMessages.unshift({
         role: "system",
         content: `EXAM ANSWER LENGTH & SCOPE BOUNDARY DIRECTIVES:
-1. 12-MARK LONG ANSWERS: Target exactly ~1,000 words (~2.5 to 3 pages formatted). Provide thorough depth, clear structured headings, and relevant diagrams/formulas. Do NOT inflate or stretch answers beyond 1,000 words. Do NOT bring in unrelated topics or tangential derivations.
-2. 2-MARK / SHORT QUESTIONS: Target exactly ~200 words (~0.5 page). Provide a direct definition, key property, and 1 highlight table or equation.
+1. 12-MARK LONG ANSWERS: Target STRICTLY between 600 and 900 words MAX (~2 pages formatted). Provide concise high-density depth, structured headings, and relevant diagrams/formulas. STRICTLY DO NOT EXCEED 900 WORDS. NEVER output 4-6 pages of text.
+2. 2-MARK / SHORT QUESTIONS: Target STRICTLY between 120 and 180 words MAX (~0.5 page). Provide a direct definition, key property, and 1 highlight table or equation.
 3. TOPIC INTENT ISOLATION:
    - For VISUAL/DESCRIPTIVE topics (e.g. Data Visualization, Architectures): Provide definitions, Kroki diagrams, and a summary comparison table. Do NOT include unasked mathematical derivations or calculus.
    - For NUMERICAL/METRIC topics (e.g. Distance Metrics, Bayes Theorem): Provide LaTeX formulas, a 3-step worked numerical calculation, and metric properties. Do NOT include unasked visual history fluff.
@@ -320,7 +320,8 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
                         headers: headers,
                         body: JSON.stringify({
                             model: targetModel,
-                            messages: apiMessages
+                            messages: apiMessages,
+                            max_tokens: 1800
                         })
                     });
 

@@ -5545,10 +5545,17 @@ function showMainAreaView(viewName) {
   if (whyModel4UView) whyModel4UView.style.display = 'none';
   if (toolsHubView) toolsHubView.style.display = 'none';
   
+  const chatHeader = document.querySelector('.chat-header');
+  
   if (viewName === 'chat') {
+    if (chatHeader) chatHeader.style.display = 'flex';
     activeChatView.style.display = 'flex';
     updateHeaderLabels();
-  } else if (viewName === 'tools-hub' || viewName === 'why-model-4u') {
+  } else {
+    if (chatHeader) chatHeader.style.display = 'none';
+  }
+
+  if (viewName === 'tools-hub' || viewName === 'why-model-4u') {
     if (toolsHubView) toolsHubView.style.display = 'flex';
     document.getElementById('active-provider-label').textContent = 'TOOLS HUB';
     document.getElementById('active-model-label').textContent = 'Unified Tools, Benchmarks, API Guide & Token Tracker';

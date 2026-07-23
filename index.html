@@ -1525,66 +1525,60 @@
 
       <!-- View 6: Dedicated Arena Lab & Prompts Studio -->
       <div id="arena-lab-view" style="display: none; flex-direction: column; flex: 1; min-height: 0; background-color: var(--bg-primary);">
-        <!-- Top Control Header -->
-        <div style="padding: 12px 24px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
-          <div style="display: flex; align-items: center; gap: 14px; width: 100%; justify-content: space-between; flex-wrap: wrap;">
-            <div class="arena-header-banner-title" style="display: flex; align-items: center; gap: 8px;">
-              <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.3rem; color: var(--accent-primary);"></i>
-              <h2 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">✨ Prompt, Bookmarks &amp; AI Studio</h2>
-            </div>
-            
-            <!-- Arena Lab Sub-Navigation Mode Bar -->
-            <div class="arena-subnav-bar" style="display: flex; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 3px; gap: 4px; overflow-x: auto; max-width: 100%; white-space: nowrap;">
-              <button id="arena-tab-prompts-lib" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;">
-                📚 Prompts<span class="desktop-only"> Library</span>
-              </button>
-              <button id="arena-tab-model" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: var(--accent-primary); color: white; cursor: pointer; flex-shrink: 0;">
-                🤖 Model<span class="desktop-only"> Arena</span>
-              </button>
-              <button id="arena-tab-prompt" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;">
-                ✨ Prompt<span class="desktop-only"> Arena</span>
-              </button>
-              <button id="arena-tab-bookmarks" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;">
-                🔖 Bookmarks<span class="desktop-only"> Notes</span>
-              </button>
-            </div>
+        <!-- Top Control Header (Single Streamlined Space-Saving Row) -->
+        <div style="padding: 8px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+          <!-- Left: Sub-Navigation Tabs Bar -->
+          <div class="arena-subnav-bar" style="display: flex; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: 2px; gap: 2px; overflow-x: auto; max-width: 100%; white-space: nowrap;">
+            <button id="arena-tab-prompts-lib" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;">
+              📚 Prompts<span class="desktop-only"> Library</span>
+            </button>
+            <button id="arena-tab-model" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: var(--accent-primary); color: white; cursor: pointer; flex-shrink: 0;">
+              🤖 Model<span class="desktop-only"> Arena</span>
+            </button>
+            <button id="arena-tab-prompt" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;">
+              ✨ Prompt<span class="desktop-only"> Arena</span>
+            </button>
+            <button id="arena-tab-bookmarks" class="custom-select arena-subnav-tab-btn" style="padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; flex-shrink: 0;">
+              🔖 Bookmarks<span class="desktop-only"> Notes</span>
+            </button>
           </div>
 
-          <!-- Mode Controls Container -->
-          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; justify-content: space-between;">
+          <!-- Center: Mode Controls Group -->
+          <div id="arena-mode-controls-container" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
             <!-- Prompt Template Picker Dropdown (Used in Model Arena Mode) -->
             <div id="arena-model-mode-template-group" style="display: flex; align-items: center; gap: 6px;">
               <label style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary);">✨ TEMPLATE:</label>
-              <select id="arena-template-select" class="custom-select" style="padding: 5px 10px; font-size: 0.8rem; min-width: 140px; max-width: 220px;">
+              <select id="arena-template-select" class="custom-select" style="padding: 4px 8px; font-size: 0.78rem; min-width: 130px; max-width: 200px;">
                 <option value="">-- Direct Raw Prompt --</option>
                 <!-- Populated dynamically via app.js -->
               </select>
             </div>
 
             <!-- Shared Provider & Model Selector (Used in Prompt Arena Mode) -->
-            <div id="arena-prompt-mode-model-group" style="display: none; align-items: center; gap: 8px;">
+            <div id="arena-prompt-mode-model-group" style="display: none; align-items: center; gap: 6px;">
               <label style="font-size: 0.75rem; font-weight: 700; color: var(--accent-primary);">SHARED MODEL:</label>
-              <select id="arena-shared-provider-select" class="custom-select" style="padding: 5px 8px; font-size: 0.8rem;">
+              <select id="arena-shared-provider-select" class="custom-select" style="padding: 4px 8px; font-size: 0.78rem;">
                 <!-- Dynamically synchronized -->
               </select>
-              <select id="arena-shared-model-select" class="custom-select" style="padding: 5px 8px; font-size: 0.8rem; min-width: 140px;">
+              <select id="arena-shared-model-select" class="custom-select" style="padding: 4px 8px; font-size: 0.78rem; min-width: 130px;">
                 <!-- Dynamically populated -->
               </select>
             </div>
+          </div>
 
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <!-- Export Combined PDF Button -->
-              <button id="arena-export-combined-pdf" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.78rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--accent-secondary); padding:6px 12px; cursor:pointer;" title="Export Both Columns Side-by-Side to PDF">
-                <i class="fa-solid fa-file-pdf" style="color:var(--accent-secondary);"></i>
-                <span class="desktop-only">Export Combined PDF</span>
-              </button>
+          <!-- Right: Session Actions Group -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <!-- Export Combined PDF Button -->
+            <button id="arena-export-combined-pdf" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.75rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--accent-secondary); padding:4px 10px; cursor:pointer;" title="Export Both Columns Side-by-Side to PDF">
+              <i class="fa-solid fa-file-pdf" style="color:var(--accent-secondary);"></i>
+              <span class="desktop-only">Export Combined PDF</span>
+            </button>
 
-              <!-- Clear Session Button -->
-              <button id="arena-clear-session-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.78rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--error-color); padding:6px 12px; cursor:pointer;" title="Clear Arena Test Session">
-                <i class="fa-solid fa-broom"></i>
-                <span class="desktop-only">Clear Session</span>
-              </button>
-            </div>
+            <!-- Clear Session Button -->
+            <button id="arena-clear-session-btn" class="custom-select" style="display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.75rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--error-color); padding:4px 10px; cursor:pointer;" title="Clear Arena Test Session">
+              <i class="fa-solid fa-broom"></i>
+              <span class="desktop-only">Clear Session</span>
+            </button>
           </div>
         </div>
 

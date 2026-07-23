@@ -1489,10 +1489,13 @@
 
         <!-- Prompts Library Top Navigation Tabs & Filter Bar -->
         <div style="padding: 12px 24px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
-          <!-- 2 Main Top Section Tabs -->
-          <div style="display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 4px;">
+          <!-- 3 Main Top Section Tabs -->
+          <div style="display: flex; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 3px; gap: 4px; flex-wrap: wrap;">
             <button type="button" id="prompts-tab-msc" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: var(--accent-primary); color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
               <i class="fa-solid fa-graduation-cap"></i> 🎓 MSc Data Science Exam Prep &amp; Collections
+            </button>
+            <button type="button" id="prompts-tab-supply" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> 🚨 Supply &amp; Backlog Collection
             </button>
             <button type="button" id="prompts-tab-generic" class="custom-select" style="padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
               <i class="fa-solid fa-book-open"></i> 📖 Generic Study Helpful Prompts
@@ -1504,6 +1507,7 @@
             <label for="msc-prompts-select" style="font-size: 0.78rem; font-weight: 700; color: var(--accent-primary);">CATEGORY:</label>
             <select id="msc-prompts-select" class="custom-select" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem; font-weight: 600; outline: none; cursor: pointer;">
               <option value="all">🌐 All MSc Data Science Prompts</option>
+              <option value="supply">🚨 Supply &amp; Backlog Collection (Cryptography &amp; Network Security)</option>
               <option value="2marks">⚡ 2-Mark Short Answer Prompts</option>
               <option value="12marks">🔥 12-Mark Deep Exam Proof Prompts</option>
               <option value="fullgold">🏆 Full Gold / Exam Master Prompts</option>

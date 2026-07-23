@@ -155,39 +155,6 @@ let activeAbortController = null;
 // 2b. Curated Prompt Library Default Scenarios
 const DEFAULT_PROMPTS = [
   {
-    "id": "crypto_12marks",
-    "title": "Cryptography 12marks",
-    "badge": "MDS-401",
-    "icon": "fa-key",
-    "contributor": "Akash & uday01",
-    "isMsc": true,
-    "category": "12marks",
-    "desc": "12-mark Cryptography answer with full exact syllabus context from exam prep.",
-    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator for Cryptography & Network Security (MDS-401).\n\nOFFICIAL SYLLABUS SCOPE:\n### 📘 UNIT - I: Overview of Network Security & Block Ciphers\n\n* **Overview of Network Security:**\n  OSI Security Architecture, Security Attacks, Security Services, Security Mechanisms, a Model for Network Security.\n\n* **Classical Encryption Techniques:**\n  Symmetric Cipher Model, Substitution Techniques, Transposition Techniques, Rotor Machines, Steganography.\n\n* **Block Ciphers:**\n  Structure and Data Encryption Standard (DES), Strength of DES.\n\n* **Block Cipher Operation:**\n  Double and Triple DES, Electronic Code Book (ECB), Cipher Block Chaining (CBC) Mode, Cipher Feedback (CFB) Mode, Output Feedback (OFB) Mode, Counter (CTR) Mode.\n\n\n### 📘 UNIT - II: AES, Stream Ciphers & Public-Key Cryptography\n\n* **Advanced Encryption Standard (AES):**\n  Origins, Structure, Round Functions, AES Key Expansion.\n\n* **Pseudorandom Number Generation & Stream Ciphers:**\n  Principles, Block Cipher based PRNG, RC4.\n\n* **Public-Key Cryptography:**\n  Principles of Public-Key Cryptosystems, RSA Algorithm.\n\n* **Key Management and Distribution:**\n  Symmetric and Asymmetric Key Distribution, Public Key Distribution, X.509 Certificates, Diffie-Hellman Key Exchange.\n\n\n### 📘 UNIT - III: Hash Functions, Digital Signatures & System/Network Security\n\n* **Cryptographic Hash Functions:**\n  Applications, SHA & MD5 Algorithms.\n\n* **Message Authentication Codes (MAC):**\n  Requirements, HMAC, CMAC.\n\n* **Digital Signatures:**\n  Concepts, NIST Digital Signature Algorithm (DSA).\n\n* **Transport-Level Security:**\n  SSL, TLS, HTTPS, SSH.\n\n* **E-Mail Security:**\n  Pretty Good Privacy (PGP), S/MIME.\n\n* **IP Security:**\n  Overview, Architecture, Encapsulating Security Payload (ESP), Internet Key Exchange (IKE).\n\n* **System Security:**\n  Intruders, Intrusion Detection Systems (IDS), Password Management, Virus and Countermeasures, Firewall Design Principles and Types.\n\n\n---\n\n### 📚 Recommended Textbooks & Reference Books:\n1. **William Stallings**, *Cryptography and Network Security – Principles and Practice (6th Edition)*\n2. **Zhenfu Cao**, *New Directions of Modern Cryptography*\n3. **Douglas R. Stinson**, *Cryptography Theory and Practice*\n4. **Tom St Denis, Simon Johnson**, *Cryptography for Developers*\n5. **Joseph Migga Kizza**, *A Guide to Computer Network Security*\n6. **A. Menezes, P. Van Oorschot, S. Vanstone**, *Handbook of Applied Cryptography*\n7. **Henk C.A. van Tilborg, Sushil Jajodia**, *Encyclopedia of Cryptography and Security*\n8. **Keith M. Martin**, *Everyday Cryptography - Fundamental Principles and Applications*\n\nSTRICT RULES:\n1) Generate a dynamic 12-mark answer (1. Introduction when context demands it; 2. Mathematical Proofs/Derivations ONLY when topic demands math; 3. Pipeline/Architecture/Flow ONLY when topic demands a workflow; 4. Security/Properties/Advantages & Disadvantages selected dynamically based on topic requirement; 5. Conclusion).\n2) Simple day-to-day Indian English.\n3) Bold all core evaluator key terms.\n4) Conclude with ### 🔑 Key Exam Keywords Glossary table.\n5) Draw top-to-bottom vertical Mermaid TD diagram ONLY if value-adding to a complex multi-step pipeline."
-  },
-  {
-    "id": "crypto_2marks",
-    "title": "Cryptography 2marks",
-    "badge": "MDS-401",
-    "icon": "fa-key",
-    "contributor": "Akash & uday01",
-    "isMsc": true,
-    "category": "2marks",
-    "desc": "2-mark Cryptography short answer with unit topics, responsive comparison, and strict 3-4 mark brevity cap.",
-    "promptText": "You are an Osmania University Exam Evaluator for Cryptography & Network Security (MDS-401).\nSyllabus Scope: Unit 1 (Network Security Overview, Classical Ciphers, Block Ciphers, DES, Modes), Unit 2 (AES, PRNG, RC4, RSA, Diffie-Hellman, X.509), Unit 3 (Hash Functions, MAC, Digital Signatures, SSL/TLS, PGP, IPsec, Firewalls/IDS).\n\nSTRICT 2-MARK BREVITY & LENGTH BOUNDARY (3-4 MARKS ANSWER):\n1) Output ONLY a 3-4 mark concise answer (150-250 words max).\n2) Direct Definition / Synthesis / Explanation / etc. (2-4 sentences max matching question intent).\n3) If Comparison Requested: [Comparing 2 Topics ➔ 1 clean 4-row 2-Column Markdown Table; Comparing 3+ Topics ➔ Stacked Side-Headings].\n4) Conclude with ### 🔑 Key Exam Keywords Glossary listing ALL technical keywords present in the answer (3 to 6 terms with 1-line definitions).\n5) NEVER output diagrams, flowcharts, multi-section essays, or real-world analogies."
-  },
-  {
-    "id": "crypto_fools_gold",
-    "title": "Cryptography Fools Gold",
-    "badge": "MDS-401",
-    "icon": "fa-key",
-    "contributor": "Akash & uday01",
-    "isMsc": true,
-    "category": "fullgold",
-    "desc": "Interactive Cryptography mentor asking student preference.",
-    "promptText": "You are an interactive Cryptography & Network Security (MDS-401) Study Buddy.\n1) First ask student: \"Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?\"\n2) Tailor response to their choice in simple Indian English.\n3) Bold key terms and conclude with ### 🔑 Key Exam Keywords Glossary."
-  },
-  {
     "id": "datamining_12marks",
     "title": "Data Mining 12marks",
     "badge": "MDS-402",
@@ -448,8 +415,40 @@ const DEFAULT_PROMPTS = [
     "contributor": "uday01",
     "isMsc": true,
     "category": "msc_core",
-    "desc": "Interactive study buddy aware of all 6 MSc Data Science subject papers.",
     "promptText": "You are an interactive M.Sc. Data Science Core Study Buddy aware of Cryptography, Data Mining, Sentiment Analysis, Computer Vision, Web Mining, and Scalable Architecture.\n1) Ask student their preference (intuitive vs step-by-step breakdown).\n2) Tailor response in simple Indian English with ### 🔑 Key Exam Keywords Glossary."
+  },
+  {
+    "id": "crypto_12marks",
+    "title": "Cryptography 12marks",
+    "badge": "MDS-401",
+    "icon": "fa-key",
+    "contributor": "Akash & uday01",
+    "isMsc": true,
+    "category": "12marks",
+    "desc": "12-mark Cryptography answer with full exact syllabus context from exam prep.",
+    "promptText": "You are an Osmania University M.Sc. Data Science Exam Evaluator for Cryptography & Network Security (MDS-401).\n\nOFFICIAL SYLLABUS SCOPE:\n### 📘 UNIT - I: Overview of Network Security & Block Ciphers\n\n* **Overview of Network Security:**\n  OSI Security Architecture, Security Attacks, Security Services, Security Mechanisms, a Model for Network Security.\n\n* **Classical Encryption Techniques:**\n  Symmetric Cipher Model, Substitution Techniques, Transposition Techniques, Rotor Machines, Steganography.\n\n* **Block Ciphers:**\n  Structure and Data Encryption Standard (DES), Strength of DES.\n\n* **Block Cipher Operation:**\n  Double and Triple DES, Electronic Code Book (ECB), Cipher Block Chaining (CBC) Mode, Cipher Feedback (CFB) Mode, Output Feedback (OFB) Mode, Counter (CTR) Mode.\n\n\n### 📘 UNIT - II: AES, Stream Ciphers & Public-Key Cryptography\n\n* **Advanced Encryption Standard (AES):**\n  Origins, Structure, Round Functions, AES Key Expansion.\n\n* **Pseudorandom Number Generation & Stream Ciphers:**\n  Principles, Block Cipher based PRNG, RC4.\n\n* **Public-Key Cryptography:**\n  Principles of Public-Key Cryptosystems, RSA Algorithm.\n\n* **Key Management and Distribution:**\n  Symmetric and Asymmetric Key Distribution, Public Key Distribution, X.509 Certificates, Diffie-Hellman Key Exchange.\n\n\n### 📘 UNIT - III: Hash Functions, Digital Signatures & System/Network Security\n\n* **Cryptographic Hash Functions:**\n  Applications, SHA & MD5 Algorithms.\n\n* **Message Authentication Codes (MAC):**\n  Requirements, HMAC, CMAC.\n\n* **Digital Signatures:**\n  Concepts, NIST Digital Signature Algorithm (DSA).\n\n* **Transport-Level Security:**\n  SSL, TLS, HTTPS, SSH.\n\n* **E-Mail Security:**\n  Pretty Good Privacy (PGP), S/MIME.\n\n* **IP Security:**\n  Overview, Architecture, Encapsulating Security Payload (ESP), Internet Key Exchange (IKE).\n\n* **System Security:**\n  Intruders, Intrusion Detection Systems (IDS), Password Management, Virus and Countermeasures, Firewall Design Principles and Types.\n\n\n---\n\n### 📚 Recommended Textbooks & Reference Books:\n1. **William Stallings**, *Cryptography and Network Security – Principles and Practice (6th Edition)*\n2. **Zhenfu Cao**, *New Directions of Modern Cryptography*\n3. **Douglas R. Stinson**, *Cryptography Theory and Practice*\n4. **Tom St Denis, Simon Johnson**, *Cryptography for Developers*\n5. **Joseph Migga Kizza**, *A Guide to Computer Network Security*\n6. **A. Menezes, P. Van Oorschot, S. Vanstone**, *Handbook of Applied Cryptography*\n7. **Henk C.A. van Tilborg, Sushil Jajodia**, *Encyclopedia of Cryptography and Security*\n8. **Keith M. Martin**, *Everyday Cryptography - Fundamental Principles and Applications*\n\nSTRICT RULES:\n1) Generate a dynamic 12-mark answer (1. Introduction when context demands it; 2. Mathematical Proofs/Derivations ONLY when topic demands math; 3. Pipeline/Architecture/Flow ONLY when topic demands a workflow; 4. Security/Properties/Advantages & Disadvantages selected dynamically based on topic requirement; 5. Conclusion).\n2) Simple day-to-day Indian English.\n3) Bold all core evaluator key terms.\n4) Conclude with ### 🔑 Key Exam Keywords Glossary table.\n5) Draw top-to-bottom vertical Mermaid TD diagram ONLY if value-adding to a complex multi-step pipeline."
+  },
+  {
+    "id": "crypto_2marks",
+    "title": "Cryptography 2marks",
+    "badge": "MDS-401",
+    "icon": "fa-key",
+    "contributor": "Akash & uday01",
+    "isMsc": true,
+    "category": "2marks",
+    "desc": "2-mark Cryptography short answer with unit topics, responsive comparison, and strict 3-4 mark brevity cap.",
+    "promptText": "You are an Osmania University Exam Evaluator for Cryptography & Network Security (MDS-401).\nSyllabus Scope: Unit 1 (Network Security Overview, Classical Ciphers, Block Ciphers, DES, Modes), Unit 2 (AES, PRNG, RC4, RSA, Diffie-Hellman, X.509), Unit 3 (Hash Functions, MAC, Digital Signatures, SSL/TLS, PGP, IPsec, Firewalls/IDS).\n\nSTRICT 2-MARK BREVITY & LENGTH BOUNDARY (3-4 MARKS ANSWER):\n1) Output ONLY a 3-4 mark concise answer (150-250 words max).\n2) Direct Definition / Synthesis / Explanation / etc. (2-4 sentences max matching question intent).\n3) If Comparison Requested: [Comparing 2 Topics ➔ 1 clean 4-row 2-Column Markdown Table; Comparing 3+ Topics ➔ Stacked Side-Headings].\n4) Conclude with ### 🔑 Key Exam Keywords Glossary listing ALL technical keywords present in the answer (3 to 6 terms with 1-line definitions).\n5) NEVER output diagrams, flowcharts, multi-section essays, or real-world analogies."
+  },
+  {
+    "id": "crypto_fools_gold",
+    "title": "Cryptography Fools Gold",
+    "badge": "MDS-401",
+    "icon": "fa-key",
+    "contributor": "Akash & uday01",
+    "isMsc": true,
+    "category": "fullgold",
+    "desc": "Interactive Cryptography mentor asking student preference.",
+    "promptText": "You are an interactive Cryptography & Network Security (MDS-401) Study Buddy.\n1) First ask student: \"Would you prefer a simple intuitive explanation with plain equation notations, or a step-by-step mathematical breakdown?\"\n2) Tailor response to their choice in simple Indian English.\n3) Bold key terms and conclude with ### 🔑 Key Exam Keywords Glossary."
   }
 ];
 
@@ -5599,6 +5598,7 @@ function renderPromptsLibrary() {
   container.innerHTML = '';
 
   const tabMsc = document.getElementById('prompts-tab-msc');
+  const tabSupply = document.getElementById('prompts-tab-supply');
   const tabGeneric = document.getElementById('prompts-tab-generic');
   const filterContainer = document.getElementById('msc-filter-container');
   const mscSelect = document.getElementById('msc-prompts-select');
@@ -5609,40 +5609,60 @@ function renderPromptsLibrary() {
 
   if (isGuestUser) {
     if (tabMsc) tabMsc.style.display = 'none';
+    if (tabSupply) tabSupply.style.display = 'none';
     if (filterContainer) filterContainer.style.display = 'none';
     currentPromptsTab = 'generic';
   } else {
     if (tabMsc) tabMsc.style.display = 'flex';
+    if (tabSupply) tabSupply.style.display = 'flex';
   }
 
   // Wire Tab Buttons if available
-  if (tabMsc && tabGeneric) {
+  const updateTabStyles = () => {
+    if (tabMsc) {
+      tabMsc.style.background = currentPromptsTab === 'msc' ? 'var(--accent-primary)' : 'transparent';
+      tabMsc.style.color = currentPromptsTab === 'msc' ? 'white' : 'var(--text-secondary)';
+    }
+    if (tabSupply) {
+      tabSupply.style.background = currentPromptsTab === 'supply' ? '#d97706' : 'transparent';
+      tabSupply.style.color = currentPromptsTab === 'supply' ? 'white' : 'var(--text-secondary)';
+    }
+    if (tabGeneric) {
+      tabGeneric.style.background = currentPromptsTab === 'generic' ? 'var(--accent-primary)' : 'transparent';
+      tabGeneric.style.color = currentPromptsTab === 'generic' ? 'white' : 'var(--text-secondary)';
+    }
+  };
+
+  if (tabMsc) {
     tabMsc.onclick = () => {
-      if (isGuestUser) {
-        showToast('Guest users do not have access to MSc Data Science Exam Collections.', 'error');
-        return;
-      }
+      if (isGuestUser) return showToast('Guest users do not have access to MSc Collections.', 'error');
       currentPromptsTab = 'msc';
-      tabMsc.style.background = 'var(--accent-primary)';
-      tabMsc.style.color = 'white';
-      tabGeneric.style.background = 'transparent';
-      tabGeneric.style.color = 'var(--text-secondary)';
+      updateTabStyles();
       if (filterContainer) filterContainer.style.display = 'flex';
       renderPromptsLibrary();
     };
+  }
 
+  if (tabSupply) {
+    tabSupply.onclick = () => {
+      if (isGuestUser) return showToast('Guest users do not have access to Supply Collections.', 'error');
+      currentPromptsTab = 'supply';
+      updateTabStyles();
+      if (filterContainer) filterContainer.style.display = 'flex';
+      renderPromptsLibrary();
+    };
+  }
+
+  if (tabGeneric) {
     tabGeneric.onclick = () => {
       currentPromptsTab = 'generic';
-      tabGeneric.style.background = 'var(--accent-primary)';
-      tabGeneric.style.color = 'white';
-      if (!isGuestUser) {
-        tabMsc.style.background = 'transparent';
-        tabMsc.style.color = 'var(--text-secondary)';
-      }
+      updateTabStyles();
       if (filterContainer) filterContainer.style.display = 'none';
       renderPromptsLibrary();
     };
   }
+
+  updateTabStyles();
 
   // Wire MSc Dropdown Selector if available
   if (mscSelect) {
@@ -5665,9 +5685,13 @@ function renderPromptsLibrary() {
 
     if (currentPromptsTab === 'generic') {
       return p.category === 'generic' || !p.isMsc;
+    } else if (currentPromptsTab === 'supply') {
+      // Supply Tab: strictly show Cryptography & Network Security (MDS-401) and supply prompts
+      return p.id.includes('crypto') || p.badge === 'MDS-401' || p.category === 'supply';
     } else {
       // MSc Tab
       if (!p.isMsc) return false;
+      if (currentMscFilter === 'supply') return p.id.includes('crypto') || p.badge === 'MDS-401' || p.category === 'supply';
       if (currentMscFilter === 'all') return true;
       if (currentMscFilter === '2marks') return p.id.includes('2marks') || p.category === '2marks';
       if (currentMscFilter === '12marks') return p.id.includes('12marks') || p.category === '12marks';

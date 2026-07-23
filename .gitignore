@@ -40,6 +40,7 @@
 vercel-credentials-map.md
 credentials.json
 token.json
+nrchatterbot_api_keys_*.json
 .env
 .env.local
 .env.*.local

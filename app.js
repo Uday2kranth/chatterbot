@@ -511,7 +511,7 @@ const PROVIDER_MODELS = {
     { value: "gemini-3.5-flash-lite", name: "Gemini 3.5 Flash-Lite", multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
     { value: "gemini-3.5-flash", name: "Gemini 3.5 Flash [WS]", webSearch: true, multimodal: true, voice: true, preferredVision: true, preferredVoice: true },
     { value: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash-Lite", multimodal: true, voice: true },
-    { value: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Preview)", multimodal: true, voice: true },
+    { value: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Preview - Offline)", multimodal: true, voice: true },
     { value: "gemma-4-31b-it", name: "Gemma 4 31B (AI Studio) [WS]", webSearch: true, multimodal: true, preferredVision: true }
   ],
   nararouter: [
@@ -1243,10 +1243,13 @@ function setupSidebarAndPrompts() {
 
 function checkMistralWarning() {
   const providerSelect = document.getElementById('provider-select');
+  const modelSelect = document.getElementById('model-select');
   const inputFooterText = document.querySelector('.input-footer span');
   if (!inputFooterText) return;
-  if (providerSelect.value === 'mistral') {
+  if (providerSelect && providerSelect.value === 'mistral') {
     inputFooterText.innerHTML = `<span style="color:var(--accent-primary); font-weight:500;"><i class="fa-solid fa-gauge-high"></i> Mistral Limit: 2 messages/min enforced.</span>`;
+  } else if (modelSelect && modelSelect.value === 'gemini-3.1-pro-preview') {
+    inputFooterText.innerHTML = `<span style="color:#ef4444; font-weight:600;"><i class="fa-solid fa-triangle-exclamation"></i> Notice: Gemini 3.1 Pro (Preview) is currently offline due to API quota limits. Please switch to Flash models.</span>`;
   } else {
     inputFooterText.innerHTML = `Logged in session secured.`;
   }
@@ -3228,7 +3231,13 @@ function renderMessages(messages) {
 
     const sender = document.createElement('span');
     sender.className = 'message-sender';
-    sender.textContent = msg.role === 'user' ? 'User' : 'Assistant';
+    if (msg.role === 'user') {
+      sender.textContent = 'User';
+    } else {
+      const provName = (msg.provider || (chatSessions[activeChatId] && chatSessions[activeChatId].provider) || '').toUpperCase();
+      const modelName = msg.modelName || msg.model || (chatSessions[activeChatId] && chatSessions[activeChatId].model) || 'AI Model';
+      sender.textContent = provName ? `${provName} / ${modelName}` : modelName;
+    }
     wrapper.appendChild(sender);
 
     const bubble = document.createElement('div');
@@ -3557,23 +3566,32 @@ function renderMessages(messages) {
       actions.appendChild(editBtn);
     }
 
+    // 5. Smart Retry Button (strictly for the last assistant message in session)
+    let lastAssistantIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') {
+        lastAssistantIdx = i;
+        break;
+      }
+    }
+    if (msg.role === 'assistant' && idx === lastAssistantIdx) {
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'msg-action-btn retry-action-btn';
+      retryBtn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> <span>Retry</span>`;
+      retryBtn.title = 'Regenerate response with current selected model';
+      retryBtn.addEventListener('click', () => {
+        let targetUserIdx = idx - 1;
+        while (targetUserIdx >= 0 && messages[targetUserIdx].role !== 'user') {
+          targetUserIdx--;
+        }
+        if (targetUserIdx >= 0) {
+          reSubmitFromUserMessage(targetUserIdx);
+        }
+      });
+      actions.appendChild(retryBtn);
+    }
+
     if (msg.role === 'assistant') {
-      // Render Responding Model Badge for total transparency (AI Assistant responses ONLY)
-      const modelBadge = document.createElement('span');
-      modelBadge.className = 'msg-model-badge';
-      modelBadge.style.fontSize = '0.75rem';
-      modelBadge.style.color = 'var(--text-muted)';
-      modelBadge.style.opacity = '0.85';
-      modelBadge.style.marginRight = '8px';
-      modelBadge.style.display = 'inline-flex';
-      modelBadge.style.alignItems = 'center';
-      modelBadge.style.gap = '4px';
-      modelBadge.style.fontWeight = '600';
-
-      const rawModel = msg.modelUsed || msg.model || 'AI Response';
-      modelBadge.innerHTML = `<i class="fa-solid fa-microchip" style="color:var(--accent-secondary);"></i> <span>${rawModel}</span>`;
-      actions.insertBefore(modelBadge, actions.firstChild);
-
       if (msg.usage && chatSettings.bubbleTokensEnabled !== false) {
         const usageBadge = document.createElement('span');
         usageBadge.className = 'msg-usage-badge';
@@ -5162,11 +5180,126 @@ function updateTokenTracker(provider, model, usage) {
   tokenTrackerData.models[model].completion += completion;
   tokenTrackerData.models[model].total += total;
 
-  // Save to localStorage
-  localStorage.setItem('chatterbot_token_tracker', JSON.stringify(tokenTrackerData));
-
-  // Sync to database
   saveTokenTrackerToServer();
+  renderTokenTracker();
+}
+
+// ── Global Alias Wrapper for Token Tracker (Fixes 'trackTokens is not defined' error) ──
+function trackTokens(provider, model, usage) {
+  if (typeof updateTokenTracker === 'function') {
+    updateTokenTracker(provider, model, usage);
+  }
+}
+
+// ── Individual Chat Bubble PDF Export Handler ──
+function exportMessageToPDF(content, idx) {
+  const activeSession = chatSessions[activeChatId];
+  if (!activeSession || !activeSession.messages) return;
+
+  // Find user prompt preceding this assistant message
+  let userQuestion = 'ChatterBot Individual Answer Export';
+  for (let i = idx - 1; i >= 0; i--) {
+    if (activeSession.messages[i].role === 'user') {
+      userQuestion = activeSession.messages[i].content;
+      break;
+    }
+  }
+
+  // Create clean safe dynamic filename from user question
+  const safeWords = userQuestion
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 7)
+    .join('_');
+  const pdfFileName = safeWords ? `${safeWords}.pdf` : 'ChatterBot_Export.pdf';
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Pop-up blocked. Please allow popups to export PDF.', 'error');
+    return;
+  }
+
+  const formattedContent = renderMarkdownWithMath(content);
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${pdfFileName}</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+      <style>
+        * { box-sizing: border-box; }
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+          padding: 24px; 
+          color: #0f172a; 
+          line-height: 1.6; 
+          background: #ffffff;
+          max-width: 800px;
+          margin: 0 auto;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        .pdf-header {
+          border-bottom: 2px solid #3b82f6;
+          padding-bottom: 12px;
+          margin-bottom: 20px;
+        }
+        .pdf-user-question {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 6px;
+        }
+        .pdf-meta {
+          font-size: 0.78rem;
+          color: #64748b;
+          font-weight: 600;
+        }
+        .pdf-body {
+          font-size: 0.95rem;
+          color: #1e293b;
+        }
+        img {
+          max-width: 100% !important;
+          height: auto !important;
+          border-radius: 8px;
+          margin: 12px 0;
+          display: block;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
+        th { background: #f1f5f9; }
+        @media print { 
+          body { padding: 12px; max-width: 100%; } 
+          @page { margin: 15mm; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="pdf-header">
+        <div class="pdf-user-question">❓ ${escapeHtml(userQuestion)}</div>
+        <div class="pdf-meta">Exported on ${new Date().toLocaleString()} | User: ${currentUser || 'Student'}</div>
+      </div>
+      <div class="pdf-body">${formattedContent}</div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 400);
+        };
+      </script>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(html);
+  printWindow.document.close();
+  showToast('Opening PDF compilation window...', 'success');
 }
 
 async function saveTokenTrackerToServer() {
@@ -5664,7 +5797,13 @@ function renderPromptsLibrary() {
 async function reSubmitFromUserMessage(index) {
   if (!activeChatId || !chatSessions[activeChatId]) return;
   const activeSession = chatSessions[activeChatId];
-  
+
+  // Update activeSession provider & model from current UI header dropdown selection
+  const curProv = document.getElementById('provider-select')?.value || activeSession.provider;
+  const curMod = document.getElementById('model-select')?.value || activeSession.model;
+  activeSession.provider = curProv;
+  activeSession.model = curMod;
+
   // Keep only messages up to the user message
   activeSession.messages = activeSession.messages.slice(0, index + 1);
   saveChatSessionsToStorage();
@@ -5905,6 +6044,8 @@ async function reSubmitFromUserMessage(index) {
       activeSession.messages.push({
         role: 'assistant',
         content: responseData.content,
+        provider: activeSession.provider,
+        model: activeSession.model,
         usage: responseData.usage || null
       });
       

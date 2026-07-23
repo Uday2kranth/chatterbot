@@ -250,9 +250,9 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
         content: `SMART DIAGRAM TRIGGERING & EXAM VALUATION DIRECTIVES:
 1. GREETINGS & SHORT QUERIES: NEVER output diagrams or flowcharts for greetings ("Hi", "Hello"), brief definitions, or basic questions.
 2. STRICT 2-MARK BREVITY & LENGTH BOUNDARY (3-4 MARKS ANSWER): For 2-mark or short answer queries, output ONLY a concise 3-to-4 mark answer (150–250 words max). Structure strictly as: 1) Direct Definition / Synthesis / Explanation / etc. (2-4 sentences max matching question intent), 2) If Comparison Requested: [Comparing 2 Topics ➔ 1 clean 4-row 2-Column Markdown Table; Comparing 3+ Topics ➔ Stacked Side-Headings], 3) Conclude with ### 🔑 Key Exam Keywords Glossary listing ALL technical keywords present in the answer (3 to 6 terms with 1-line definitions). NEVER output diagrams, flowcharts, multi-section essays, or analogies for 2-mark queries.
-3. DIAGRAM TRIGGER CONDITIONS: Generate a vertical Mermaid \`graph TD\` diagram ONLY IF:
-   a) The user explicitly asks for a diagram or flowchart (e.g., "draw a flowchart", "explain with diagram").
-   b) The query involves a complex 12-mark multi-step architecture or protocol pipeline (e.g., RSA key generation, OSI layers, AES rounds) where visual representation compresses fluff while maximizing exam marks.
+3. DIAGRAM TRIGGER CONDITIONS:
+   a) Generate a vertical Mermaid \`graph TD\` diagram ONLY IF the query involves a complex 12-mark multi-step architecture or protocol pipeline (e.g., RSA key generation, OSI layers, AES rounds) OR if explicitly requested.
+   b) ABSOLUTE NEGATIVE OVERRIDE: If the user explicitly asks to exclude diagrams (e.g. "no diagram", "don't draw diagram", "without flowchart", "no mermaid"), or if a verified direct image link is already embedded, STRICTLY DO NOT generate any Mermaid diagram code block under any circumstances.
 4. MANDATORY MERMAID FORMAT: ALWAYS use top-to-bottom direction \`graph TD\`. Wrap node text in double quotes inside brackets (e.g., A["Clean Label"]). Keep labels under 6 words.
 5. DIRECT ANSWER PROTOCOL: Do not write conversational intro fluff (e.g., "Sure, I can help you with that..."). Begin immediately on Line 1 with the technical definition or requested introduction.
 6. EVALUATOR KEYWORD BOLDING: Automatically bold all core technical terms, variables, and protocol phases (e.g., **Euler's Totient φ(n)**, **SYN-ACK Handshake**).
@@ -272,7 +272,7 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
     // Final Mandatory System Directive: Override any prompt templates that request TikZ code or horizontal LR graphs
     apiMessages.push({
         role: "system",
-        content: "CRITICAL MANDATORY OVERRIDE: ALWAYS output all diagrams exclusively as top-to-bottom vertical Mermaid.js code blocks (```mermaid\\ngraph TD\\n...\\n```). NEVER use graph LR or raw TikZ. Only output diagrams when value-adding or requested."
+        content: "CRITICAL MANDATORY OVERRIDE: If a diagram is generated, output it exclusively as top-to-bottom vertical Mermaid.js code blocks (```mermaid\\ngraph TD\\n...\\n```). NEVER use graph LR or raw TikZ. STRICTLY DO NOT generate any diagram if the user explicitly requested no diagram or if a direct image link is present."
     });
 
     try {
@@ -299,13 +299,11 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
                 headers["X-Title"] = "ChatterBot Dashboard";
             }
 
-            // Build model candidates for Gemini to handle preview and fallback models gracefully
+            // Build model candidates for Gemini (No quiet fallback for gemini-3.1-pro-preview as requested)
             let modelCandidates = [model];
             if (provider === "gemini") {
                 if (model === "gemini-3.6-flash" || model === "gemini-3.5-flash-lite" || model === "gemini-3.5-flash") {
                     modelCandidates.push("gemini-2.0-flash", "gemini-2.0-flash-lite");
-                } else if (!["gemini-2.0-flash", "gemini-2.0-flash-lite"].includes(model)) {
-                    modelCandidates.push("gemini-2.0-flash");
                 }
             }
 

@@ -9030,7 +9030,118 @@ function bindWhyModel4UListeners() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bindWhyModel4UListeners);
+  document.addEventListener('DOMContentLoaded', () => {
+    bindWhyModel4UListeners();
+    bindStagingTestSuiteListener();
+  });
 } else {
   bindWhyModel4UListeners();
+  bindStagingTestSuiteListener();
+}
+
+// Staging Diagram & PDF Export Test Suite Runner
+function runStagingTestSuite() {
+  const testSession = {
+    id: 'test-session-staging-' + Date.now(),
+    title: '🧪 Staging Diagram & Export Test Suite',
+    createdAt: new Date().toISOString(),
+    messages: [
+      {
+        role: 'user',
+        content: 'Run Staging Test Suite for Kroki Diagrams and PDF Exports',
+        timestamp: new Date().toISOString()
+      },
+      {
+        role: 'assistant',
+        model: 'Staging Test Engine',
+        content: `### 🧪 Test 1: Wide 6-Column Mermaid Flowchart (Option 1 & 2 Validation)
+Demonstrating wide flowchart auto-transformation from \`graph LR\` to \`graph TD\`:
+
+\`\`\`mermaid
+graph LR
+  A[1. Scalability & High Dimensionality] --> B[2. Complex & Heterogeneous Data]
+  B --> C[3. Data Quality & Uncertainty]
+  C --> D[4. Privacy, Ethics & Fairness]
+  D --> E[5. Dynamic Streams & Concept Drift]
+  E --> F[6. Interpretability & Explainability]
+\`\`\`
+
+---
+
+### 🧪 Test 2: Graphviz Directed Network Graph (Option 2 Protection)
+Demonstrating Graphviz node ranking and PDF un-cropping protection:
+
+\`\`\`kroki-graphviz
+digraph G {
+  rankdir=TB;
+  node [shape=box, style=filled, fillcolor="#e0f2fe", color="#0284c7", fontname="sans-serif"];
+  "User Request" -> "API Proxy Gateway";
+  "API Proxy Gateway" -> "Kroki Vector Engine";
+  "Kroki Vector Engine" -> "SVG Renderer";
+  "SVG Renderer" -> "PDF Export Safety Shield";
+}
+\`\`\`
+
+---
+
+### 🧪 Test 3: PlantUML System Architecture (Label Wrapping Validation)
+Demonstrating PlantUML component diagram label wrapping:
+
+\`\`\`kroki-plantuml
+@startuml
+skinparam componentStyle rectangle
+package "ChatterBot Client" {
+  [App Frontend] --> [Kroki SVG Processor]
+  [Kroki SVG Processor] --> [High-DPI PDF Capture Engine]
+}
+package "Vercel Backend" {
+  [Kroki API Proxy] --> [Kroki Server]
+}
+@enduml
+\`\`\`
+
+---
+
+### 🧪 Test 4: ERD Database Relational Diagram (Grid Entity Stacking)
+Demonstrating ERD entity relationship diagram:
+
+\`\`\`kroki-erd
+[Users]
+*id
+username
+created_at
+
+[Sessions]
+*id
++user_id
+title
+updated_at
+
+Users 1--* Sessions
+\`\`\`
+`,
+        timestamp: new Date().toISOString()
+      }
+    ]
+  };
+
+  if (!Array.isArray(chatSessions)) {
+    chatSessions = [];
+  }
+  chatSessions.unshift(testSession);
+  activeSessionId = testSession.id;
+  saveChatSessionsToStorage();
+  renderSessionsList();
+  renderMessages(testSession.messages);
+  showToast('🧪 Staging Test Suite Loaded! Tap "Export PDF" to verify high-res export.', 'success');
+}
+
+function bindStagingTestSuiteListener() {
+  const btn = document.getElementById('staging-test-suite-btn');
+  if (btn) {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      runStagingTestSuite();
+    };
+  }
 }

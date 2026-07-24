@@ -6790,7 +6790,7 @@ function exportMessagePairToImage(idx) {
     window.html2canvas(exportArea, {
       backgroundColor: bgPrimary,
       useCORS: true,
-      scale: 2, // High resolution crisp image exports
+      scale: 3, // High-DPI 300+ DPI crisp image exports
       logging: false,
       onclone: (clonedDoc) => {
         // Shift offscreen export element back to visible coords inside cloned iframe context 
@@ -6822,6 +6822,21 @@ function exportMessagePairToImage(idx) {
           b.style.width = '100%';
           b.style.maxWidth = '100%';
           b.style.boxSizing = 'border-box';
+        });
+
+        // Un-crop Kroki SVG viewports inside the cloned DOM so diagrams are captured 100% without right/bottom clipping
+        const clonedViewports = clonedDoc.querySelectorAll('.kroki-svg-viewport');
+        clonedViewports.forEach(vp => {
+          vp.style.overflow = 'visible';
+          vp.style.maxHeight = 'none';
+          vp.style.width = 'auto';
+          vp.style.maxWidth = 'none';
+          const svg = vp.querySelector('svg');
+          if (svg) {
+            svg.style.maxWidth = '100%';
+            svg.style.height = 'auto';
+            svg.style.overflow = 'visible';
+          }
         });
       }
     }).then(canvas => {
@@ -7506,28 +7521,6 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
           }
           .slide-container {
             width: 100% !important;
-            height: auto !important;
-            max-height: none !important;
-            border: none !important;
-            box-shadow: none !important;
-            display: block !important;
-            opacity: 1 !important;
-            transform: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            overflow: visible !important;
-          }
-          .slide-body {
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
-            display: block !important;
-          }
-          .slide-body div {
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
-            display: block !important;
           }
           .slide-container, .slide-header, .slide-body, .slide-body *, .slide-title {
             background: white !important;
@@ -7535,7 +7528,6 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
             color: black !important;
             border-color: #cbd5e1 !important;
           }
-          /* Custom overrides for pre/code/tables in print layout */
           pre, code, pre code {
             background: #f8fafc !important;
             color: #0f172a !important;
@@ -7581,22 +7573,15 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
           
           setTimeout(() => {
             const slide = slides[currentIdx];
-            document.getElementById('slide-title').textContent = slide.title;
+            document.getElementById('slide-title').innerText = slide.title;
             document.getElementById('slide-body').innerHTML = slide.content;
-            document.getElementById('counter-label').textContent = \`Slide \${currentIdx + 1} of \${slides.length}\`;
+            document.getElementById('counter-label').innerText = 'Slide ' + (currentIdx + 1) + ' of ' + slides.length;
             
-            document.getElementById('prev-btn').disabled = currentIdx === 0;
-            document.getElementById('next-btn').disabled = currentIdx === slides.length - 1;
+            document.getElementById('prev-btn').disabled = (currentIdx === 0);
+            document.getElementById('next-btn').disabled = (currentIdx === slides.length - 1);
             
             card.style.opacity = 1;
             card.style.transform = 'scale(1)';
-
-            if (window.mermaid) {
-              try {
-                window.mermaid.initialize({ startOnLoad: true, theme: 'dark' });
-                window.mermaid.run();
-              } catch(e){}
-            }
           }, 150);
         }
 
@@ -7621,6 +7606,7 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
             document.exitFullscreen();
           }
         }
+
         window.addEventListener('keydown', (e) => {
           if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
             nextSlide();
@@ -7632,38 +7618,28 @@ function launchSlideViewer(slides, docTitle = 'Slide Presentation') {
         function exportCurrentSlideToWord() {
           const slide = slides[currentIdx];
           let cleanContent = slide.content ? slide.content.replace(/\\n/g, '<br/>') : '';
-          // Ensure high-contrast dark text inside Microsoft Word by cleaning up light color tags
-          cleanContent = cleanContent.replace(/color\s*:\s*#[a-f0-9]{3,6}/gi, 'color:#1f2937')
-                                     .replace(/background\s*:\s*#[a-f0-9]{3,6}/gi, '')
-                                     .replace(/background-color\s*:\s*#[a-f0-9]{3,6}/gi, '');
-          let html = \`
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-            <head>
-              <title>\${slide.title}</title>
-              <style>
-                body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.25; color: #1f2937; padding: 30px; background-color: #ffffff; }
-                h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; margin-top: 12px; }
-                h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 12px; margin-bottom: 6px; }
-                p, ul, ol, li { margin-top: 0px; margin-bottom: 6px; line-height: 1.25; }
-                .content-body { font-size: 11pt; color: #1f2937; }
-                .footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }
-              </style>
-            </head>
-            <body>
-              <h1>\${slide.title}</h1>
-              <div class="content-body">\${cleanContent}</div>
-              <div class="footer-note">
-                Exported from ChatterBot Slide Presentation.
-              </div>
-            </body>
-            </html>
-          \`;
+          cleanContent = cleanContent.replace(/color\\s*:\\s*#[a-f0-9]{3,6}/gi, 'color:#1f2937')
+                                     .replace(/background\\s*:\\s*#[a-f0-9]{3,6}/gi, '')
+                                     .replace(/background-color\\s*:\\s*#[a-f0-9]{3,6}/gi, '');
+          let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+          html += '<head><title>' + slide.title + '</title><style>';
+          html += 'body { font-family: "Segoe UI", Arial, sans-serif; line-height: 1.25; color: #1f2937; padding: 30px; background-color: #ffffff; }';
+          html += 'h1 { color: #8b5cf6; font-size: 22pt; font-weight: bold; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; margin-top: 12px; }';
+          html += 'h2, h3, h4, h5, h6 { color: #1f2937; margin-top: 12px; margin-bottom: 6px; }';
+          html += 'p, ul, ol, li { margin-top: 0px; margin-bottom: 6px; line-height: 1.25; }';
+          html += '.content-body { font-size: 11pt; color: #1f2937; }';
+          html += '.footer-note { font-size: 9pt; color: #9ca3af; margin-top: 50px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 15px; }';
+          html += '</style></head><body>';
+          html += '<h1>' + slide.title + '</h1>';
+          html += '<div class="content-body">' + cleanContent + '</div>';
+          html += '<div class="footer-note">Exported from ChatterBot Slide Presentation.</div>';
+          html += '</body></html>';
           
           const blob = new Blob(['\\ufeff' + html], { type: 'application/msword' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = \`\${slide.title.replace(/[^a-z0-9_-]/gi, '_')}.doc\`;
+          a.download = slide.title.replace(/[^a-z0-9_-]/gi, '_') + '.doc';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -7708,6 +7684,37 @@ function exportMessageToSlides(rawContent, msgIdx) {
   launchSlideViewer(slides, `Message Slides`);
 }
 
+function inlineSvgComputedStyles(svgEl) {
+  if (!svgEl) return;
+  const elements = svgEl.querySelectorAll('*');
+  elements.forEach(el => {
+    try {
+      const computed = window.getComputedStyle(el);
+      const fill = computed.getPropertyValue('fill');
+      const stroke = computed.getPropertyValue('stroke');
+      const strokeWidth = computed.getPropertyValue('stroke-width');
+      const color = computed.getPropertyValue('color');
+      
+      let styleStr = el.getAttribute('style') || '';
+      if (fill && fill !== 'none' && !styleStr.includes('fill:')) {
+        styleStr += `; fill: ${fill} !important;`;
+      }
+      if (stroke && stroke !== 'none' && !styleStr.includes('stroke:')) {
+        styleStr += `; stroke: ${stroke} !important;`;
+      }
+      if (strokeWidth && strokeWidth !== '0px' && !styleStr.includes('stroke-width:')) {
+        styleStr += `; stroke-width: ${strokeWidth} !important;`;
+      }
+      if (color && !styleStr.includes('color:')) {
+        styleStr += `; color: ${color} !important;`;
+      }
+      if (styleStr) {
+        el.setAttribute('style', styleStr);
+      }
+    } catch (e) {}
+  });
+}
+
 async function exportMessageToPDF(rawContent, msgIdx) {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -7720,81 +7727,44 @@ async function exportMessageToPDF(rawContent, msgIdx) {
   const messagesContainer = document.getElementById('messages-container');
   let targetContentHTML = '';
   if (messagesContainer && msgIdx !== undefined) {
-    const msgEl = messagesContainer.querySelector(`[data-index="${msgIdx}"]`);
-    if (msgEl) {
-      const cloned = msgEl.cloneNode(true);
+    const origMsgEl = messagesContainer.querySelector(`[data-index="${msgIdx}"]`);
+    if (origMsgEl) {
+      const cloned = origMsgEl.cloneNode(true);
       cloned.querySelectorAll('.message-actions, .diagram-card-toolbar, .code-copy-btn').forEach(el => el.remove());
 
-      const diagramCards = cloned.querySelectorAll('.mermaid-diagram-card');
-      for (const card of diagramCards) {
+      const diagramCards = cloned.querySelectorAll('.mermaid-diagram-card, .kroki-diagram-card');
+      const origCards = origMsgEl.querySelectorAll('.mermaid-diagram-card, .kroki-diagram-card');
+
+      for (let cIdx = 0; cIdx < diagramCards.length; cIdx++) {
+        const card = diagramCards[cIdx];
         const activeMode = card.getAttribute('data-active-mode') || 'full';
         let rawCode = card.getAttribute('data-raw-code');
         if (rawCode && (rawCode.includes('%0A') || rawCode.includes('%20') || rawCode.includes('%3A'))) {
           try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
         }
-        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
-          const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
-          rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
-          if (rawCode && (rawCode.includes('%0A') || rawCode.includes('%20') || rawCode.includes('%3A'))) {
-            try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
-          }
+
+        // Stage 1: Fetch live rendered SVG from original DOM (handles Kroki, Mermaid, Graphviz, PlantUML, ERD)
+        let existingSvg = null;
+        if (origCards[cIdx]) {
+          existingSvg = origCards[cIdx].querySelector('.kroki-svg-viewport svg') || origCards[cIdx].querySelector('.mermaid svg') || origCards[cIdx].querySelector('.mermaid-full svg');
+        }
+        if (!existingSvg) {
+          existingSvg = card.querySelector('.kroki-svg-viewport svg') || card.querySelector('.mermaid svg') || card.querySelector('.mermaid-full svg');
         }
 
-        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
+        if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
+          inlineSvgComputedStyles(existingSvg); // Retain live computed theme colors
+          card.innerHTML = `<div class="mermaid-rendered kroki-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
           continue;
         }
 
         if (activeMode === 'text') {
-          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
+          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode || ''))}</pre>`;
           continue;
         }
 
-        // Stage 1: Check if live SVG exists in DOM without syntax error for the active mode
-        let existingSvg = null;
-        if (activeMode === 'simple') {
-          existingSvg = card.querySelector('.mermaid-simple svg');
-        } else {
-          existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
-        }
-
-        if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
-          continue;
-        }
-
-        // Stage 2: Pre-render vector in main window JS scope corresponding to activeMode
-        const codeToRender = activeMode === 'simple' ? formatMermaidToSimplifiedLinear(rawCode) : rawCode;
-        const sanitizedCode = sanitizeRawMermaidSyntax(codeToRender);
-        let renderedSvg = null;
-
-        if (window.mermaid) {
-          try {
-            const renderId = 'pdf-msg-svg-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-            const { svg } = await window.mermaid.render(renderId, sanitizedCode);
-            if (svg && !svg.includes('Syntax error') && !svg.includes('dmermaid')) {
-              renderedSvg = svg;
-            }
-          } catch (err1) {}
-
-          // Stage 3: Try simplified linear fallback (only if activeMode is 'full' and it failed)
-          if (!renderedSvg && activeMode === 'full') {
-            try {
-              const simpleCode = formatMermaidToSimplifiedLinear(sanitizedCode);
-              const fbRenderId = 'pdf-msg-fb-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-              const { svg: fbSvg } = await window.mermaid.render(fbRenderId, simpleCode);
-              if (fbSvg && !fbSvg.includes('Syntax error') && !fbSvg.includes('dmermaid')) {
-                renderedSvg = fbSvg;
-              }
-            } catch (err2) {}
-          }
-        }
-
-        if (renderedSvg) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(renderedSvg)}</div>`;
-        } else {
-          // Stage 4 Guaranteed Fallback: Render ASCII text schema
-          card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(formatMermaidToAsciiSchema(rawCode))}</pre>`;
-        }
+        // Stage 2: Guaranteed Text Fallback
+        card.innerHTML = `<pre class="diagram-text-schema" style="background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; overflow-x:auto;">${escapeHtml(rawCode || 'Diagram Code')}</pre>`;
       }
 
       targetContentHTML = cloned.innerHTML;

@@ -3135,7 +3135,7 @@ async function processKrokiDiagramCards(container) {
   const cards = root.querySelectorAll('.mermaid-diagram-card, .kroki-diagram-card');
   if (!cards || cards.length === 0) return;
 
-  cards.forEach(async (card) => {
+  const tasks = Array.from(cards).map(async (card) => {
     if (card.getAttribute('data-kroki-rendered') === 'true') return;
 
     const rawType = card.getAttribute('data-kroki-type') || 'mermaid';
@@ -3233,6 +3233,7 @@ async function processKrokiDiagramCards(container) {
       svgViewport.innerHTML = `<pre style="margin:0; font-family:monospace; font-size:0.8rem; background:var(--bg-secondary); padding:12px; border-radius:6px; color:var(--text-primary); overflow-x:auto;">${rawCode}</pre>`;
     }
   });
+  await Promise.all(tasks);
 }
 
 // Render Messages
@@ -6825,15 +6826,16 @@ function exportMessagePairToImage(idx) {
         });
 
         // Un-crop Kroki SVG viewports inside the cloned DOM so diagrams are captured 100% without right/bottom clipping
-        const clonedViewports = clonedDoc.querySelectorAll('.kroki-svg-viewport');
+        const clonedViewports = clonedDoc.querySelectorAll('.kroki-svg-viewport, .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered');
         clonedViewports.forEach(vp => {
           vp.style.overflow = 'visible';
           vp.style.maxHeight = 'none';
-          vp.style.width = 'auto';
+          vp.style.width = 'max-content';
           vp.style.maxWidth = 'none';
           const svg = vp.querySelector('svg');
           if (svg) {
-            svg.style.maxWidth = '100%';
+            svg.style.maxWidth = 'none';
+            svg.style.width = 'auto';
             svg.style.height = 'auto';
             svg.style.overflow = 'visible';
           }
@@ -7686,6 +7688,7 @@ function exportMessageToSlides(rawContent, msgIdx) {
 
 function inlineSvgComputedStyles(svgEl) {
   if (!svgEl) return;
+  const isMermaid = svgEl.classList.contains('mermaid') || (svgEl.closest && svgEl.closest('.mermaid-diagram-card')) || svgEl.outerHTML.includes('mermaid');
   const elements = svgEl.querySelectorAll('*');
   elements.forEach(el => {
     try {
@@ -7694,20 +7697,32 @@ function inlineSvgComputedStyles(svgEl) {
       const stroke = computed.getPropertyValue('stroke');
       const strokeWidth = computed.getPropertyValue('stroke-width');
       const color = computed.getPropertyValue('color');
+      const rx = el.getAttribute('rx') || computed.getPropertyValue('rx');
+      const ry = el.getAttribute('ry') || computed.getPropertyValue('ry');
       
       let styleStr = el.getAttribute('style') || '';
-      if (fill && fill !== 'none' && !styleStr.includes('fill:')) {
+      
+      if (isMermaid && (el.tagName === 'rect' || el.classList.contains('basic') || el.classList.contains('label-container'))) {
+        styleStr += '; fill: #e0e7ff !important; stroke: #6366f1 !important; stroke-width: 2px !important; rx: 6px !important; ry: 6px !important;';
+      } else if (fill && fill !== 'none' && !styleStr.includes('fill:')) {
         styleStr += `; fill: ${fill} !important;`;
       }
+      
+      if (isMermaid && (el.tagName === 'text' || el.tagName === 'tspan' || el.tagName === 'span' || el.classList.contains('nodeLabel'))) {
+        styleStr += '; fill: #0f172a !important; color: #0f172a !important; font-weight: 600 !important; font-size: 14px !important;';
+      } else if (color && !styleStr.includes('color:')) {
+        styleStr += `; color: ${color} !important;`;
+      }
+      
       if (stroke && stroke !== 'none' && !styleStr.includes('stroke:')) {
         styleStr += `; stroke: ${stroke} !important;`;
       }
       if (strokeWidth && strokeWidth !== '0px' && !styleStr.includes('stroke-width:')) {
         styleStr += `; stroke-width: ${strokeWidth} !important;`;
       }
-      if (color && !styleStr.includes('color:')) {
-        styleStr += `; color: ${color} !important;`;
-      }
+      if (rx && !styleStr.includes('rx:')) styleStr += `; rx: ${rx} !important;`;
+      if (ry && !styleStr.includes('ry:')) styleStr += `; ry: ${ry} !important;`;
+      
       if (styleStr) {
         el.setAttribute('style', styleStr);
       }
@@ -7796,8 +7811,8 @@ async function exportMessageToPDF(rawContent, msgIdx) {
         blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; word-break: break-word; }
-        .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered, .kroki-svg-viewport { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: center; page-break-inside: auto !important; break-inside: auto !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-        .mermaid-rendered svg, .mermaid svg, .kroki-svg-viewport svg, svg, img { max-width: 88% !important; max-height: 520px !important; height: auto !important; display: block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered, .kroki-svg-viewport { background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px; padding: 10px !important; margin: 8px 0 !important; text-align: center; page-break-inside: avoid !important; break-inside: avoid !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        .mermaid-rendered svg, .mermaid svg, .kroki-svg-viewport svg, svg, img { max-width: 95% !important; max-height: 480px !important; height: auto !important; display: block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         .katex-display { max-width: 100% !important; overflow-x: auto; }
         @media print {
           @page { size: auto; margin: 10mm; }

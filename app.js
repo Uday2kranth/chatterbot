@@ -3084,11 +3084,12 @@ function renderMarkdownWithMath(text) {
 
   // 6. Convert Diagram code blocks (Mermaid, PlantUML, Graphviz, BlockDiag, Nomnoml, Erd, etc.) into Kroki diagram cards
   html = html.replace(/<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/gi, (match, lang, code) => {
+    const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
     const rawLang = (lang || '').toLowerCase();
     const l = rawLang.replace(/^language-/, '').replace(/^kroki-/, '');
     const diagramTypes = ['mermaid', 'plantuml', 'graphviz', 'dot', 'blockdiag', 'seqdiag', 'actdiag', 'nwdiag', 'c4', 'c4plantuml', 'erd', 'nomnoml', 'svgbob', 'vegalite', 'vega', 'excalidraw', 'wavedrom', 'bytefield', 'ditaa', 'bpmn'];
 
-    const isDiagram = diagramTypes.includes(l) || cleanCode.startsWith('graph') || cleanCode.startsWith('flowchart') || cleanCode.startsWith('@startuml') || cleanCode.startsWith('digraph') || cleanCode.includes('[') && cleanCode.includes(']');
+    const isDiagram = diagramTypes.includes(l) || cleanCode.startsWith('graph') || cleanCode.startsWith('flowchart') || cleanCode.startsWith('@startuml') || cleanCode.startsWith('digraph');
 
     if (isDiagram) {
       const diagramType = diagramTypes.includes(l) ? l : (cleanCode.startsWith('@startuml') ? 'plantuml' : (cleanCode.startsWith('digraph') ? 'graphviz' : 'mermaid'));

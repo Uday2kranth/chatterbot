@@ -7221,7 +7221,7 @@ async function exportChatToPDF() {
         // Stage 1: Check if live SVG (Kroki or Mermaid) already exists in DOM
         const existingSvg = card.querySelector('svg');
         if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
-          card.innerHTML = `<div class="mermaid-rendered kroki-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
+          card.innerHTML = `<div class="mermaid-rendered kroki-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${existingSvg.outerHTML}</div>`;
           continue;
         }
 
@@ -7688,7 +7688,6 @@ function exportMessageToSlides(rawContent, msgIdx) {
 
 function inlineSvgComputedStyles(svgEl) {
   if (!svgEl) return;
-  const isMermaid = svgEl.classList.contains('mermaid') || (svgEl.closest && svgEl.closest('.mermaid-diagram-card')) || svgEl.outerHTML.includes('mermaid');
   const elements = svgEl.querySelectorAll('*');
   elements.forEach(el => {
     try {
@@ -7702,21 +7701,27 @@ function inlineSvgComputedStyles(svgEl) {
       
       let styleStr = el.getAttribute('style') || '';
       
-      if (isMermaid && (el.tagName === 'rect' || el.classList.contains('basic') || el.classList.contains('label-container'))) {
-        styleStr += '; fill: #e0e7ff !important; stroke: #6366f1 !important; stroke-width: 2px !important; rx: 6px !important; ry: 6px !important;';
-      } else if (fill && fill !== 'none' && !styleStr.includes('fill:')) {
+      // Fix Mermaid & Diagram Node Boxes (Test 1)
+      if (el.tagName === 'rect' || el.classList.contains('basic') || el.classList.contains('label-container') || (el.parentNode && el.parentNode.classList && el.parentNode.classList.contains('node'))) {
+        styleStr += '; fill: #e0e7ff !important; stroke: #4338ca !important; stroke-width: 2px !important; rx: 6px !important; ry: 6px !important;';
+      } else if (fill && fill !== 'none' && fill !== 'transparent' && !styleStr.includes('fill:')) {
         styleStr += `; fill: ${fill} !important;`;
       }
       
-      if (isMermaid && (el.tagName === 'text' || el.tagName === 'tspan' || el.tagName === 'span' || el.classList.contains('nodeLabel'))) {
-        styleStr += '; fill: #0f172a !important; color: #0f172a !important; font-weight: 600 !important; font-size: 14px !important;';
+      // Fix Mermaid & Diagram Text Labels (Test 1)
+      if (el.tagName === 'text' || el.tagName === 'tspan' || el.tagName === 'span' || el.classList.contains('nodeLabel')) {
+        styleStr += '; fill: #0f172a !important; color: #0f172a !important; font-weight: 700 !important; font-size: 13px !important;';
       } else if (color && !styleStr.includes('color:')) {
         styleStr += `; color: ${color} !important;`;
       }
       
-      if (stroke && stroke !== 'none' && !styleStr.includes('stroke:')) {
+      // Fix PlantUML & Kroki Node Outlines (Test 5)
+      if (stroke && stroke !== 'none' && stroke !== 'transparent') {
         styleStr += `; stroke: ${stroke} !important;`;
+      } else if (el.tagName === 'rect' || el.tagName === 'path' || el.tagName === 'polygon') {
+        styleStr += '; stroke: #334155 !important; stroke-width: 1.5px !important;';
       }
+      
       if (strokeWidth && strokeWidth !== '0px' && !styleStr.includes('stroke-width:')) {
         styleStr += `; stroke-width: ${strokeWidth} !important;`;
       }

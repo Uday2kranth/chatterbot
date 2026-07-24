@@ -7199,15 +7199,22 @@ async function exportChatToPDF() {
       const cloned = msgEl.cloneNode(true);
       cloned.querySelectorAll('.message-actions, .diagram-card-toolbar, .code-copy-btn').forEach(el => el.remove());
 
-      const diagramCards = cloned.querySelectorAll('.mermaid-diagram-card');
+      const diagramCards = cloned.querySelectorAll('.mermaid-diagram-card, .kroki-diagram-card');
       for (const card of diagramCards) {
+        // Stage 1: Check if live SVG (Kroki or Mermaid) already exists in DOM
+        const existingSvg = card.querySelector('svg');
+        if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
+          card.innerHTML = `<div class="mermaid-rendered kroki-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
+          continue;
+        }
+
         const activeMode = card.getAttribute('data-active-mode') || 'full';
         let rawCode = card.getAttribute('data-raw-code');
         if (rawCode && (rawCode.includes('%0A') || rawCode.includes('%20') || rawCode.includes('%3A'))) {
           try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
         }
-        if (!rawCode || (!rawCode.includes('graph') && !rawCode.includes('flowchart'))) {
-          const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid');
+        if (!rawCode) {
+          const fullEl = card.querySelector('.mermaid-full') || card.querySelector('.mermaid') || card.querySelector('.kroki-svg-viewport');
           rawCode = fullEl ? (fullEl.getAttribute('data-raw-code') || fullEl.textContent) : '';
           if (rawCode && (rawCode.includes('%0A') || rawCode.includes('%20') || rawCode.includes('%3A'))) {
             try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
@@ -7223,16 +7230,16 @@ async function exportChatToPDF() {
           continue;
         }
 
-        // Stage 1: Check if live SVG exists in DOM without syntax error for the active mode
-        let existingSvg = null;
+        // Stage 1b: Mode-specific Mermaid SVG check
+        let modeSvg = null;
         if (activeMode === 'simple') {
-          existingSvg = card.querySelector('.mermaid-simple svg');
+          modeSvg = card.querySelector('.mermaid-simple svg');
         } else {
-          existingSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
+          modeSvg = card.querySelector('.mermaid-full svg') || card.querySelector('.mermaid svg');
         }
 
-        if (existingSvg && !existingSvg.outerHTML.includes('Syntax error') && !existingSvg.outerHTML.includes('dmermaid')) {
-          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(existingSvg.outerHTML)}</div>`;
+        if (modeSvg && !modeSvg.outerHTML.includes('Syntax error') && !modeSvg.outerHTML.includes('dmermaid')) {
+          card.innerHTML = `<div class="mermaid-rendered" style="text-align:center; margin:12px 0; overflow-x:auto;">${sanitizeSvgForMobilePrint(modeSvg.outerHTML)}</div>`;
           continue;
         }
 

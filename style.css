@@ -2185,7 +2185,8 @@ details.guide-details .guide-content {
   min-height: 220px !important;
   max-height: 600px !important;
   overflow-x: auto !important;
-  padding: 12px 0 !important;
+  padding: 18px 12px !important;
+  box-sizing: border-box !important;
 }
 
 .kroki-svg-viewport svg {
@@ -2194,6 +2195,19 @@ details.guide-details .guide-content {
   height: auto !important;
   display: block !important;
   margin: 0 auto !important;
+}
+
+/* Un-crop standard rendered markdown HTML images in chat bubbles */
+.message-content img,
+.chat-bubble img,
+.markdown-body img {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 12px auto !important;
+  overflow: visible !important;
+  border-radius: 8px !important;
 }
 
 /* Subgraph Cluster Title Text: Add heavy background halo so arrow lines NEVER obstruct full spelling */

@@ -3084,11 +3084,11 @@ function renderMarkdownWithMath(text) {
 
   // 6. Convert Diagram code blocks (Mermaid, PlantUML, Graphviz, BlockDiag, Nomnoml, Erd, etc.) into Kroki diagram cards
   html = html.replace(/<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/gi, (match, lang, code) => {
-    const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
-    const l = (lang || '').toLowerCase().replace(/^kroki-/, '');
+    const rawLang = (lang || '').toLowerCase();
+    const l = rawLang.replace(/^language-/, '').replace(/^kroki-/, '');
     const diagramTypes = ['mermaid', 'plantuml', 'graphviz', 'dot', 'blockdiag', 'seqdiag', 'actdiag', 'nwdiag', 'c4', 'c4plantuml', 'erd', 'nomnoml', 'svgbob', 'vegalite', 'vega', 'excalidraw', 'wavedrom', 'bytefield', 'ditaa', 'bpmn'];
 
-    const isDiagram = diagramTypes.includes(l) || cleanCode.startsWith('graph') || cleanCode.startsWith('flowchart') || cleanCode.startsWith('@startuml') || cleanCode.startsWith('digraph');
+    const isDiagram = diagramTypes.includes(l) || cleanCode.startsWith('graph') || cleanCode.startsWith('flowchart') || cleanCode.startsWith('@startuml') || cleanCode.startsWith('digraph') || cleanCode.includes('[') && cleanCode.includes(']');
 
     if (isDiagram) {
       const diagramType = diagramTypes.includes(l) ? l : (cleanCode.startsWith('@startuml') ? 'plantuml' : (cleanCode.startsWith('digraph') ? 'graphviz' : 'mermaid'));
@@ -7169,8 +7169,8 @@ async function exportChatToPDF() {
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; word-break: break-word; }
         th { background: #f8fafc; }
-        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
-        .mermaid-rendered svg, .mermaid svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+        .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered, .kroki-svg-viewport { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: center; page-break-inside: auto !important; break-inside: auto !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+        .mermaid-rendered svg, .mermaid svg, .kroki-svg-viewport svg, svg, img { max-width: 88% !important; max-height: 520px !important; height: auto !important; display: block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; }
         .katex-display { max-width: 100% !important; overflow-x: auto; }
         @media print {
           @page { size: auto; margin: 10mm; }
@@ -7816,8 +7816,8 @@ async function exportMessageToPDF(rawContent, msgIdx) {
         blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; word-break: break-word; }
-        .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered, .kroki-svg-viewport { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-        .mermaid-rendered svg, .mermaid svg, .kroki-svg-viewport svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered, .kroki-svg-viewport { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: center; page-break-inside: auto !important; break-inside: auto !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        .mermaid-rendered svg, .mermaid svg, .kroki-svg-viewport svg, svg, img { max-width: 88% !important; max-height: 520px !important; height: auto !important; display: block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         .katex-display { max-width: 100% !important; overflow-x: auto; }
         @media print {
           @page { size: auto; margin: 10mm; }

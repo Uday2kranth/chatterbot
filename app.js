@@ -9131,7 +9131,9 @@ Users 1--* Sessions
   chatSessions.unshift(testSession);
   activeSessionId = testSession.id;
   saveChatSessionsToStorage();
-  renderSessionsList();
+  if (typeof renderChatSessionsList === 'function') {
+    renderChatSessionsList();
+  }
   renderMessages(testSession.messages);
   showToast('🧪 Staging Test Suite Loaded! Tap "Export PDF" to verify high-res export.', 'success');
 }

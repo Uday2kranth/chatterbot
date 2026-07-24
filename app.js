@@ -3145,10 +3145,16 @@ async function processKrokiDiagramCards(container) {
     if (rawCode.includes('%0A') || rawCode.includes('%20')) {
       try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
     }
-    rawCode = rawCode.trim();
-    if (!rawCode) return;
-
     card.setAttribute('data-raw-code', rawCode);
+
+    // Option 1: JS-Level Auto-Transform (Mermaid graph LR -> graph TD for >4 horizontal nodes)
+    if ((type === 'mermaid' || type === 'flowchart') && (rawCode.includes('graph LR') || rawCode.includes('flowchart LR'))) {
+      const nodeArrowCount = (rawCode.match(/-->|---|==>|->/g) || []).length;
+      if (nodeArrowCount >= 4) {
+        rawCode = rawCode.replace(/graph\s+LR/i, 'graph TD').replace(/flowchart\s+LR/i, 'flowchart TD');
+        card.setAttribute('data-raw-code', rawCode);
+      }
+    }
 
     // Primary target container for vector SVG
     let svgViewport = card.querySelector('.kroki-svg-viewport');
@@ -7810,9 +7816,8 @@ async function exportMessageToPDF(rawContent, msgIdx) {
         blockquote { border-left: 4px solid #cbd5e1; margin: 0 0 16px 0; padding-left: 16px; color: #475569; font-style: italic; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.85rem; }
         th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; word-break: break-word; }
-        th { background: #f8fafc; color: #0f172a; }
-        .mermaid-diagram-card, .mermaid-rendered { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
-        .mermaid-rendered svg, .mermaid svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+        .mermaid-diagram-card, .kroki-diagram-card, .mermaid-rendered, .kroki-svg-viewport { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; border-radius: 8px; padding: 16px; margin: 12px 0; text-align: center; page-break-inside: avoid; break-inside: avoid; overflow: visible !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+        .mermaid-rendered svg, .mermaid svg, .kroki-svg-viewport svg, svg, img { max-width: 100% !important; height: auto !important; display: inline-block !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         .katex-display { max-width: 100% !important; overflow-x: auto; }
         @media print {
           @page { size: auto; margin: 10mm; }

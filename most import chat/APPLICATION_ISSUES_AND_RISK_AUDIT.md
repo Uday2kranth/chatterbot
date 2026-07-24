@@ -174,3 +174,123 @@ This document serves as the master tracking log for current application issues, 
      - Deploy latest code to Vercel preview for multi-device testing.
 - **Status**: ⏳ Master Roadmap Tracking Log
 
+---
+
+### 🟢 Issue #7: Ultra High-DPI (300 DPI) Canvas Resolution for PDF & Image Exports
+
+- **Category**: Export Quality & Canvas DPI Scaling
+- **User Description**:
+  - Exported PDFs and PNG chat images become blurry and pixelated when zoomed in on mobile or desktop screens (e.g. 380% zoom).
+- **Root Cause**:
+  - `html2canvas` renders DOM elements at default 1x screen resolution (72 DPI).
+- **Proposed Solution**:
+  - Set `html2canvas` configuration to `scale: 3` (300 DPI Ultra High Resolution) and `useCORS: true`.
+  - Ensures vector text and SVG diagram elements remain sharp and crisp even at 400% zoom.
+- **Risk Assessment**:
+  - **Risk Level**: **1% Risk (Low)**. confined strictly to PDF/Image export rendering.
+- **Status**: 🔍 Approved for Implementation
+
+---
+
+### 🟢 Issue #8: PDF Export Theme Color Normalization & SVG Contrast
+
+- **Category**: PDF Styling & Print Contrast
+- **User Description**:
+  - Dark mode diagrams in PDF exports retain dark fill backgrounds with pink nodes, creating visual contrast inconsistencies on printable white PDF pages.
+- **Proposed Solution**:
+  - Inject a temporary `data-pdf-export="true"` print filter during PDF capture to normalize SVG nodes to clean, print-friendly academic colors (black text `#000000`, white background `#ffffff`, dark blue SVG borders `#1e40af`).
+- **Risk Assessment**:
+  - **Risk Level**: **1% Risk (Very Low)**. Temporary filter is removed immediately after capture; live app UI remains untouched.
+- **Status**: 🔍 Approved for Implementation
+
+---
+
+---
+
+### 🔴 High Priority Issue #7: Ultra High-DPI (300 DPI) Canvas Resolution for PDF & Image Exports
+
+- **Category**: Export Quality & Canvas DPI Scaling
+- **User Description**:
+  - Exported PDFs and PNG chat images become blurry and pixelated when zoomed in on mobile or desktop screens (e.g. 380% zoom).
+- **Root Cause**:
+  - `html2canvas` renders DOM elements at default 1x screen resolution (72 DPI).
+- **Proposed Solution**:
+  - Set `html2canvas` configuration to `scale: 3` (300 DPI Ultra High Resolution) and `useCORS: true`.
+  - Ensures vector text and SVG diagram elements remain sharp and crisp even at 400% zoom.
+- **Risk Assessment**:
+  - **Risk Level**: **1% Risk (Low)**. Confined strictly to PDF/Image export rendering.
+- **Status**: 🔴 Approved (High Priority Implementation)
+
+---
+
+### 🔴 High Priority Issue #8: PDF Export Theme Color Normalization & SVG Contrast
+
+- **Category**: PDF Styling & Print Contrast
+- **User Description**:
+  - Dark mode diagrams in PDF exports retain dark fill backgrounds with pink nodes, creating visual contrast inconsistencies on printable white PDF pages.
+- **Proposed Solution**:
+  - Inject a temporary `data-pdf-export="true"` print filter during PDF capture to normalize SVG nodes to clean, print-friendly academic colors (black text `#000000`, white background `#ffffff`, dark blue SVG borders `#1e40af`).
+- **Risk Assessment**:
+  - **Risk Level**: **1% Risk (Very Low)**. Temporary filter is removed immediately after capture; live app UI remains untouched.
+- **Status**: 🔴 Approved (High Priority Implementation)
+
+---
+
+### 🔴 High Priority Issue #9: Option 1 — JS-Level Auto-Transform (`graph LR` $\rightarrow$ `graph TD` for >4 Nodes)
+
+- **Category**: Client-Side Diagram Parsing & Mobile Readability
+- **User Description**:
+  - Wide 5+ node horizontal Mermaid flowcharts (`graph LR`) shrink down on mobile/desktop screens, creating unreadable micro-text.
+- **Proposed Solution**:
+  - In `app.js`, inspect Mermaid code during parsing. If syntax is `graph LR` or `flowchart LR` with $>4$ horizontal nodes, automatically convert to `graph TD` (top-to-bottom) before rendering.
+  - **0% System Prompt Risk**: System prompts remain 100% untouched.
+  - **0% Risk to Non-Mermaid Engines**: PlantUML, Graphviz, Erd, and BlockDiag remain untouched.
+- **Risk Assessment**:
+  - **Risk Level**: **0.5% Risk (Very Low)**.
+- **Status**: 🔴 Approved (High Priority Implementation)
+
+---
+
+### 🔴 High Priority Issue #10: Option 2 — PDF Export Viewport Auto-Expansion (Safety Shield)
+
+- **Category**: PDF / PNG Export Complete Capture Protection
+- **User Description**:
+  - Ensure that scrollable, wide diagrams from any Kroki engine (PlantUML, Graphviz, Erd, BlockDiag, etc.) are exported 100% complete without right-edge cropping.
+- **Proposed Solution**:
+  - When the user clicks **Export PDF** or **Export Image**, temporarily set `overflow: visible` and `width: max-content` on the diagram viewport for 0.1s during capture.
+  - Guarantees `html2canvas` captures **100% of the un-cropped diagram** for ALL Kroki engines.
+- **Risk Assessment**:
+  - **Risk Level**: **0% Export Risk**.
+- **Status**: 🔴 Approved (High Priority Implementation)
+
+---
+
+### 🟢 Issue #11: Desktop Viewport Aspect Ratio & Dynamic Height Scaling
+
+- **Category**: Desktop UI Layout & Natural Aspect Ratio Preserving
+- **User Description**:
+  - Prevent wide SVG diagrams from appearing short and squished (flat ribbons) on laptop and desktop displays.
+- **Proposed Solution**:
+  - Update `.kroki-svg-viewport` CSS with `width: auto; max-width: 100%; height: auto; min-height: 220px; max-height: 600px;`.
+  - Normal diagrams render at their natural intrinsic viewBox ratio; wide diagrams automatically receive comfortable vertical height on PC screens.
+- **Risk Assessment**:
+  - **Risk Level**: **1% Risk (Low)**. Purely CSS container presentation.
+- **Status**: 🟢 Approved for Implementation
+
+---
+
+### 🟡 Low Priority Feature #12: Interactive Fullscreen Diagram Zoom Button
+
+- **Category**: Mobile UI Usability & SVG Diagram Zooming
+- **User Description**:
+  - Add a dedicated low-priority Zoom button to open rendered Kroki SVG diagrams in a full-screen modal overlay for easier reading on small phone screens.
+- **Proposed Solution**:
+  - Add an interactive `🔍 Zoom` button to the diagram card toolbar to open the vector SVG in a full-screen modal (`.kroki-zoom-modal`).
+  - **Export Protection**: Exclude `.kroki-zoom-modal` overlays from export engines (**0% interference**).
+- **Risk Assessment**:
+  - **Risk Level**: **Low Priority / 0% Export Risk**.
+- **Status**: ⏳ Queued for Low Priority Implementation
+
+
+
+

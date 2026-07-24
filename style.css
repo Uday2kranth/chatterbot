@@ -2176,6 +2176,26 @@ details.guide-details .guide-content {
   transition: all 0.3s ease;
 }
 
+/* Kroki SVG Viewport Responsive Desktop Aspect Ratio Scaling */
+.kroki-svg-viewport {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 220px !important;
+  max-height: 600px !important;
+  overflow-x: auto !important;
+  padding: 12px 0 !important;
+}
+
+.kroki-svg-viewport svg {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
 /* Subgraph Cluster Title Text: Add heavy background halo so arrow lines NEVER obstruct full spelling */
 .mermaid .cluster text,
 .mermaid .cluster-label text,

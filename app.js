@@ -3093,7 +3093,7 @@ function renderMarkdownWithMath(text) {
 
     if (isDiagram) {
       const diagramType = diagramTypes.includes(l) ? l : (cleanCode.startsWith('@startuml') ? 'plantuml' : (cleanCode.startsWith('digraph') ? 'graphviz' : 'mermaid'));
-      const sanitized = sanitizeRawMermaidSyntax(cleanCode);
+      const sanitized = (diagramType === 'mermaid' || diagramType === 'flowchart') ? sanitizeRawMermaidSyntax(cleanCode) : cleanCode;
       return `<div class="mermaid-diagram-card kroki-diagram-card" data-kroki-type="${diagramType}" data-raw-code="${encodeURIComponent(sanitized)}" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 12px 0; overflow-x: auto;"><div class="mermaid">${sanitized}</div></div>`;
     }
     

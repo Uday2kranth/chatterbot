@@ -2176,16 +2176,17 @@ details.guide-details .guide-content {
   transition: all 0.3s ease;
 }
 
-/* Kroki SVG Viewport Responsive Desktop Aspect Ratio Scaling */
+/* Kroki SVG Viewport Responsive Desktop Aspect Ratio Scaling & Top-Clipping Shield */
 .kroki-svg-viewport {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   width: 100% !important;
-  min-height: 220px !important;
-  max-height: 600px !important;
+  min-height: 180px !important;
+  max-height: 800px !important;
   overflow-x: auto !important;
-  padding: 18px 12px !important;
+  overflow-y: auto !important;
+  padding: 22px 16px !important; /* Top padding prevents root node top clipping */
   box-sizing: border-box !important;
 }
 
@@ -2195,6 +2196,7 @@ details.guide-details .guide-content {
   height: auto !important;
   display: block !important;
   margin: 0 auto !important;
+  overflow: visible !important;
 }
 
 /* Un-crop standard rendered markdown HTML images in chat bubbles */

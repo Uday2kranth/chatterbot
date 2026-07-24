@@ -254,15 +254,12 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
 4. GREETINGS & SIMPLE QUESTIONS: NEVER output diagrams or flowcharts for greetings ("Hi", "Hello"), simple definitions, or basic questions.
 5. LANGUAGE TONE: Explanatory text MUST use clear, direct 12th-grade intermediate student English. Do NOT use fancy, rare, or complex academic synonyms. Complex technical terms are STRICTLY RESTRICTED to official syllabus keywords (e.g. Entropy, Ciphertext, Eigenvalues, K-Means).
 6. WEB SEARCH & IMAGE HYPERLINKS: Use Web Search for facts, statistics, and citations. NEVER hotlink external HTML webpage URLs as image tags ![img](http...). Render all visual diagrams exclusively via Kroki.
-7. KROKI DIAGRAM ENGINE CAPABILITIES:
-   You have access to the Kroki Diagram Engine supporting 8 main categories:
-   - Common Graphs: Block Diagram (BlockDiag, Ditaa), DAG (Graphviz), Mindmap (PlantUML)
-   - UML / C4: Sequence (SeqDiag, Mermaid), E-R (Erd), Activity (ActDiag), Use Case (PlantUML), UMLs (nomnoml), C4 Diagram (PlantUML)
-   - Project Management: WBS (PlantUML), Gantt Diagram (Mermaid), Business Process (BPMN)
-   - Data Visualization: Word Cloud (Vega), Bar Chart (Vega-Lite)
-   - Freestyle: Hand-drawn look (Excalidraw), ASCII Art (SvgBob)
-   - Hardware: Byte Field (Bytefield), Digital Timing (WaveDrom)
-   - Network: Network (NwDiag), Packets (PacketDiag), Rack (RackDiag)
+7. KROKI DIAGRAM ENGINE CAPABILITIES & SELECTION MATRIX:
+   Select the optimal code block type when illustrating concepts:
+   - Simple Workflows (<= 5 steps): Use standard Mermaid (\`\`\`mermaid\\ngraph TD\\n...\`\`\`). Always use <br/> inside labels for text wrapping.
+   - Deep Hierarchies & Concept Trees (> 3 levels or > 6 nodes): Use PlantUML Mindmap (\`\`\`kroki-plantuml\\n@startmindmap\\n* Root\\n** Branch 1\\n*** Leaf 1.1\\n@endmindmap\`\`\`) or WBS (\`\`\`kroki-wbs\\n@startwbs\\n* Root\\n** Task 1\\n@endwbs\`\`\`).
+   - Relational Database Schemas: Use ERD (\`\`\`kroki-erd\\n[Users]\\n*id\`\`\`).
+   - Network & System Graphs: Use Graphviz (\`\`\`kroki-graphviz\\ndigraph G {\\n  rankdir=TB;\\n  node [shape=box];\\n  A -> B;\\n}\`\`\`).
    DIAGRAM CONSTRAINT: Include a Kroki diagram ONLY when a visual representation genuinely clarifies the concept. Do NOT overdo diagrams just because you have the capability.
 8. DIRECT ANSWER PROTOCOL: Begin immediately on Line 1 with the technical definition or requested answer. No conversational intro fluff.
 9. EVALUATOR KEYWORD BOLDING: Automatically bold all core technical terms, variables, and protocol phases (e.g., **Euler's Totient φ(n)**, **SYN-ACK Handshake**).
@@ -278,7 +275,7 @@ STRICT IMAGE & DIAGRAM EMBEDDING DIRECTIVES:
     // Final Mandatory System Directive: Override any prompt templates that request TikZ code or horizontal LR graphs
     apiMessages.push({
         role: "system",
-        content: "CRITICAL MANDATORY OVERRIDE: If a diagram is generated, output it exclusively as top-to-bottom vertical Mermaid.js code blocks (```mermaid\\ngraph TD\\n...\\n```). NEVER use graph LR or raw TikZ. STRICTLY DO NOT generate any diagram if the user explicitly requested no diagram or if a direct image link is present."
+        content: "DIAGRAM MANDATORY OVERRIDE: If a diagram is generated, use valid vertical Mermaid.js (```mermaid\\ngraph TD\\n...\\n```) or Kroki engines (```kroki-plantuml @startmindmap``` for deep hierarchies, ```kroki-erd``` for database schemas, ```kroki-graphviz``` for network graphs). NEVER use graph LR or raw TikZ. STRICTLY DO NOT generate any diagram if the user explicitly requested no diagram or if a direct image link is present."
     });
 
     try {

@@ -3084,7 +3084,7 @@ function renderMarkdownWithMath(text) {
 
   // 6. Convert Diagram code blocks (Mermaid, PlantUML, Graphviz, BlockDiag, Nomnoml, Erd, etc.) into Kroki diagram cards
   html = html.replace(/<pre><code(?: class="language-([^"]+)")?>([\s\S]*?)<\/code><\/pre>/gi, (match, lang, code) => {
-    const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
+    const cleanCode = code.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
     const rawLang = (lang || '').toLowerCase();
     const l = rawLang.replace(/^language-/, '').replace(/^kroki-/, '');
     const diagramTypes = ['mermaid', 'plantuml', 'graphviz', 'dot', 'blockdiag', 'seqdiag', 'actdiag', 'nwdiag', 'c4', 'c4plantuml', 'erd', 'nomnoml', 'svgbob', 'vegalite', 'vega', 'excalidraw', 'wavedrom', 'bytefield', 'ditaa', 'bpmn'];
@@ -3146,6 +3146,8 @@ async function processKrokiDiagramCards(container) {
     if (rawCode.includes('%0A') || rawCode.includes('%20')) {
       try { rawCode = decodeURIComponent(rawCode); } catch (e) {}
     }
+    // Safety-net: decode any residual HTML entities that marked.js may have injected into code blocks
+    rawCode = rawCode.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
     card.setAttribute('data-raw-code', rawCode);
 
     // Option 1: JS-Level Auto-Transform (Mermaid graph LR -> graph TD for >4 horizontal nodes)
@@ -3162,7 +3164,7 @@ async function processKrokiDiagramCards(container) {
     if (!svgViewport) {
       svgViewport = document.createElement('div');
       svgViewport.className = 'kroki-svg-viewport';
-      svgViewport.style.cssText = 'display:flex; justify-content:center; align-items:center; min-height:100px; overflow-x:auto; padding:8px 0; width:100%;';
+      svgViewport.style.cssText = 'display:flex; justify-content:center; align-items:center; min-height:100px; overflow-x:auto; width:100%;';
       if (mermaidEl) {
         card.replaceChild(svgViewport, mermaidEl);
       } else {
@@ -9119,6 +9121,26 @@ title
 updated_at
 
 Users 1--* Sessions
+\`\`\`
+
+---
+
+### 🧪 Test 5: PlantUML Hierarchical Mindmap (Deep Tree Validation)
+Demonstrating PlantUML mindmap tree hierarchy and root node top clearance:
+
+\`\`\`kroki-plantuml
+@startmindmap
+* Data Mining Challenges & Research Issues
+** 1. Scalability & High Dimensionality
+*** Curse of Dimensionality
+*** Big Data Scale
+** 2. Complex & Heterogeneous Data
+*** Graph & Spatial-Temporal Data
+*** Multi-Modal Deep Features
+** 3. Data Quality & Uncertainty
+*** Noise & Imprecise Streams
+*** Missing Value Imputation
+@endmindmap
 \`\`\`
 `,
         timestamp: new Date().toISOString()
